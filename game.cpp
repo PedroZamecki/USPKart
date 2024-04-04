@@ -69,6 +69,8 @@ struct GameData
   int p_dirx;
   int p_dirz;
   float p_vel;
+  bool p_accelerating;
+  bool p_steering;
   enum animationType anim;
   enum skinType skin;
   // Move destination position:
@@ -86,7 +88,7 @@ struct GameData
   float c_vel;
 };
 
-SDL_Surface *load_image(char *filename)
+SDL_Surface *loadImage(char *filename)
 {
   // The image that's loaded
   SDL_Surface *loadedImage = NULL;
@@ -111,7 +113,7 @@ SDL_Surface *load_image(char *filename)
   return loadedImage; // optimizedImage;
 }
 
-void crossproduct(float A[3], float B[3], float C[3])
+void crossProduct(float A[3], float B[3], float C[3])
 {
   C[0] = A[1] * B[2] - A[2] * B[1];
   C[1] = A[2] * B[0] - A[0] * B[2];
@@ -123,7 +125,7 @@ float magnitude(float A[3])
   return sqrtf(A[0] * A[0] + A[1] * A[1] + A[2] * A[2]);
 }
 
-static void quit_game(int code)
+static void quitGame(int code)
 {
   /*
    * Quit SDL so we can release the fullscreen
@@ -136,7 +138,7 @@ static void quit_game(int code)
   exit(code);
 }
 
-void left_direction(int *dirx, int *dirz)
+void leftDirection(int *dirx, int *dirz)
 {
   if (*dirx == 1 && *dirz == 0)
   {
@@ -160,7 +162,7 @@ void left_direction(int *dirx, int *dirz)
   }
 }
 
-void right_direction(int *dirx, int *dirz)
+void rightDirection(int *dirx, int *dirz)
 {
   if (*dirx == 1 && *dirz == 0)
   {
@@ -184,7 +186,7 @@ void right_direction(int *dirx, int *dirz)
   }
 }
 
-void rotate_clockwise(struct GameData *GD)
+void rotateClockwise(struct GameData *GD)
 {
   if (GD->p_dirx == 1 && GD->p_dirz == 0)
   {
@@ -208,7 +210,7 @@ void rotate_clockwise(struct GameData *GD)
   }
 }
 
-void rotate_counter_clockwise(struct GameData *GD)
+void rotateCounterClockwise(struct GameData *GD)
 {
   if (GD->p_dirx == 1 && GD->p_dirz == 0)
   {
@@ -232,7 +234,7 @@ void rotate_counter_clockwise(struct GameData *GD)
   }
 }
 
-void update_player(struct GameData *GD, float deltatime)
+void updatePlayer(struct GameData *GD, float deltatime)
 {
   float d = 60.0;
   float D = GD->p_vel * deltatime;
@@ -247,16 +249,21 @@ void update_player(struct GameData *GD, float deltatime)
   printf("l: %f\n", l);
   printf("dtheta: %f\n", (180.0 / PI) * ((D * d) / l) * tanf(GD->steering_angle * (PI / 180.0)));
   GD->p_angle += (180.0 / PI) * ((D * d) / l) * tanf(GD->steering_angle * (PI / 180.0));
+
+  if (!GD->p_steering)
+    GD->steering_angle *= 0.99;
+  if (!GD->p_accelerating)
+    GD->p_vel *= 0.99;
 }
 
-static void handle_key(SDL_KeyboardEvent *key, struct GameData *GD, bool down)
+static void handleKey(SDL_KeyboardEvent *key, struct GameData *GD, bool down)
 {
   static bool hold_ctrl = false;
   switch (key->keysym.sym)
   {
   case SDLK_ESCAPE:
     if (down)
-      quit_game(0);
+      quitGame(0);
     break;
   case SDLK_SPACE:
     break;
@@ -265,6 +272,10 @@ static void handle_key(SDL_KeyboardEvent *key, struct GameData *GD, bool down)
     {
       GD->steering_angle += 1.0;
       // move_player_left(GD);
+      GD->p_steering = true;
+    }
+    else {
+      GD->p_steering = false;
     }
     break;
   case SDLK_RIGHT:
@@ -272,6 +283,10 @@ static void handle_key(SDL_KeyboardEvent *key, struct GameData *GD, bool down)
     {
       GD->steering_angle -= 1.0;
       // move_player_right(GD);
+      GD->p_steering = true;
+    }
+    else {
+      GD->p_steering = false;
     }
     break;
   case SDLK_DOWN:
@@ -284,8 +299,12 @@ static void handle_key(SDL_KeyboardEvent *key, struct GameData *GD, bool down)
   case SDLK_UP:
     if (down)
     {
+      GD->p_accelerating = true;
       GD->p_vel += 0.5;
       // move_player_front(GD, hold_ctrl);
+    }
+    else {
+      GD->p_accelerating = false;
     }
     break;
   case SDLK_s:
@@ -339,7 +358,7 @@ static void handle_key(SDL_KeyboardEvent *key, struct GameData *GD, bool down)
   }
 }
 
-void ResizeWindow(int width, int height,
+void resizeWindow(int width, int height,
                   SDL_Window *Window,
                   struct GameData *GD)
 {
@@ -368,7 +387,7 @@ void ResizeWindow(int width, int height,
   // glViewport( 0, 0, width, height );
 }
 
-static void process_events(SDL_Window *Window,
+static void processEvents(SDL_Window *Window,
                            struct GameData *GD)
 {
   /* Our SDL event placeholder. */
@@ -382,28 +401,28 @@ static void process_events(SDL_Window *Window,
     {
     case SDL_KEYDOWN:
       /* Handle key presses. */
-      handle_key(&event.key, GD, true);
+      handleKey(&event.key, GD, true);
       break;
     case SDL_KEYUP:
-      handle_key(&event.key, GD, false);
+      handleKey(&event.key, GD, false);
       break;
     case SDL_WINDOWEVENT:
       if (event.window.event == SDL_WINDOWEVENT_RESIZED)
       {
         // printf("MESSAGE:Resizing window...\n");
-        ResizeWindow(event.window.data1, event.window.data2,
+        resizeWindow(event.window.data1, event.window.data2,
                      Window, GD);
       }
       break;
     case SDL_QUIT:
       /* Handle quit requests (like Ctrl-c). */
-      quit_game(0);
+      quitGame(0);
       break;
     }
   }
 }
 
-void inverte_vetor(int L[4][2])
+void invertVector(int L[4][2])
 {
   int N = 4, tmp, i, j;
   for (i = 0; i < N / 2; i++)
@@ -417,7 +436,7 @@ void inverte_vetor(int L[4][2])
   }
 }
 
-void SetInitialView()
+void setInitialView()
 {
   /*
   glLoadIdentity( );
@@ -430,38 +449,21 @@ void SetInitialView()
 #include "drawing_primitives.cpp"
 #include "drawing.cpp"
 
-void update_camera(struct GameData *GD,
+void updateCamera(struct GameData *GD,
                    float deltatime)
 {
-  // y direction (vertical):
-  if (fabs(GD->py - GD->camTarget_y) <= GD->c_vel * deltatime)
-    GD->camTarget_y = GD->py;
-  else if (GD->py < GD->camTarget_y)
-    GD->camTarget_y -= GD->c_vel * deltatime;
-  else
-    GD->camTarget_y += GD->c_vel * deltatime;
-
-  // x direction:
-  float tolerance = 1.0;
-  if (fabs(GD->px - GD->camTarget_x) > tolerance)
-  {
-    if (GD->px < GD->camTarget_x)
-      GD->camTarget_x -= GD->c_vel * deltatime;
-    else
-      GD->camTarget_x += GD->c_vel * deltatime;
-  }
-
-  // z direction:
-  if (fabs(GD->pz - GD->camTarget_z) > tolerance)
-  {
-    if (GD->pz < GD->camTarget_z)
-      GD->camTarget_z -= GD->c_vel * deltatime;
-    else
-      GD->camTarget_z += GD->c_vel * deltatime;
-  }
+  GD->camTarget_x = GD->px;
+  GD->camTarget_y = GD->py;
+  GD->camTarget_z = GD->pz;
+  GD->camTarget_dist = 300;
+  if (GD->yaw > 90-GD->p_angle)
+    GD->yaw -= 1;
+  else if (GD->yaw < 90-GD->p_angle)
+    GD->yaw += 1;
+  GD->pitch = -35.0;
 }
 
-void draw_screen(SDL_Window *Window,
+void drawScreen(SDL_Window *Window,
                  struct GameData *GD,
                  unsigned int shaderProgram,
                  float deltatime)
@@ -472,7 +474,7 @@ void draw_screen(SDL_Window *Window,
   float di, dj, dk;
 
   // Camera movement:
-  update_camera(GD, deltatime);
+  updateCamera(GD, deltatime);
 
   // Clear the color and depth buffers.
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -527,7 +529,7 @@ void draw_screen(SDL_Window *Window,
   //--------------------------------------------------
 
   // DrawRedDragon();
-  SetInitialView();
+  setInitialView();
 
   DrawTrack(GD, shaderProgram, deltatime);
 
@@ -559,7 +561,7 @@ void draw_screen(SDL_Window *Window,
   SDL_GL_SwapWindow(Window);
 }
 
-char *ReadShader(char *filename)
+char *readShader(char *filename)
 {
   char *Source;
   FILE *fp;
@@ -589,7 +591,7 @@ char *ReadShader(char *filename)
   return Source;
 }
 
-static void setup_opengl(int width, int height)
+static void setupOpenGL(int width, int height)
 {
   float ratio = (float)width / (float)height;
   static GLfloat light_pos[] = {0.0f, 0.0f, 0.0f, 1.0f};
@@ -657,7 +659,7 @@ int main(int argc, char *argv[])
     if( SDL_Init( SDL_INIT_VIDEO ) < 0 ) {
     fprintf( stderr, "Video initialization failed: %s\n",
     SDL_GetError( ) );
-    quit_game( 1 );
+    quitGame( 1 );
     }
   */
 
@@ -706,7 +708,7 @@ int main(int argc, char *argv[])
   printf("Renderer: %s\n", glGetString(GL_RENDERER));
   printf("Version:  %s\n", glGetString(GL_VERSION));
 
-  setup_opengl(GD.width, GD.height);
+  setupOpenGL(GD.width, GD.height);
 
   glEnable(GL_TEXTURE_2D);
   // glGenTextures(5+7+6+10, tex);
@@ -725,7 +727,7 @@ int main(int argc, char *argv[])
   glTexParameteri(GL_TEXTURE_2D,
                   GL_TEXTURE_MIN_FILTER,
                   GL_LINEAR);
-  img = load_image((char *)"./textures/null.png");
+  img = loadImage((char *)"./textures/null.png");
   glTexImage2D(GL_TEXTURE_2D, 0,
                GL_RGB, 1, 1, 0,
                GL_RGB, GL_UNSIGNED_BYTE,
@@ -740,7 +742,7 @@ int main(int argc, char *argv[])
   glTexParameteri(GL_TEXTURE_2D,
                   GL_TEXTURE_MIN_FILTER,
                   GL_LINEAR);
-  img = load_image((char *)"./textures/IME/ime_usp.png");
+  img = loadImage((char *)"./textures/IME/ime_usp.png");
   glTexImage2D(GL_TEXTURE_2D, 0,
                GL_RGB, 668, 209, 0,
                GL_RGB, GL_UNSIGNED_BYTE,
@@ -755,7 +757,7 @@ int main(int argc, char *argv[])
   glTexParameteri(GL_TEXTURE_2D,
                   GL_TEXTURE_MIN_FILTER,
                   GL_LINEAR);
-  img = load_image((char *)"./textures/IME/fluffy_4.png");
+  img = loadImage((char *)"./textures/IME/fluffy_4.png");
   glTexImage2D(GL_TEXTURE_2D, 0,
                GL_RGB, 378, 378, 0,
                GL_RGB, GL_UNSIGNED_BYTE,
@@ -770,7 +772,7 @@ int main(int argc, char *argv[])
   glTexParameteri(GL_TEXTURE_2D,
                   GL_TEXTURE_MIN_FILTER,
                   GL_LINEAR);
-  img = load_image((char *)"./textures/wheel_cap.png");
+  img = loadImage((char *)"./textures/wheel_cap.png");
   glTexImage2D(GL_TEXTURE_2D, 0,
                GL_RGB, 512, 512, 0,
                GL_RGB, GL_UNSIGNED_BYTE,
@@ -785,7 +787,7 @@ int main(int argc, char *argv[])
   glTexParameteri(GL_TEXTURE_2D,
                   GL_TEXTURE_MIN_FILTER,
                   GL_LINEAR);
-  img = load_image((char *)"./textures/kart/track.png");
+  img = loadImage((char *)"./textures/kart/track.png");
   glTexImage2D(GL_TEXTURE_2D, 0,
                GL_RGB, 1024, 1024, 0,
                GL_RGB, GL_UNSIGNED_BYTE,
@@ -816,7 +818,7 @@ int main(int argc, char *argv[])
   //================VERTEX_SHADER=====================
   char *Source = NULL;
 
-  Source = ReadShader((char *)"shader.vs");
+  Source = readShader((char *)"shader.vs");
   const char *vertexShaderSource = Source;
   /*
   const char *vertexShaderSource = "#version 330 core\n"
@@ -846,7 +848,7 @@ int main(int argc, char *argv[])
     exit(1);
   }
   //===============FRAGMENT_SHADER================
-  Source = ReadShader((char *)"shader.fs");
+  Source = readShader((char *)"shader.fs");
 
   const char *fragmentShaderSource = Source;
 
@@ -897,14 +899,14 @@ int main(int argc, char *argv[])
   while (1)
   {
     /* Process incoming events. */
-    process_events(Window, &GD);
+    processEvents(Window, &GD);
 
     // update_tower(&GD, deltatime);
 
-    update_player(&GD, deltatime);
+    updatePlayer(&GD, deltatime);
 
     /* Draw the screen. */
-    draw_screen(Window, &GD, shaderProgram, deltatime);
+    drawScreen(Window, &GD, shaderProgram, deltatime);
 
     currentFrame = clock();
     deltatime = ((float)(currentFrame - lastFrame)) / CLOCKS_PER_SEC;
