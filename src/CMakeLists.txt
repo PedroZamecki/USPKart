@@ -1,9 +1,14 @@
-﻿find_package(glfw3 REQUIRED)
+﻿set(OpenGL_GL_PREFERENCE "GLVND")
+
 find_package(GLEW REQUIRED)
 find_package(glad REQUIRED)
 find_package(glm REQUIRED)
-find_package(soil2 REQUIRED)
+find_package(OpenGL REQUIRED)
 find_package(nlohmann_json REQUIRED)
+find_package(SDL2 REQUIRED)
+find_package(SDL2_image REQUIRED)
+find_package(SDL2_ttf REQUIRED)
+find_package(SDL2_mixer REQUIRED)
 
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/std:c++latest>")
@@ -27,8 +32,12 @@ add_executable (USPKart "graphicsHelper.cpp"
 
 
 target_link_libraries(USPKart PRIVATE   GLEW::GLEW
-                                        soil2 
-                                        glfw 
+                                        -lSDL2
+                                        SDL2
+                                        SDL2_image
+                                        SDL2_ttf
+                                        SDL2_mixer
+                                        ${OPENGL_LIBRARIES}
                                         glm::glm
                                         glad::glad 
                                         nlohmann_json::nlohmann_json)

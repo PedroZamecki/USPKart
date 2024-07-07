@@ -1,8 +1,10 @@
 #pragma once
 
-#include <gl/glew.h>
-#include <GLFW/glfw3.h>
-#include <SOIL2/SOIL2.h>
+#include <GL/glew.h>
+#include <GL/glu.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_syswm.h>
+
 
 #include <iostream>
 #include <string>
@@ -26,8 +28,8 @@ void setupOpenGL();
 * @param borderless If the window is borderless.
 * @return A pointer to the window created.
 */
-GLFWwindow* createWindow(const char* title, Configuration *config);
-void manageWindow(GLFWwindow* window);
+SDL_Window* createWindow(const char* title, Configuration *config);
+void manageWindow(SDL_Window* window);
 
 /*
 * Generate a shader program with the specified vertex and fragment shaders.
@@ -37,4 +39,4 @@ void manageWindow(GLFWwindow* window);
 */
 void generateShaders(GLuint &programID, const char* vertexShader, const char* fragmentShader);
 
-static void manageInputs(GLFWwindow* window);
+static void manageInputs(SDL_Window* window);

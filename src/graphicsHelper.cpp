@@ -10,189 +10,128 @@ void setupOpenGL() {
     //glClearColor(1.0f, 0.7f, 0.8f, 1.0f);
 }
 
-GLFWwindow* createWindow(const char* title, Configuration *config)
+SDL_Window* createWindow(const char* title, Configuration *config)
 {
     graphicsConfig = config;
-
     unsigned int width = config->getWidth();
     unsigned int height = config->getHeight();
     bool resizable = config->isResizable(); 
     bool fullScreen = config->isFullScreen();
     bool borderless = config->isBorderless();
 
-    if (!glfwInit()) {
-        std::cerr << "Failed to initialize GLFW" << std::endl;
-        return nullptr;
+    SDL_WindowFlags flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL);
+    if (resizable) flags = (SDL_WindowFlags)(flags | SDL_WINDOW_RESIZABLE);
+    if (fullScreen) flags = (SDL_WindowFlags)(flags | SDL_WINDOW_FULLSCREEN);
+    if (borderless) flags = (SDL_WindowFlags)(flags | SDL_WINDOW_BORDERLESS);
+
+    SDL_Window* window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, flags);
+    assert(window != nullptr);
+
+    // Configure the window
+    if (resizable) {        
+        SDL_SetWindowMinimumSize(window, 640, 480);
+    }
+    if (fullScreen) {
+        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+    }
+    if (borderless) {
+        SDL_SetWindowBordered(window, SDL_FALSE);
     }
 
-    // Configure the OpenGL context
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    SDL_GLContext context = SDL_GL_CreateContext(window);
 
-    // Configure the color channels
-    glfwWindowHint(GLFW_RED_BITS, 5);
-    glfwWindowHint(GLFW_GREEN_BITS, 5);
-    glfwWindowHint(GLFW_BLUE_BITS, 5);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 
-    glfwWindowHint(GLFW_DEPTH_BITS, 16);
-    glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
-
-    if (!width || !height) {
-        // Get the monitor information
-        GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-        config->setWidth(glfwGetVideoMode(monitor)->width);
-        config->setHeight(glfwGetVideoMode(monitor)->height);
-    }
-
-    // Create the window
-    GLFWwindow* window = glfwCreateWindow(width, height, title, fullScreen ? glfwGetPrimaryMonitor() : nullptr, nullptr);
-    if (!window) {
-        glfwTerminate();
-        return nullptr;
-    }
+    /*
+   * Now, we want to setup our requested
+   * window attributes for our OpenGL window.
+   * We want *at least* 5 bits of red, green
+   * and blue. We also want at least a 16-bit
+   * depth buffer.
+   *
+   * The last thing we do is request a double
+   * buffered window. '1' turns on double
+   * buffering, '0' turns it off.
+   *
+   * Note that we do not use SDL_DOUBLEBUF in
+   * the flags to SDL_SetVideoMode. That does
+   * not affect the GL attribute state, only
+   * the standard 2D blitting setup.
+   */
+    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
+    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 5);
+    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
     // Load icon
-    int iconWidth, iconHeight;
-    unsigned char* icon = SOIL_load_image("assets/icon.png", &iconWidth, &iconHeight, 0, SOIL_LOAD_RGBA);
-    if (icon) {
-		GLFWimage *image = new GLFWimage();
-		image->width = iconWidth;
-		image->height = iconHeight;
-		image->pixels = icon;
-		glfwSetWindowIcon(window, 1, image);
-		SOIL_free_image_data(icon);
-	} else {
-        std::cerr << "Failed to load icon" << std::endl;
+    SDL_Surface* icon = SDL_LoadBMP("assets/icon.png");
+    SDL_SetWindowIcon(window, icon);
+    SDL_FreeSurface(icon);
+
+    // Initialize GLEW
+    glewExperimental = GL_TRUE;
+    // GLenum glewError = glewInit(); WE DON´T USE THIS ANYMORE
+    GLenum glewError = glewInit();
+    if (glewError != GLEW_OK) {
+        std::cerr << "Error: " << glewGetErrorString(glewError) << std::endl;
     }
 
-    glfwMakeContextCurrent(window);
+    // Initialize SDL
+    if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
+        std::cerr << "Error: " << SDL_GetError() << std::endl;
+    }                
 
-    if (resizable) {
-        glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int width, int height) {
-            glfwMakeContextCurrent(window);
-            glViewport(0, 0, width, height);
-            // Update the configuration
-            graphicsConfig->setWidth(width);
-            graphicsConfig->setHeight(height);
-            graphicsConfig->writeConfigurationFile();
-            });
-    }
-    else {
-        glfwSetWindowSizeLimits(window, width, height, width, height);
+    SDL_SysWMinfo info;
+    SDL_VERSION(&info.version);
+    if (SDL_GetWindowWMInfo(window, &info) == SDL_TRUE) {
+        switch (info.subsystem) {
+            case SDL_SYSWM_X11:
+                std::cout << "Running on X11" << std::endl;
+                break;
+            case SDL_SYSWM_WINDOWS:
+                std::cout << "Running on Windows" << std::endl;
+                break;
+            case SDL_SYSWM_WAYLAND:
+                std::cout << "Running on Wayland" << std::endl;
+                break;
+            default:
+                std::cout << "Running on an unknown system" << std::endl;
+                break;
+        }
+    } else {
+        std::cerr << "Error: " << SDL_GetError() << std::endl;
     }
 
-    if (borderless || fullScreen) {
-        glfwSetWindowAttrib(window, GLFW_DECORATED, GLFW_FALSE);
-    }
+    // Set up OpenGL
+    setupOpenGL();
 
-    std::cout << "Video information" << std::endl
-        << "GLFW version: " << glfwGetVersionString() << std::endl
-        << "OpenGL version: " << glGetString(GL_VERSION) << std::endl
-        << "OpenGL renderer: " << glGetString(GL_RENDERER) << std::endl
-        << "OpenGL vendor: " << glGetString(GL_VENDOR) << std::endl;
+    std::cout   << "Video information" << std::endl
+                << "OpenGL version: " << glGetString(GL_VERSION) << std::endl
+                << "OpenGL renderer: " << glGetString(GL_RENDERER) << std::endl
+                << "OpenGL vendor: " << glGetString(GL_VENDOR) << std::endl;
 
     glEnable(GL_TEXTURE_2D);
 
     return window;
 }
 
-void manageWindow(GLFWwindow* window)
-{
-	while (!glfwWindowShouldClose(window))
-	{
-		glClear(GL_COLOR_BUFFER_BIT);
-		glfwSwapBuffers(window);
-		glfwPollEvents();
-
-        manageInputs(window);
-	}
-	glfwDestroyWindow(window);
-	glfwTerminate();
+void manageWindow(SDL_Window* window) {
+    SDL_bool done = SDL_FALSE;
+    while (!done) {
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) {
+                done = SDL_TRUE;
+            }
+        }
+        SDL_GL_SwapWindow(window);
+    }
 }
 
 void generateShaders(GLuint& programID, const char* vertexShader, const char* fragmentShader) {
-    // Create the shaders
-    GLuint vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
-    GLuint fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
-
-    // Compile the vertex shader
-    glShaderSource(vertexShaderID, 1, &vertexShader, nullptr);
-    glCompileShader(vertexShaderID);
-
-    // Check the vertex shader
-    GLint result = GL_FALSE;
-    int infoLogLength;
-    glGetShaderiv(vertexShaderID, GL_COMPILE_STATUS, &result);
-    glGetShaderiv(vertexShaderID, GL_INFO_LOG_LENGTH, &infoLogLength);
-    
-    if (infoLogLength > 0) {
-		std::vector<char> vertexShaderErrorMessage(infoLogLength + 1);
-		glGetShaderInfoLog(vertexShaderID, infoLogLength, nullptr, &vertexShaderErrorMessage[0]);
-		std::cerr << &vertexShaderErrorMessage[0] << std::endl;
-	}
-
-    // Compile the fragment shader
-	glShaderSource(fragmentShaderID, 1, &fragmentShader, nullptr);
-	glCompileShader(fragmentShaderID);
-
-	// Check the fragment shader
-	glGetShaderiv(fragmentShaderID, GL_COMPILE_STATUS, &result);
-	glGetShaderiv(fragmentShaderID, GL_INFO_LOG_LENGTH, &infoLogLength);
-	
-	if (infoLogLength > 0) {
-		std::vector<char> fragmentShaderErrorMessage(infoLogLength + 1);
-		glGetShaderInfoLog(fragmentShaderID, infoLogLength, nullptr, &fragmentShaderErrorMessage[0]);
-		std::cerr << &fragmentShaderErrorMessage[0] << std::endl;
-	}
-
-	// Link the program
-	programID = glCreateProgram();
-	glAttachShader(programID, vertexShaderID);
-	glAttachShader(programID, fragmentShaderID);
-	glLinkProgram(programID);
-
-	// Check the program
-	glGetProgramiv(programID, GL_LINK_STATUS, &result);
-	glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &infoLogLength);
-	
-	if (infoLogLength > 0) {
-		std::vector<char> programErrorMessage(infoLogLength + 1);
-		glGetProgramInfoLog(programID, infoLogLength, nullptr, &programErrorMessage[0]);
-		std::cerr << &programErrorMessage[0] << std::endl;
-	}
-
-	glDeleteShader(vertexShaderID);
-	glDeleteShader(fragmentShaderID);
-
-    glUseProgram(programID);
 }
 
-static void manageInputs(GLFWwindow* window) {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-        glfwSetWindowShouldClose(window, GLFW_TRUE);
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-        std::cout << "Left key pressed" << std::endl;
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-        std::cout << "Right key pressed" << std::endl;
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-        std::cout << "Up key pressed" << std::endl;
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-        std::cout << "Down key pressed" << std::endl;
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-        std::cout << "Space key pressed" << std::endl;
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
-        std::cout << "Enter key pressed" << std::endl;
-    }
+static void manageInputs(SDL_Window* window) {
 }
