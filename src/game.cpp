@@ -5,9 +5,11 @@
 
 int main()
 {
+	putenv(const_cast<char*>("GDK_BACKEND=wayland"));
+	putenv(const_cast<char*>("SDL_VIDEODRIVER=wayland"));
+
 	Configuration *config = new Configuration();
-	GLFWwindow* window = createWindow("USPKart v0.0.1", config);
-	setupOpenGL();
+	SDL_Window* window = createWindow("USPKart v0.0.1", config);
 	manageWindow(window);
 
 	return 0;
