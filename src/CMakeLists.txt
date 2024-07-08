@@ -42,8 +42,31 @@ target_link_libraries(USPKart PRIVATE   GLEW::GLEW
                                         glad::glad 
                                         nlohmann_json::nlohmann_json)
 
-file(GLOB ASSETS "${CMAKE_CURRENT_SOURCE_DIR}/assets/*")
-foreach(ASSET ${ASSETS})
-    get_filename_component(ASSET_NAME ${ASSET} NAME)
-    configure_file(${ASSET} ${CMAKE_CURRENT_BINARY_DIR}/assets/${ASSET_NAME} COPYONLY)
-endforeach()
+function(copy_directory SRC_DIR DST_DIR)
+    # Cria o diretório de destino se ele não existir
+    file(MAKE_DIRECTORY ${DST_DIR})
+
+    # Obtém uma lista de todos os arquivos e diretórios no diretório de origem
+    file(GLOB_RECURSE ITEMS RELATIVE ${SRC_DIR} ${SRC_DIR}/*)
+
+    foreach(ITEM ${ITEMS})
+        # Determina o caminho de origem completo
+        set(SRC "${SRC_DIR}/${ITEM}")
+        # Determina o caminho de destino completo
+        set(DST "${DST_DIR}/${ITEM}")
+
+        # Verifica se o item atual é um diretório
+        if(IS_DIRECTORY ${SRC})
+            # Cria o diretório de destino
+            file(MAKE_DIRECTORY ${DST})
+        else()
+            # Copia o arquivo para o diretório de destino
+            configure_file(${SRC} ${DST} COPYONLY)
+        endif()
+    endforeach()
+endfunction()
+
+set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/assets")
+set(DESTINATION_DIR "${CMAKE_CURRENT_BINARY_DIR}/assets")
+
+copy_directory(${SOURCE_DIR} ${DESTINATION_DIR})

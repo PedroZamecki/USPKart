@@ -1,20 +1,21 @@
 #pragma once
 
-#include <GL/glew.h>
+#include <glad/glad.h>
 #include <GL/glu.h>
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_syswm.h>
-
+#include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_mixer.h>
 
 #include <iostream>
+#include <cstdlib>
 #include <string>
 
 #include "config.hpp"
 
 /*
-* Set up the OpenGL context.
+* Configure the environment for the game.
 */
-void setupOpenGL();
+void configureEnvironment();
 
 /*
 * Create a window with the specified title, width, and height.
@@ -32,6 +33,11 @@ SDL_Window* createWindow(const char* title, Configuration *config);
 void manageWindow(SDL_Window* window);
 
 /*
+* Set up the OpenGL context.
+*/
+void setupOpenGL();
+
+/*
 * Generate a shader program with the specified vertex and fragment shaders.
 * @param programID The ID of the shader program.
 * @param vertexShader The vertex shader.
@@ -39,4 +45,4 @@ void manageWindow(SDL_Window* window);
 */
 void generateShaders(GLuint &programID, const char* vertexShader, const char* fragmentShader);
 
-static void manageInputs(SDL_Window* window);
+static SDL_bool manageInputs(SDL_Window* window, SDL_Event event);
