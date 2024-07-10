@@ -3,13 +3,29 @@
 
 #include "game.hpp"
 
+Game::Game()
+{
+	config = new Configuration();
+	graphicsHelper = new GraphicsHelper();
+}
+
+Game::~Game()
+{
+	delete config;
+	delete graphicsHelper;
+}
+
+void Game::run()
+{
+	graphicsHelper->configureEnvironment();
+
+	window = graphicsHelper->createWindow("USPKart v0.0.1", config);
+
+	graphicsHelper->manageWindow(window);
+}
+
 int main()
 {
-	Configuration *config = new Configuration();
-	configureEnvironment();
-
-	SDL_Window* window = createWindow("USPKart v0.0.1", config);
-	manageWindow(window);
-
-	return 0;
+	Game *game = new Game();
+	game->run();
 }

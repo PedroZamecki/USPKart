@@ -10,7 +10,7 @@ Uint32 startTime = 0, currentTime = 0;
 float deltaTime = 0;
 int frameCount = 0, fps = 0;
 
-void configureEnvironment() {
+void GraphicsHelper::configureEnvironment() {
 	#ifdef _WIN32
     session = "windows";
     std::cout << "Running on Windows" << std::endl;
@@ -40,7 +40,7 @@ void configureEnvironment() {
     #endif
 }
 
-SDL_Window* createWindow(const char* title, Configuration *config)
+SDL_Window* GraphicsHelper::createWindow(const char* title, Configuration *config)
 {
     graphicsConfig = config;
     unsigned int width = config->getWidth();
@@ -138,7 +138,7 @@ SDL_Window* createWindow(const char* title, Configuration *config)
     return window;
 }
 
-void setupOpenGL() {
+void GraphicsHelper::setupOpenGL() {
     // Set up OpenGL
     if (!gladLoadGLLoader(SDL_GL_GetProcAddress)) {
         std::cerr << "Failed to initialize OpenGL context" << std::endl;
@@ -170,7 +170,7 @@ void setupOpenGL() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-void calculateFPS() {
+void GraphicsHelper::calculateFPS() {
     frameCount++;
     currentTime = SDL_GetTicks();
     deltaTime = (currentTime - startTime) / 1000.0f;
@@ -182,7 +182,7 @@ void calculateFPS() {
     }
 }
 
-void displayFPS(SDL_Renderer* renderer) {
+void GraphicsHelper::displayFPS(SDL_Renderer* renderer) {
     std::string fpsText = "FPS: " + std::to_string(fps);
     SDL_Surface* textSurface = TTF_RenderText_Solid(font, fpsText.c_str(), textColor);
 
@@ -207,7 +207,7 @@ void displayFPS(SDL_Renderer* renderer) {
     SDL_DestroyTexture(textTexture);
 }
 
-void manageWindow(SDL_Window* window) {
+void GraphicsHelper::manageWindow(SDL_Window* window) {
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     SDL_bool done = SDL_FALSE;
     startTime = SDL_GetTicks();
@@ -218,13 +218,14 @@ void manageWindow(SDL_Window* window) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) {
                 done = SDL_TRUE;
-            }
+            }   
 
             if (event.type == SDL_WINDOWEVENT) {
                 switch (event.window.event) {
                     case SDL_WINDOWEVENT_RESIZED:
                         graphicsConfig->setWidth(event.window.data1);
                         graphicsConfig->setHeight(event.window.data2);
+                        graphicsConfig->writeConfigurationFile();
                         break;
                     default:
                         break;
@@ -244,7 +245,7 @@ void manageWindow(SDL_Window* window) {
     SDL_DestroyRenderer(renderer);
 }
 
-void generateShaders(GLuint& programID, const char* vertexShader, const char* fragmentShader) {
+void GraphicsHelper::generateShaders(GLuint& programID, const char* vertexShader, const char* fragmentShader) {
     // Create the shaders
     GLuint vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
     GLuint fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
@@ -296,7 +297,7 @@ void generateShaders(GLuint& programID, const char* vertexShader, const char* fr
     glDeleteShader(fragmentShaderID);
 }
 
-static SDL_bool manageInputs(SDL_Window* window, SDL_Event event) {
+SDL_bool GraphicsHelper::manageInputs(SDL_Window* window, SDL_Event event) {
     switch (event.type) {
         case SDL_KEYDOWN:
             switch (event.key.keysym.sym) {
