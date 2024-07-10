@@ -13,11 +13,6 @@ class Configuration {
 		bool fullScreen;
 		bool borderless;
 
-		// Destructor
-		~Configuration() {
-			writeConfigurationFile();
-		}
-	
 	public:
 		Configuration(	unsigned int width = 800, 
 						unsigned int height = 600,
@@ -25,6 +20,9 @@ class Configuration {
 						bool fullScreen = false,
 						bool borderless = false) : width(width), height(height), resizable(resizable), fullScreen(fullScreen), borderless(borderless) {
 			readConfigurationFile();
+		}
+		~Configuration() {
+			writeConfigurationFile();
 		}
 		unsigned int getWidth() const { return width; }
 		unsigned int getHeight() const { return height; }
