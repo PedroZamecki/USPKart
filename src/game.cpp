@@ -19,9 +19,9 @@ void Game::run()
 {
 	graphicsHelper->configureEnvironment();
 
-	window = graphicsHelper->createWindow("USPKart v0.0.1", config);
+	graphicsHelper->createWindow("USPKart v0.0.1", config);
 
-	graphicsHelper->manageWindow(window);
+	graphicsHelper->manageWindow();
 }
 
 int main()
