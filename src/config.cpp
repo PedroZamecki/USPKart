@@ -1,4 +1,4 @@
-#include "config.hpp"
+#include <config.hpp>
 
 const char* configPath = "../config/config.json";
 

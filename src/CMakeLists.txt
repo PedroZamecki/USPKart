@@ -21,15 +21,14 @@ add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/Zc:wchar_t>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/Zc:throwingNew>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/Zc:referenceBinding>")
 
-# Add source to this project's executable.
-add_executable (USPKart "graphicsHelper.cpp" 
-                        "graphicsHelper.hpp" 
-                        "config.cpp" 
-                        "config.hpp"
-                        "game.cpp" 
-                        "game.hpp" )
-
-
+add_executable (USPKart "graphicsHelper.cpp"
+                        "drawingHelper.cpp"
+                        "primitives.cpp"
+                        "config.cpp"
+                        "utils.cpp"
+                        "game.cpp" )
+                        
+target_include_directories(USPKart PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/headers)
 
 target_link_libraries(USPKart PRIVATE   GLEW::GLEW
                                         -lSDL2
@@ -43,24 +42,17 @@ target_link_libraries(USPKart PRIVATE   GLEW::GLEW
                                         nlohmann_json::nlohmann_json)
 
 function(copy_directory SRC_DIR DST_DIR)
-    # Cria o diretório de destino se ele não existir
     file(MAKE_DIRECTORY ${DST_DIR})
 
-    # Obtém uma lista de todos os arquivos e diretórios no diretório de origem
     file(GLOB_RECURSE ITEMS RELATIVE ${SRC_DIR} ${SRC_DIR}/*)
 
     foreach(ITEM ${ITEMS})
-        # Determina o caminho de origem completo
         set(SRC "${SRC_DIR}/${ITEM}")
-        # Determina o caminho de destino completo
         set(DST "${DST_DIR}/${ITEM}")
 
-        # Verifica se o item atual é um diretório
         if(IS_DIRECTORY ${SRC})
-            # Cria o diretório de destino
             file(MAKE_DIRECTORY ${DST})
         else()
-            # Copia o arquivo para o diretório de destino
             configure_file(${SRC} ${DST} COPYONLY)
         endif()
     endforeach()

@@ -1,4 +1,4 @@
-#include "graphicsHelper.hpp"
+#include <graphicsHelper.hpp>
 
 std::string readShader(const std::string &filename)
 {
@@ -27,7 +27,7 @@ unsigned int compileShader(GLenum type, const std::string &source)
     {
         char infoLog[512];
         glGetShaderInfoLog(shader, 512, nullptr, infoLog);
-        std::cerr << "ERROR::SHADER::COMPILATION_FAILED\n"
+        std::cerr << "ERROR::SHADER::COMPILATION_FAILED" << std::endl
                   << infoLog << std::endl;
         glDeleteShader(shader); // Garante que o shader é deletado em caso de falha
         throw std::runtime_error("Shader compilation failed");
@@ -51,7 +51,7 @@ unsigned int createShaderProgram(const std::vector<unsigned int> &shaders)
     {
         char infoLog[512];
         glGetProgramInfoLog(program, 512, nullptr, infoLog);
-        std::cerr << "ERROR::PROGRAM::LINKING_FAILED\n"
+        std::cerr << "ERROR::PROGRAM::LINKING_FAILED" << std::endl
                   << infoLog << std::endl;
         glDeleteProgram(program); // Garante que o programa é deletado em caso de falha
         throw std::runtime_error("Program linking failed");
@@ -227,6 +227,8 @@ SDL_Window *GraphicsHelper::createWindow(const char *title, Configuration *confi
     }
     Mix_VolumeMusic(MIX_MAX_VOLUME / 5);
 
+    SDL_GL_SetSwapInterval(0);
+
     return window;
 }
 
@@ -250,9 +252,9 @@ void GraphicsHelper::setupOpenGL()
 
 void GraphicsHelper::calculateFPS()
 {
+    frameCount++;
     currentTime = SDL_GetTicks();
     deltaTime = (currentTime - startTime) / 1000.0f;
-    frameCount++;
     if (deltaTime >= 1.0f)
     {
         fps = frameCount;
@@ -310,11 +312,11 @@ void draw(Camera *cam, unsigned int shaderProgram, Configuration *conf)
                                             (float)conf->getWidth() / (float)conf->getHeight(),
                                             0.1f, 100.0f);
 
-    float dist = cam->camTargetDist * cos(glm::radians(cam->pitch));
+    float dist = cam->targetDist * cos(glm::radians(cam->pitch));
 
     float cam_z = d * cam->target.z - sin(glm::radians(cam->yaw)) * dist;
     float cam_x = d * cam->target.x - cos(glm::radians(cam->yaw)) * dist;
-    float cam_y = d * cam->target.y - sin(glm::radians(cam->pitch)) * cam->camTargetDist;
+    float cam_y = d * cam->target.y - sin(glm::radians(cam->pitch)) * cam->targetDist;
 
     glm::vec3 cameraPos = glm::vec3(cam_x, cam_y, cam_z);
     glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.5f);
@@ -460,10 +462,10 @@ SDL_bool GraphicsHelper::manageInputs(SDL_Event event)
                 return SDL_TRUE;
                 break;
             case SDLK_w:
-                cam->camTargetDist -= 0.1f;
+                cam->targetDist -= 0.1f;
                 break;
             case SDLK_s:
-                cam->camTargetDist += 0.1f;
+                cam->targetDist += 0.1f;
                 break;
             case SDLK_a:
                 cam->yaw -= 1.0f;

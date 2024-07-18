@@ -1,7 +1,7 @@
 ﻿// Game.cpp : Defines the entry point for the application.
 //
 
-#include "game.hpp"
+#include <game.hpp>
 
 Game::Game()
 {
