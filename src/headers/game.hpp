@@ -1,8 +1,10 @@
-﻿#pragma once
+﻿#ifndef GAME_HPP
+#define GAME_HPP
 
 #include <iostream>
 
-#include "graphicsHelper.hpp"
+#include <utils.hpp>
+#include <graphicsHelper.hpp>
 
 class Game {
     public:
@@ -16,3 +18,5 @@ class Game {
         Configuration *config;
         SDL_Window* window;
 };
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CONFIG_HPP
+#define CONFIG_HPP
 
 #include <fstream>
 #include <sstream>
@@ -38,3 +39,5 @@ class Configuration {
 		void readConfigurationFile();
 		void writeConfigurationFile();
 };
+
+#endif

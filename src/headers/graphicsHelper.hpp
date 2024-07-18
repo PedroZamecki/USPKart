@@ -1,4 +1,5 @@
-#pragma once
+#ifndef GRAPHICS_HELPER_HPP
+#define GRAPHICS_HELPER_HPP
 
 #include <glad/glad.h>
 #include <GL/glu.h>
@@ -13,21 +14,8 @@
 #include <cstdlib>
 #include <string>
 
-#include "config.hpp"
-
-struct Position {
-    float x;
-    float y;
-    float z;
-};
-
-class Camera {
-public:
-    Position target = {0.0f, 0.0f, 0.0f};
-    float pitch = 0.0f;
-    float yaw = 0.0f;
-    float camTargetDist = 10.0f;
-};
+#include <config.hpp>
+#include <utils.hpp>
 
 class GraphicsHelper
 {
@@ -42,11 +30,7 @@ public:
      * The window can be resizable, full screen, and borderless.
      * Returns a pointer to the window created.
      * @param title The title of the window.
-     * @param width The width of the window.
-     * @param height The height of the window.
-     * @param resizable If the window can be resized.
-     * @param fullScreen If the window is full screen.
-     * @param borderless If the window is borderless.
+     * @param config The configuration of the window.
      * @return A pointer to the window created.
      */
     SDL_Window *createWindow(const char *title, Configuration *config);
@@ -67,7 +51,7 @@ private:
 
     Uint32 startTime = 0, currentTime = 0;
     float deltaTime = 0;
-    int frameCount = 0, fps = 0;
+    unsigned int frameCount = 0, fps = 0;
 
     /*
      * Set up the OpenGL context.
@@ -97,3 +81,5 @@ private:
 
     void stop();
 };
+
+#endif
