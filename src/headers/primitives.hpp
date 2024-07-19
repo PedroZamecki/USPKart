@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef PRIMITIVES_HPP
 #define PRIMITIVES_HPP
 

@@ -1,4 +1,6 @@
-﻿#ifndef GAME_HPP
+﻿#pragma once
+
+#ifndef GAME_HPP
 #define GAME_HPP
 
 #include <iostream>
