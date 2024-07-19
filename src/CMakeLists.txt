@@ -21,7 +21,8 @@ add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/Zc:wchar_t>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/Zc:throwingNew>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/Zc:referenceBinding>")
 
-add_executable (USPKart "graphicsHelper.cpp"
+add_executable (USPKart "resourceManager.cpp"
+                        "graphicsHelper.cpp"
                         "drawingHelper.cpp"
                         "primitives.cpp"
                         "config.cpp"

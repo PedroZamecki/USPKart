@@ -1,7 +1,7 @@
+#pragma once
+
 #ifndef UTILS_HPP
 #define UTILS_HPP
-
-#pragma once
 
 #define SQUARE(x) ((x)*(x))
 #define ROUND(x) ((x < 0)?(int)(x-0.5):(int)(x+0.5))

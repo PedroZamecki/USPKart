@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef DRAWING_HELPER_HPP
 #define DRAWING_HELPER_HPP
 

@@ -1,8 +1,10 @@
+#pragma once
+
 #ifndef GRAPHICS_HELPER_HPP
 #define GRAPHICS_HELPER_HPP
 
 #include <glad/glad.h>
-#include <GL/glu.h>
+#include <GL/gl.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_mixer.h>
@@ -10,8 +12,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <iostream>
-#include <cstdlib>
 #include <string>
 
 #include <config.hpp>
