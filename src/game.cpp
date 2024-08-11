@@ -3,19 +3,19 @@
 
 #include <game.hpp>
 
-Game::Game()
+Game::Game(): window(), data()
 {
 	config = new Configuration();
-	graphicsHelper = new GraphicsHelper();
+	graphicsHelper = new GraphicsHelper(data);
 }
 
 Game::~Game()
 {
-	delete config;
 	delete graphicsHelper;
+	delete config;
 }
 
-void Game::run()
+void Game::run() const
 {
 	graphicsHelper->configureEnvironment();
 
@@ -26,6 +26,7 @@ void Game::run()
 
 int main()
 {
-	Game *game = new Game();
+	const auto game = new Game();
 	game->run();
+	delete game;
 }

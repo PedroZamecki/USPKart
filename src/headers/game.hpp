@@ -13,12 +13,13 @@ class Game {
         Game();
         ~Game();
 
-        void run();
+        void run() const;
 
     private:
         GraphicsHelper *graphicsHelper;
         Configuration *config;
-        SDL_Window* window;
+        SDL_Window *window;
+        Data *data;
 };
 
 #endif

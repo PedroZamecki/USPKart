@@ -1,11 +1,10 @@
 #include <config.hpp>
 
-const char* configPath = "../config/config.json";
+const auto configPath = "../config/config.json";
 
 void Configuration::readConfigurationFile() {
 	// Create the directory if it doesn't exist.
-	std::string directory = "../config";
-	if (!std::filesystem::exists(directory)) {
+	if (const auto directory = "../config"; !std::filesystem::exists(directory)) {
 		std::filesystem::create_directory(directory);
 	}
 
@@ -41,6 +40,13 @@ void Configuration::readConfigurationFile() {
 	resizable = json["resizable"];
 	fullScreen = json["fullScreen"];
 	borderless = json["borderless"];
+
+	if (width <= 0 || height <= 0 || width > 1920*16 || height > 1080*16) {
+		std::cerr << "Invalid width or height in the configuration file" << std::endl;
+		width = 800;
+		height = 600;
+		writeConfigurationFile();
+	}
 }
 
 void Configuration::writeConfigurationFile() {

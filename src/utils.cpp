@@ -1,5 +1,15 @@
 #include <utils.hpp>
 
+Data::Data()
+{
+    // Constructor
+}
+
+Data::~Data()
+{
+    // Destructor
+}
+
 Position::Position()
 {
     x = 0.0f;
@@ -62,7 +72,7 @@ Camera::Camera()
     this->fov = 20;
     this->aspectRatio = 1;
     this->near = 0;
-    this->far = 0;
+    this->far = 4096;
 }
 
 Camera::Camera( Position pos,
