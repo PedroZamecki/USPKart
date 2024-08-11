@@ -19,6 +19,13 @@ enum animationType {normal, pushing, walking, pulling, hanging, hangingLeft, han
 enum skinType {none=0, professor, last};
 enum camViewType {back=0, front, left, right};
 
+
+class Data {
+    public:
+        Data();
+        ~Data();
+};
+
 class Position
 {
     public:

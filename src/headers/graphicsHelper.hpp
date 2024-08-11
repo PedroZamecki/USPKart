@@ -16,10 +16,15 @@
 
 #include <config.hpp>
 #include <utils.hpp>
+#include <drawingHelper.hpp>
+#include <resourceManager.hpp>
 
 class GraphicsHelper
 {
 public:
+    explicit GraphicsHelper(Data *data);
+    ~GraphicsHelper();
+
     /*
      * Configure the environment for the game.
      */
@@ -33,20 +38,23 @@ public:
      * @param config The configuration of the window.
      * @return A pointer to the window created.
      */
-    SDL_Window *createWindow(const char *title, Configuration *config);
+    SDL_Window *createWindow(const char* title, Configuration* configuration);
 
     void manageWindow();
 
 private:
-    Camera *cam = new Camera();
-    SDL_GLContext glContext;
-    Configuration *graphicsConfig;
-    unsigned int shaderProgram;
-    SDL_Renderer *renderer;
-    SDL_Window *window;
-    std::string session;
+    Data *data;
 
-    TTF_Font *font;
+    Camera *cam = new Camera();
+    SDL_GLContext glContext{};
+    Configuration *config{};
+    unsigned int shaderProgram{};
+    SDL_Renderer *renderer{};
+    SDL_Window *window{};
+    std::string session;
+    ResourceManager *rm{};
+
+    TTF_Font *font{};
     SDL_Color textColor = {255, 255, 255, 255}; // White
 
     Uint32 startTime = 0, currentTime = 0;
@@ -56,13 +64,14 @@ private:
     /*
      * Set up the OpenGL context.
      */
-    void setupOpenGL();
+    void setupOpenGL() const;
 
     /*
      * Display the frames per second on the screen.
      * @param renderer The renderer to display the FPS.
      */
-    void displayText(std::string message, SDL_Color color, int x, int y, int size);
+    void displayText(std::string message, SDL_Color color, int x, int y, int size) const;
+    void drawWindow(const Camera* cam, unsigned int shaderProgram, float deltaTime) const;
 
     /*
      * Calculate the frames per second.
@@ -77,7 +86,7 @@ private:
      * @param vertexShader The vertex shader.
      * @param fragmentShader The fragment shader.
      */
-    void generateShaders(GLuint &programID, const char *vertexShader, const char *fragmentShader);
+    static void generateShaders(GLuint &programID, const char *vertexShader, const char *fragmentShader);
 
     void stop();
 };

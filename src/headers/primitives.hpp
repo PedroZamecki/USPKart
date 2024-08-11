@@ -6,7 +6,7 @@
 #include <glad/glad.h>
 
 #include <utils.hpp>
-#include <math.h>
+#include <cmath>
 
 float magnitude(float A[3]);
 

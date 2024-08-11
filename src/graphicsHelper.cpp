@@ -84,11 +84,10 @@ void GraphicsHelper::configureEnvironment()
     std::cout << "Running on Windows" << std::endl;
 // Configurações específicas do Windows aqui
 #elif __linux__
-    const char *sessionType = std::getenv("XDG_SESSION_TYPE");
-    if (sessionType != nullptr)
+    if (const std::string sessionType = std::getenv("XDG_SESSION_TYPE"); !sessionType.empty())
     {
         session = sessionType;
-        if (session == "wayland")
+        if (std::string(session) == "wayland")
         {
             std::cout << "Running on Linux (Wayland)" << std::endl;
             putenv(const_cast<char *>("GDK_BACKEND=wayland"));
@@ -102,13 +101,16 @@ void GraphicsHelper::configureEnvironment()
         }
         else
         {
-            std::cout << "Tipo de sessão desconhecido: " << session << std::endl;
+            std::cout << "Unknown session type: " << session << std::endl;
         }
     }
     else
     {
-        std::cout << "Variável XDG_SESSION_TYPE não definida." << std::endl;
+        std::cout << "Variable XDG_SESSION_TYPE not defined." << std::endl;
     }
+    // Make sure the audio works on Linux
+    putenv(const_cast<char *>("SDL_AUDIODRIVER=pulseaudio"));
+    putenv(const_cast<char *>("PULSE_RUNTIME_PATH=/run/user/1000/pulse"));
 #else
     session = "unknown";
     std::cout << "Not running on known environment, please ask for new implementation if required" << std::endl;
@@ -116,24 +118,37 @@ void GraphicsHelper::configureEnvironment()
 #endif
 }
 
-SDL_Window *GraphicsHelper::createWindow(const char *title, Configuration *config)
+GraphicsHelper::GraphicsHelper(Data *data): glContext(), config(), shaderProgram(0),
+                                            renderer(), window(), session(), rm(), font()
 {
-    graphicsConfig = config;
-    unsigned int width = config->getWidth();
-    unsigned int height = config->getHeight();
-    bool resizable = config->isResizable();
-    bool fullScreen = config->isFullScreen();
-    bool borderless = config->isBorderless();
+    this->data = data;
+}
 
-    SDL_WindowFlags flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL);
+GraphicsHelper::~GraphicsHelper()
+{
+    delete data;
+    delete cam;
+    delete rm;
+}
+
+SDL_Window *GraphicsHelper::createWindow(const char *title, Configuration *configuration)
+{
+    config = configuration;
+    const unsigned int width = config->getWidth();
+    const unsigned int height = config->getHeight();
+    const bool resizable = config->isResizable();
+    const bool fullScreen = config->isFullScreen();
+    const bool borderless = config->isBorderless();
+
+    auto flags = SDL_WINDOW_OPENGL;
     if (resizable)
-        flags = (SDL_WindowFlags)(flags | SDL_WINDOW_RESIZABLE);
+        flags = static_cast<SDL_WindowFlags>(flags | SDL_WINDOW_RESIZABLE);
     if (fullScreen)
-        flags = (SDL_WindowFlags)(flags | SDL_WINDOW_FULLSCREEN);
+        flags = static_cast<SDL_WindowFlags>(flags | SDL_WINDOW_FULLSCREEN);
     if (borderless)
-        flags = (SDL_WindowFlags)(flags | SDL_WINDOW_BORDERLESS);
+        flags = static_cast<SDL_WindowFlags>(flags | SDL_WINDOW_BORDERLESS);
 
-    window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, flags);
+    window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, static_cast<int>(width), static_cast<int>(height), flags);
     assert(window != nullptr);
 
     // Configure the window
@@ -220,8 +235,7 @@ SDL_Window *GraphicsHelper::createWindow(const char *title, Configuration *confi
         std::cerr << "Error: " << Mix_GetError() << std::endl;
         throw std::runtime_error("Failed to initialize audio");
     }
-    Mix_Music *music = Mix_LoadMUS("assets/audio/test.mp3");
-    if (Mix_PlayMusic(music, -1) == -1)
+    if (const auto music = Mix_LoadMUS("assets/audio/test.mp3"); Mix_PlayMusic(music, -1) == -1)
     {
         std::cerr << "Error: " << Mix_GetError() << std::endl;
     }
@@ -229,12 +243,21 @@ SDL_Window *GraphicsHelper::createWindow(const char *title, Configuration *confi
 
     SDL_GL_SetSwapInterval(0);
 
+    // Load textures
+    rm = new ResourceManager();
+    rm->loadTexture("assets/textures/null.png", 1, 1, "null");
+    rm->loadTexture("assets/textures/kart/SNES_Donut_Plains_1.png", 1024, 1024, "track");
+    rm->loadTexture("assets/textures/kart/background.png", 256, 1024, "background");
+    rm->loadTexture("assets/textures/IME/ime_usp.png", 209, 668, "ime_usp");
+    rm->loadTexture("assets/textures/IME/fluffy_4.png", 378, 378,"fluffy");
+    rm->loadTexture("assets/textures/wheel_cap.png", 512, 512, "wheel_cap");
+
     return window;
 }
 
-void GraphicsHelper::setupOpenGL()
+void GraphicsHelper::setupOpenGL() const
 {
-    float ratio = (float)graphicsConfig->getWidth() / (float)graphicsConfig->getHeight();
+    float ratio = static_cast<float>(config->getWidth()) / static_cast<float>(config->getHeight());
     static GLfloat lightPosition[] = {0.0f, 0.0f, 0.0f, 1.0f};
     static GLfloat lightAmbient[] = {0.7f, 0.7f, 0.7f, 1.0f};
     static GLfloat lightDiffuse[] = {0.8f, 0.8f, 0.8f, 1.0f};
@@ -247,14 +270,14 @@ void GraphicsHelper::setupOpenGL()
     glClearColor(1, 0.6, 0.8, 0);
 
     /* Setup our viewport. */
-    glViewport(0, 0, graphicsConfig->getWidth(), graphicsConfig->getHeight());
+    glViewport(0, 0, static_cast<int>(config->getWidth()), static_cast<int>(config->getHeight()));
 }
 
 void GraphicsHelper::calculateFPS()
 {
     frameCount++;
     currentTime = SDL_GetTicks();
-    deltaTime = (currentTime - startTime) / 1000.0f;
+    deltaTime = static_cast<float>(currentTime - startTime) / 1000.0f;
     if (deltaTime >= 1.0f)
     {
         fps = frameCount;
@@ -263,7 +286,7 @@ void GraphicsHelper::calculateFPS()
     }
 }
 
-void GraphicsHelper::displayText(std::string message, SDL_Color color, int x, int y, int size)
+void GraphicsHelper::displayText(std::string message, SDL_Color color, int x, int y, int size) const
 {
     // Function to create a rectangle with the text as a texture and render in front of the camera
     SDL_Surface *surface = TTF_RenderText_Solid(font, message.c_str(), color);
@@ -275,72 +298,74 @@ void GraphicsHelper::displayText(std::string message, SDL_Color color, int x, in
     rect.w = size;
     rect.h = size;
 
-    SDL_RenderCopy(renderer, texture, NULL, &rect);
+    SDL_RenderCopy(renderer, texture, nullptr, &rect);
     SDL_FreeSurface(surface);
     SDL_DestroyTexture(texture);
 
     SDL_RenderPresent(renderer);
 }
 
-void draw(Camera *cam, unsigned int shaderProgram, Configuration *conf)
+void GraphicsHelper::drawWindow(const Camera *cam, const unsigned int shaderProgram, const float deltaTime) const
 {
-    // Habilitar o teste de profundidade
-    glEnable(GL_DEPTH_TEST);
-
-    float vertices[] = {
-        -0.5f, -0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        0.0f, 0.5f, 0.0f};
-
-    unsigned int VBO, VAO;
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
-    glEnableVertexAttribArray(0);
-
-    float d = 1.0f;
-
-    // Set the shader program.
-    glUseProgram(shaderProgram);
-
+    static animationType last_anim = normal;
+    constexpr float d = 60.0;
     glm::mat4 projection = glm::perspective(glm::radians(60.0f),
-                                            (float)conf->getWidth() / (float)conf->getHeight(),
-                                            0.1f, 100.0f);
+                                            static_cast<float>(config->getWidth()) / static_cast<float>(config->getHeight()),
+                                            1.0f, 4024.0f);
 
-    float dist = cam->targetDist * cos(glm::radians(cam->pitch));
+    const float dist = cam->targetDist * cos(glm::radians(cam->pitch));
 
-    float cam_z = d * cam->target.z - sin(glm::radians(cam->yaw)) * dist;
-    float cam_x = d * cam->target.x - cos(glm::radians(cam->yaw)) * dist;
-    float cam_y = d * cam->target.y - sin(glm::radians(cam->pitch)) * cam->targetDist;
+    const float cam_z = d * cam->target.z - sin(glm::radians(cam->yaw)) * dist;
+    const float cam_x = d * cam->target.x - cos(glm::radians(cam->yaw)) * dist;
+    const float cam_y = d * cam->target.y - sin(glm::radians(cam->pitch)) * cam->targetDist;
 
-    glm::vec3 cameraPos = glm::vec3(cam_x, cam_y, cam_z);
-    glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.5f);
-    glm::mat4 view;
+    const auto cameraPos = glm::vec3(cam_x, cam_y, cam_z);
+    constexpr auto up = glm::vec3(0.0f, 1.0f, 0.0f);
 
     glm::vec3 direction;
     direction.x = cos(glm::radians(cam->yaw)) * cos(glm::radians(cam->pitch));
     direction.y = sin(glm::radians(cam->pitch));
     direction.z = sin(glm::radians(cam->yaw)) * cos(glm::radians(cam->pitch));
-    glm::vec3 cameraFront = glm::normalize(direction);
+    const auto cameraFront = glm::normalize(direction);
 
-    view = glm::lookAt(cameraPos, cameraPos + cameraFront, up);
+    glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, up);
 
-    unsigned int viewLoc = glGetUniformLocation(shaderProgram, "view");
+    const GLint viewLoc = glGetUniformLocation(shaderProgram, "view");
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 
-    unsigned int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
+    const GLint projectionLoc = glGetUniformLocation(shaderProgram, "projection");
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-    glm::mat4 model = glm::mat4(1.0f);
-    // Aplicar uma transformação à matriz de modelo
-    model = glm::translate(model, glm::vec3(0.0f, 2.0f, -3.0f)); // Mover o triângulo para trás na cena
+    auto model = glm::mat4(1.0f);
     unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    //--------------------------------------------------
+    auto normal = glm::mat4(1.0f);
+    const GLint normalLoc = glGetUniformLocation(shaderProgram, "normal");
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    //--------------------------------------------------
+    glm::vec3 lightPos = cameraPos;
+    const GLint lightPosLocation = glGetUniformLocation(shaderProgram, "lightPos");
+    glUniform3f(lightPosLocation, lightPos[0], lightPos[1], lightPos[2]);
+
+    const GLint viewPosLocation = glGetUniformLocation(shaderProgram, "viewPos");
+    glUniform3f(viewPosLocation, cameraPos[0], cameraPos[1], cameraPos[2]);
+
+    const GLint lightColorLocation = glGetUniformLocation(shaderProgram, "lightColor");
+    glUniform3f(lightColorLocation, 1.0f, 1.0f, 1.0f);
+
+    const GLint lightMinLoc = glGetUniformLocation(shaderProgram, "lightMin");
+    glUniform3f(lightMinLoc, 0.0, 0.0, 0.0);
+    //--------------------------------------------------
+
+    drawTrack({0.0f, 0.0f, 0.0f}, shaderProgram, deltaTime, 0.0f, rm->getTexture("track"));
+    drawBackground({0, 0, 0}, shaderProgram, deltaTime, rm->getTexture("background"));
+
+    constexpr bool restart = false;
+    last_anim = seated;
+    drawFluffy({1, 1, 1}, 45.0, shaderProgram, deltaTime, restart, rm->getTexture("null"), 0);
+    drawKart({1, 0.4, 1}, shaderProgram, deltaTime, restart, 45.0, 0.0, rm->getTexture("wheel_cap"), rm->getTexture("null"), rm->getTexture("fluffy"), rm->getTexture("ime_usp"), 0);
+
+    glEnable(GL_TEXTURE_2D);
 }
 
 void GraphicsHelper::manageWindow()
@@ -366,7 +391,7 @@ void GraphicsHelper::manageWindow()
         glUseProgram(shaderProgram);
 
         // Desenhe o triângulo uma vez.
-        draw(cam, shaderProgram, graphicsConfig);
+        drawWindow(cam, shaderProgram, deltaTime);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
         SDL_GL_SwapWindow(window);
@@ -442,9 +467,9 @@ SDL_bool GraphicsHelper::manageInputs(SDL_Event event)
         switch (event.window.event)
         {
         case SDL_WINDOWEVENT_RESIZED:
-            graphicsConfig->setWidth(event.window.data1);
-            graphicsConfig->setHeight(event.window.data2);
-            graphicsConfig->writeConfigurationFile();
+            config->setWidth(event.window.data1);
+            config->setHeight(event.window.data2);
+            config->writeConfigurationFile();
             break;
         default:
             break;

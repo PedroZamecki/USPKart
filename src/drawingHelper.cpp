@@ -22,7 +22,7 @@ void drawHairyEllipsoid(unsigned int VAO,
 {
     glm::mat4 model = glm::mat4(1.0f);
     glm::mat4 normal = glm::mat4(1.0f);
-    float w0, w1, angle, x0, y0, z0, x1, y1, z1, xb, yb, zb;
+    float w1, angle, x0, y0, z0, x1, y1, z1, xb, yb, zb;
     float cos_angle, sin_angle, hair_theta, hair_R;
     float mag, a0, a1, b0, b1, th0, th1, c_th0, s_th0;
     float C[3];
@@ -33,12 +33,12 @@ void drawHairyEllipsoid(unsigned int VAO,
     c_th0 = cosf(th0 * (PI / 180.0f));
     s_th0 = sinf(th0 * (PI / 180.0f));
 
-    for (i = 1; i < (int)(0.8 * slices + 0.5); i++)
+    for (i = 1; i < static_cast<int>(0.8 * slices + 0.5); i++)
     {
         if (i % di != 0)
             continue;
-        w0 = (float)i / (float)slices;
-        w1 = (float)(i + 1) / (float)slices;
+        const float w0 = static_cast<float>(i) / static_cast<float>(slices);
+        const float w1 = static_cast<float>(i + 1) / static_cast<float>(slices);
 
         z0 = (-c) * (1.0 - w0) + c * w0;
         z1 = (-c) * (1.0 - w1) + c * w1;
@@ -56,7 +56,7 @@ void drawHairyEllipsoid(unsigned int VAO,
 
         for (j = dj; j <= 360; j += 20)
         {
-            angle = (float)j * (PI / 180.0f);
+            angle = static_cast<double>(j) * (PI / 180.0f);
             cos_angle = cosf(angle);
             sin_angle = sinf(angle);
             x0 = a0 * cos_angle;
@@ -106,11 +106,11 @@ void drawHairyEllipsoid(unsigned int VAO,
 }
 
 void drawFluffyProfessorSkin(Position pos,
-                             float a, float b, float c,
+                             const float a, const float b, const float c,
                              unsigned int modelLoc,
                              unsigned int normalLoc,
-                             glm::mat4 std_model,
-                             glm::mat4 std_normal,
+                             const glm::mat4& std_model,
+                             const glm::mat4& std_normal,
                              float deltaTime)
 {
     static bool firstTime = true;
@@ -522,7 +522,7 @@ void drawFluffyBody(Position pos,
     firstTime = false;
 }
 
-void drawFluffy(Position pos,
+void drawFluffyNormal(Position pos,
                 float playerAngle,
                 unsigned int shaderProgram,
                 float deltaTime,
@@ -2809,4 +2809,17 @@ void drawFluffyHangLeft(Position pos,
     draw_ellipsoid(hands_VAO[5], 40);
     //-------------------------------------------------
     firstTime = false;
+}
+
+
+void drawFluffy(const Position pos,
+                const float playerAngle,
+                const GLuint shaderProgram,
+                const float deltaTime,
+                const bool restart,
+                const GLuint nullTexture,
+                const GLuint skin)
+{
+    // Just testing
+    drawFluffySeated(pos, shaderProgram, deltaTime, restart, playerAngle, nullTexture, skin);
 }

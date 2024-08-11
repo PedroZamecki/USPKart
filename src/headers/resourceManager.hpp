@@ -7,9 +7,16 @@
 #include <SDL2/SDL_image.h>
 #include <utils.hpp>
 #include <iostream>
+#include <map>
 
-SDL_Surface *loadImage(const char *filePath);
-
-GLuint loadTexture(const char *filePath);    
+class ResourceManager
+{
+private:
+    ~ResourceManager();
+    std::map<std::string, GLuint> textures;
+public:
+    GLuint loadTexture(const char *filePath, const int height, const int width, const std::string& name);
+    GLuint getTexture(const std::string& name) const;
+};
 
 #endif

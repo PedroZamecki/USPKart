@@ -1,5 +1,14 @@
 #include <resourceManager.hpp>
 
+ResourceManager::~ResourceManager()
+{
+    for (auto & [fst, snd] : textures)
+    {
+        glDeleteTextures(1, &snd);
+    }
+    textures.clear();
+}
+
 SDL_Surface *loadImage(const char *filePath)
 {
     SDL_Surface *loadedImage = nullptr;
@@ -14,7 +23,7 @@ SDL_Surface *loadImage(const char *filePath)
     return loadedImage;
 }
 
-GLuint loadTexture(const char *filePath)
+GLuint ResourceManager::loadTexture(const char *filePath, const int height, const int width, const std::string& name)
 {
     GLuint texture;
 
@@ -31,10 +40,21 @@ GLuint loadTexture(const char *filePath)
     SDL_Surface *image = loadImage(filePath);
 
     glTexImage2D(GL_TEXTURE_2D, 0,
-                 GL_RGB, 1184, 1184, 0,
+                 GL_RGB, width, height, 0,
                  GL_RGB, GL_UNSIGNED_BYTE,
                  image->pixels);
     SDL_FreeSurface(image);
 
+    textures[name] = texture;
     return texture;
+}
+
+GLuint ResourceManager::getTexture(const std::string& name) const
+{
+    if (textures.find(name) == textures.end())
+    {
+        std::cerr << "Error: Texture \"" << name << "\" not found." << std::endl;
+        return 0;
+    }
+    return textures.at(name);
 }
