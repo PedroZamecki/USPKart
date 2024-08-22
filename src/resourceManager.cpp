@@ -58,3 +58,4 @@ GLuint ResourceManager::getTexture(const std::string& name) const
     }
     return textures.at(name);
 }
+

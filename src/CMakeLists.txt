@@ -1,4 +1,6 @@
-﻿set(OpenGL_GL_PREFERENCE "GLVND")
+﻿cmake_minimum_required (VERSION 3.8)
+
+set(OpenGL_GL_PREFERENCE "GLVND")
 
 find_package(GLEW REQUIRED)
 find_package(glad REQUIRED)
@@ -9,6 +11,10 @@ find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
 find_package(SDL2_ttf REQUIRED)
 find_package(SDL2_mixer REQUIRED)
+
+if(NOT OpenGL_FOUND)
+    message(FATAL_ERROR "OpenGL not found!")
+endif()
 
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/std:c++latest>")
@@ -29,14 +35,14 @@ add_executable (USPKart "resourceManager.cpp"
                         "utils.cpp"
                         "game.cpp" )
                         
-target_include_directories(USPKart PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/headers)
+target_include_directories(USPKart PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/headers ${OPENGL_INCLUDE_DIR})
 
 target_link_libraries(USPKart PRIVATE   GLEW::GLEW
-                                        -lSDL2
-                                        SDL2
-                                        SDL2_image
-                                        SDL2_ttf
-                                        SDL2_mixer
+                                        $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
+                                        $<IF:$<TARGET_EXISTS:SDL2_image::SDL2_image>,SDL2_image::SDL2_image,SDL2_image::SDL2_image-static>
+                                        $<IF:$<TARGET_EXISTS:SDL2_ttf::SDL2_ttf>,SDL2_ttf::SDL2_ttf,SDL2_ttf::SDL2_ttf-static>
+                                        $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>
+                                        OpenGL::GL
                                         ${OPENGL_LIBRARIES}
                                         glm::glm
                                         glad::glad 

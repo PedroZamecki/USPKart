@@ -16,15 +16,8 @@
 #define EPS 0.00001
 
 enum animationType {normal, pushing, walking, pulling, hanging, hangingLeft, hangingRight, seated};
-enum skinType {none=0, professor, last};
-enum camViewType {back=0, front, left, right};
-
-
-class Data {
-    public:
-        Data();
-        ~Data();
-};
+enum skinType {none, professor, last};
+enum camViewType {back, front, left, right};
 
 class Position
 {
@@ -34,15 +27,19 @@ class Position
 
         void setPos(float x, float y, float z);
 
-        Position operator+(Position pos);
-        Position operator-(Position pos);
-        Position operator*(float scalar);
-        Position operator/(float scalar);
+        Position operator+(Position pos) const;
+        Position operator-(Position pos) const;
+        Position operator*(float scalar) const;
+        Position operator/(float scalar) const;
 
-        float dot(Position pos);
-        Position cross(Position pos);
+        float dot(Position pos) const;
+        Position cross(Position pos) const;
+        float x() const { return x_; }
+        float y() const { return y_; }
+        float z() const { return z_; }
 
-        float x, y, z;
+    private:
+        float x_, y_, z_;
 };
 
 class Camera
@@ -66,6 +63,59 @@ class Camera
         float fov = 20;
         float aspectRatio = 1;
         float near = 0, far = 0;
+};
+
+
+class CollisionBox {
+    public:
+        CollisionBox();
+        CollisionBox(Position pos, float width, float height, float depth);
+        ~CollisionBox();
+        bool isInside(CollisionBox box);
+    private:
+        Position pos;
+        float width, height, depth;
+};
+
+class Object {
+    public:
+        Object();
+        ~Object();
+    private:
+        Position pos;
+        float width, height, depth;
+        CollisionBox box;
+};
+
+class Character: Object {
+    public:
+        Character();
+        ~Character();
+    private:
+        Position pos;
+        CollisionBox box;
+        camViewType camView;
+};
+
+class Player: Character {
+    public:
+        Player();
+        ~Player();
+    private:
+        Position pos;
+        float width, height, depth;
+        CollisionBox box;
+        animationType animation;
+        skinType skin;
+        camViewType camView;
+};
+
+class Data {
+    public:
+        Data();
+        ~Data();
+    private:
+        Object *objects;
 };
 
 #endif

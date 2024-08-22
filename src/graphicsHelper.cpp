@@ -14,9 +14,9 @@ std::string readShader(const std::string &filename)
     return buffer.str();
 }
 
-unsigned int compileShader(GLenum type, const std::string &source)
+unsigned int compileShader(GLenum const type, const std::string &source)
 {
-    unsigned int shader = glCreateShader(type);
+    const unsigned int shader = glCreateShader(type);
     const char *src = source.c_str();
     glShaderSource(shader, 1, &src, nullptr);
     glCompileShader(shader);
@@ -29,7 +29,7 @@ unsigned int compileShader(GLenum type, const std::string &source)
         glGetShaderInfoLog(shader, 512, nullptr, infoLog);
         std::cerr << "ERROR::SHADER::COMPILATION_FAILED" << std::endl
                   << infoLog << std::endl;
-        glDeleteShader(shader); // Garante que o shader é deletado em caso de falha
+        glDeleteShader(shader); // Guarantee that the shader is deleted in case of failure
         throw std::runtime_error("Shader compilation failed");
     }
 
@@ -38,8 +38,8 @@ unsigned int compileShader(GLenum type, const std::string &source)
 
 unsigned int createShaderProgram(const std::vector<unsigned int> &shaders)
 {
-    unsigned int program = glCreateProgram();
-    for (auto shader : shaders)
+    const unsigned int program = glCreateProgram();
+    for (const auto shader : shaders)
     {
         glAttachShader(program, shader);
     }
@@ -53,7 +53,7 @@ unsigned int createShaderProgram(const std::vector<unsigned int> &shaders)
         glGetProgramInfoLog(program, 512, nullptr, infoLog);
         std::cerr << "ERROR::PROGRAM::LINKING_FAILED" << std::endl
                   << infoLog << std::endl;
-        glDeleteProgram(program); // Garante que o programa é deletado em caso de falha
+        glDeleteProgram(program); // Guarantee that the shader is deleted in case of failure
         throw std::runtime_error("Program linking failed");
     }
 
@@ -62,13 +62,13 @@ unsigned int createShaderProgram(const std::vector<unsigned int> &shaders)
 
 unsigned int loadShaders()
 {
-    std::string vertexShaderSource = readShader("shaders/shader.vs");
-    std::string fragmentShaderSource = readShader("shaders/shader.fs");
+    const std::string vertexShaderSource = readShader("shaders/shader.vs");
+    const std::string fragmentShaderSource = readShader("shaders/shader.fs");
 
     unsigned int vertexShader = compileShader(GL_VERTEX_SHADER, vertexShaderSource);
     unsigned int fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
 
-    unsigned int shaderProgram = createShaderProgram({vertexShader, fragmentShader});
+    const unsigned int shaderProgram = createShaderProgram({vertexShader, fragmentShader});
 
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
@@ -82,7 +82,6 @@ void GraphicsHelper::configureEnvironment()
 #ifdef _WIN32
     session = "windows";
     std::cout << "Running on Windows" << std::endl;
-// Configurações específicas do Windows aqui
 #elif __linux__
     if (const std::string sessionType = std::getenv("XDG_SESSION_TYPE"); !sessionType.empty())
     {
@@ -108,9 +107,6 @@ void GraphicsHelper::configureEnvironment()
     {
         std::cout << "Variable XDG_SESSION_TYPE not defined." << std::endl;
     }
-    // Make sure the audio works on Linux
-    putenv(const_cast<char *>("SDL_AUDIODRIVER=pulseaudio"));
-    putenv(const_cast<char *>("PULSE_RUNTIME_PATH=/run/user/1000/pulse"));
 #else
     session = "unknown";
     std::cout << "Not running on known environment, please ask for new implementation if required" << std::endl;
@@ -171,20 +167,11 @@ SDL_Window *GraphicsHelper::createWindow(const char *title, Configuration *confi
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 
     /*
-     * Now, we want to setup our requested
+     * Now, we want to set up our requested
      * window attributes for our OpenGL window.
      * We want *at least* 5 bits of red, green
      * and blue. We also want at least a 16-bit
      * depth buffer.
-     *
-     * The last thing we do is request a double
-     * buffered window. '1' turns on double
-     * buffering, '0' turns it off.
-     *
-     * Note that we do not use SDL_DOUBLEBUF in
-     * the flags to SDL_SetVideoMode. That does
-     * not affect the GL attribute state, only
-     * the standard 2D blitting setup.
      */
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
     SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 5);
@@ -217,7 +204,7 @@ SDL_Window *GraphicsHelper::createWindow(const char *title, Configuration *confi
     }
 
     /*
-     * At this point, we should have a properly setup
+     * At this point, we should properly set up
      * double-buffered window for use with OpenGL.
      */
     gladLoadGLLoader(SDL_GL_GetProcAddress);
@@ -230,7 +217,7 @@ SDL_Window *GraphicsHelper::createWindow(const char *title, Configuration *confi
     setupOpenGL();
 
     // Start to play audio from ./assets/audio/test.mp3
-    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
+    if (Mix_OpenAudio(44100, AUDIO_S16SYS, 2, 2048) < 0)
     {
         std::cerr << "Error: " << Mix_GetError() << std::endl;
         throw std::runtime_error("Failed to initialize audio");
@@ -257,12 +244,14 @@ SDL_Window *GraphicsHelper::createWindow(const char *title, Configuration *confi
 
 void GraphicsHelper::setupOpenGL() const
 {
+    /*
     float ratio = static_cast<float>(config->getWidth()) / static_cast<float>(config->getHeight());
     static GLfloat lightPosition[] = {0.0f, 0.0f, 0.0f, 1.0f};
     static GLfloat lightAmbient[] = {0.7f, 0.7f, 0.7f, 1.0f};
     static GLfloat lightDiffuse[] = {0.8f, 0.8f, 0.8f, 1.0f};
     static GLfloat lightSpecular[] = {1.0f, 1.0f, 1.0f, 1.0f};
     static GLfloat lightAttenuation[] = {0.00002f};
+    */
     glDepthFunc(GL_LESS);
     glEnable(GL_DEPTH_TEST);
 
@@ -286,28 +275,8 @@ void GraphicsHelper::calculateFPS()
     }
 }
 
-void GraphicsHelper::displayText(std::string message, SDL_Color color, int x, int y, int size) const
-{
-    // Function to create a rectangle with the text as a texture and render in front of the camera
-    SDL_Surface *surface = TTF_RenderText_Solid(font, message.c_str(), color);
-    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
-
-    SDL_Rect rect;
-    rect.x = x;
-    rect.y = y;
-    rect.w = size;
-    rect.h = size;
-
-    SDL_RenderCopy(renderer, texture, nullptr, &rect);
-    SDL_FreeSurface(surface);
-    SDL_DestroyTexture(texture);
-
-    SDL_RenderPresent(renderer);
-}
-
 void GraphicsHelper::drawWindow(const Camera *cam, const unsigned int shaderProgram, const float deltaTime) const
 {
-    static animationType last_anim = normal;
     constexpr float d = 60.0;
     glm::mat4 projection = glm::perspective(glm::radians(60.0f),
                                             static_cast<float>(config->getWidth()) / static_cast<float>(config->getHeight()),
@@ -315,9 +284,9 @@ void GraphicsHelper::drawWindow(const Camera *cam, const unsigned int shaderProg
 
     const float dist = cam->targetDist * cos(glm::radians(cam->pitch));
 
-    const float cam_z = d * cam->target.z - sin(glm::radians(cam->yaw)) * dist;
-    const float cam_x = d * cam->target.x - cos(glm::radians(cam->yaw)) * dist;
-    const float cam_y = d * cam->target.y - sin(glm::radians(cam->pitch)) * cam->targetDist;
+    const float cam_z = d * cam->target.z()  - sin(glm::radians(cam->yaw)) * dist;
+    const float cam_x = d * cam->target.x()  - cos(glm::radians(cam->yaw)) * dist;
+    const float cam_y = d * cam->target.y()  - sin(glm::radians(cam->pitch)) * cam->targetDist;
 
     const auto cameraPos = glm::vec3(cam_x, cam_y, cam_z);
     constexpr auto up = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -328,20 +297,19 @@ void GraphicsHelper::drawWindow(const Camera *cam, const unsigned int shaderProg
     direction.z = sin(glm::radians(cam->yaw)) * cos(glm::radians(cam->pitch));
     const auto cameraFront = glm::normalize(direction);
 
-    glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, up);
+    glm::mat4 view = lookAt(cameraPos, cameraPos + cameraFront, up);
 
     const GLint viewLoc = glGetUniformLocation(shaderProgram, "view");
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, value_ptr(view));
 
     const GLint projectionLoc = glGetUniformLocation(shaderProgram, "projection");
-    glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+    glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, value_ptr(projection));
 
-    auto model = glm::mat4(1.0f);
-    unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
+    glGetUniformLocation(shaderProgram, "model");
     //--------------------------------------------------
     auto normal = glm::mat4(1.0f);
     const GLint normalLoc = glGetUniformLocation(shaderProgram, "normal");
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     //--------------------------------------------------
     glm::vec3 lightPos = cameraPos;
     const GLint lightPosLocation = glGetUniformLocation(shaderProgram, "lightPos");
@@ -360,8 +328,7 @@ void GraphicsHelper::drawWindow(const Camera *cam, const unsigned int shaderProg
     drawTrack({0.0f, 0.0f, 0.0f}, shaderProgram, deltaTime, 0.0f, rm->getTexture("track"));
     drawBackground({0, 0, 0}, shaderProgram, deltaTime, rm->getTexture("background"));
 
-    constexpr bool restart = false;
-    last_anim = seated;
+    constexpr bool restart = true;
     drawFluffy({1, 1, 1}, 45.0, shaderProgram, deltaTime, restart, rm->getTexture("null"), 0);
     drawKart({1, 0.4, 1}, shaderProgram, deltaTime, restart, 45.0, 0.0, rm->getTexture("wheel_cap"), rm->getTexture("null"), rm->getTexture("fluffy"), rm->getTexture("ime_usp"), 0);
 
@@ -390,9 +357,7 @@ void GraphicsHelper::manageWindow()
 
         glUseProgram(shaderProgram);
 
-        // Desenhe o triângulo uma vez.
         drawWindow(cam, shaderProgram, deltaTime);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
 
         SDL_GL_SwapWindow(window);
     }
@@ -402,11 +367,11 @@ void GraphicsHelper::manageWindow()
 void GraphicsHelper::generateShaders(GLuint &programID, const char *vertexShader, const char *fragmentShader)
 {
     // Create the shaders
-    GLuint vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
-    GLuint fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
+    const GLuint vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
+    const GLuint fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
 
     // Compile the vertex shader
-    glShaderSource(vertexShaderID, 1, &vertexShader, NULL);
+    glShaderSource(vertexShaderID, 1, &vertexShader, nullptr);
     glCompileShader(vertexShaderID);
 
     // Check the vertex shader
@@ -417,12 +382,12 @@ void GraphicsHelper::generateShaders(GLuint &programID, const char *vertexShader
     if (infoLogLength > 0)
     {
         std::vector<char> vertexShaderErrorMessage(infoLogLength + 1);
-        glGetShaderInfoLog(vertexShaderID, infoLogLength, NULL, &vertexShaderErrorMessage[0]);
+        glGetShaderInfoLog(vertexShaderID, infoLogLength, nullptr, &vertexShaderErrorMessage[0]);
         std::cerr << &vertexShaderErrorMessage[0] << std::endl;
     }
 
     // Compile the fragment shader
-    glShaderSource(fragmentShaderID, 1, &fragmentShader, NULL);
+    glShaderSource(fragmentShaderID, 1, &fragmentShader, nullptr);
     glCompileShader(fragmentShaderID);
 
     // Check the fragment shader
@@ -431,7 +396,7 @@ void GraphicsHelper::generateShaders(GLuint &programID, const char *vertexShader
     if (infoLogLength > 0)
     {
         std::vector<char> fragmentShaderErrorMessage(infoLogLength + 1);
-        glGetShaderInfoLog(fragmentShaderID, infoLogLength, NULL, &fragmentShaderErrorMessage[0]);
+        glGetShaderInfoLog(fragmentShaderID, infoLogLength, nullptr, &fragmentShaderErrorMessage[0]);
         std::cerr << &fragmentShaderErrorMessage[0] << std::endl;
     }
 
@@ -447,7 +412,7 @@ void GraphicsHelper::generateShaders(GLuint &programID, const char *vertexShader
     if (infoLogLength > 0)
     {
         std::vector<char> programErrorMessage(infoLogLength + 1);
-        glGetProgramInfoLog(programID, infoLogLength, NULL, &programErrorMessage[0]);
+        glGetProgramInfoLog(programID, infoLogLength, nullptr, &programErrorMessage[0]);
         std::cerr << &programErrorMessage[0] << std::endl;
     }
 
@@ -455,7 +420,7 @@ void GraphicsHelper::generateShaders(GLuint &programID, const char *vertexShader
     glDeleteShader(fragmentShaderID);
 }
 
-SDL_bool GraphicsHelper::manageInputs(SDL_Event event)
+SDL_bool GraphicsHelper::manageInputs(const SDL_Event& event) const
 {
     if (event.type == SDL_QUIT)
     {
@@ -470,6 +435,7 @@ SDL_bool GraphicsHelper::manageInputs(SDL_Event event)
             config->setWidth(event.window.data1);
             config->setHeight(event.window.data2);
             config->writeConfigurationFile();
+            glViewport(0, 0, event.window.data1, event.window.data2);
             break;
         default:
             break;
@@ -485,7 +451,6 @@ SDL_bool GraphicsHelper::manageInputs(SDL_Event event)
             {
             case SDLK_ESCAPE:
                 return SDL_TRUE;
-                break;
             case SDLK_w:
                 cam->targetDist -= 0.1f;
                 break;
@@ -510,7 +475,7 @@ SDL_bool GraphicsHelper::manageInputs(SDL_Event event)
     return SDL_FALSE;
 }
 
-void GraphicsHelper::stop()
+void GraphicsHelper::stop() const
 {
     SDL_GL_DeleteContext(glContext);
     SDL_DestroyWindow(window);

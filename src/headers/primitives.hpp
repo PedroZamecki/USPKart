@@ -8,7 +8,7 @@
 #include <utils.hpp>
 #include <cmath>
 
-float magnitude(float A[3]);
+float magnitude(const float A[3]);
 
 unsigned int createSquareY(float sx, float sz,
                              float R, float G, float B);

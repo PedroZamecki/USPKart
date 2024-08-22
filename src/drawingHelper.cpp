@@ -530,19 +530,20 @@ void drawFluffyNormal(Position pos,
                 unsigned int texture,
                 unsigned int skin)
 {
-    float d = 60.0, a, b, c;
+    float constexpr d = 60.0;
+    float a, b, c;
     static bool firstTime = true;
-    glm::mat4 model = glm::mat4(1.0f);
-    unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
-    glm::mat4 normal = glm::mat4(1.0f);
-    unsigned int normalLoc = glGetUniformLocation(shaderProgram, "normal");
+    auto model = glm::mat4(1.0f);
+    unsigned int const modelLoc = glGetUniformLocation(shaderProgram, "model");
+    auto normal = glm::mat4(1.0f);
+    unsigned int const normalLoc = glGetUniformLocation(shaderProgram, "normal");
 
-    glm::mat4 std_model = glm::mat4(1.0f);
-    std_model = glm::translate(std_model, glm::vec3(pos.x * d, pos.y * d, pos.z * d));
-    std_model = glm::rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
+    auto std_model = glm::mat4(1.0f);
+    std_model = translate(std_model, glm::vec3(pos.x() * d, pos.y() * d, pos.z() * d));
+    std_model = rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
-    glm::mat4 std_normal = glm::mat4(1.0f);
-    std_normal = glm::rotate(std_normal, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
+    auto std_normal = glm::mat4(1.0f);
+    std_normal = rotate(std_normal, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
     a = 0.8 * d / 2.0;
     b = d / 2.0;
@@ -671,7 +672,7 @@ void drawFluffyWalk(Position pos,
     }
 
     glm::mat4 std_model = glm::mat4(1.0f);
-    std_model = glm::translate(std_model, glm::vec3(pos.x * d, pos.y * d, pos.z * d));
+    std_model = glm::translate(std_model, glm::vec3(pos.x() * d, pos.y() * d, pos.z() * d));
     std_model = glm::rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
     glm::mat4 std_normal = glm::mat4(1.0f);
@@ -824,7 +825,7 @@ void drawFluffyPush(Position pos,
     }
 
     glm::mat4 std_model = glm::mat4(1.0f);
-    std_model = glm::translate(std_model, glm::vec3(pos.x * d, pos.y * d, pos.z * d));
+    std_model = glm::translate(std_model, glm::vec3(pos.x() * d, pos.y() * d, pos.z() * d));
     std_model = glm::rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
     glm::mat4 std_normal = glm::mat4(1.0f);
@@ -1035,7 +1036,7 @@ void drawFluffyPull(Position pos,
     }
 
     glm::mat4 std_model = glm::mat4(1.0f);
-    std_model = glm::translate(std_model, glm::vec3(pos.x * d, pos.y * d, pos.z * d));
+    std_model = glm::translate(std_model, glm::vec3(pos.x() * d, pos.y() * d, pos.z() * d));
     std_model = glm::rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
     glm::mat4 std_normal = glm::mat4(1.0f);
@@ -1252,7 +1253,7 @@ void drawTrack(Position pos,
     glUniform3f(lightMinLoc, 1.0, 1.0, 1.0);
 
     glm::mat4 std_model = glm::mat4(1.0f);
-    std_model = glm::translate(std_model, glm::vec3(0.0 * d, pos.y * d, 0.0 * d));
+    std_model = glm::translate(std_model, glm::vec3(0.0 * d, pos.y() * d, 0.0 * d));
     // std_model = glm::rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
     glm::mat4 std_normal = glm::mat4(1.0f);
@@ -1291,7 +1292,7 @@ void drawBackground(Position pos,
     glUniform3f(lightMinLoc, 1.0, 1.0, 1.0);
 
     glm::mat4 std_model = glm::mat4(1.0f);
-    std_model = glm::translate(std_model, glm::vec3(0.0 * d, pos.y * d, 0.0 * d));
+    std_model = glm::translate(std_model, glm::vec3(0.0 * d, pos.y() * d, 0.0 * d));
 
     glm::mat4 std_normal = glm::mat4(1.0f);
     //-------------------------------------------------
@@ -1336,7 +1337,7 @@ void drawKart(Position pos,
     unsigned int normalLoc = glGetUniformLocation(shaderProgram, "normal");
 
     glm::mat4 std_model = glm::mat4(1.0f);
-    std_model = glm::translate(std_model, glm::vec3(pos.x * d, pos.y * d + 0.20 * d, pos.z * d + d * 0.60));
+    std_model = glm::translate(std_model, glm::vec3(pos.x() * d, pos.y() * d + 0.20 * d, pos.z() * d + d * 0.60));
     std_model = glm::rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
     glm::mat4 std_normal = glm::mat4(1.0f);
@@ -1828,7 +1829,7 @@ void drawFluffySeated(Position pos,
     static float foot_angle_step = 0.0;
 
     glm::mat4 std_model = glm::mat4(1.0f);
-    std_model = glm::translate(std_model, glm::vec3(pos.x * d, pos.y * d + 0.20 * d, pos.z * d + d * 0.60));
+    std_model = glm::translate(std_model, glm::vec3(pos.x() * d, pos.y() * d + 0.20 * d, pos.z() * d + d * 0.60));
     std_model = glm::rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
     glm::mat4 std_normal = glm::mat4(1.0f);
@@ -2038,7 +2039,7 @@ void drawFluffyHang(Position pos,
     static float foot_angle = 25.0;
 
     glm::mat4 std_model = glm::mat4(1.0f);
-    std_model = glm::translate(std_model, glm::vec3(pos.x * d, pos.y * d, pos.z * d));
+    std_model = glm::translate(std_model, glm::vec3(pos.x() * d, pos.y() * d, pos.z() * d));
     std_model = glm::translate(std_model, glm::vec3(0.0, (d / 2.0) * 0.20, 0.0));
     std_model = glm::rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
@@ -2269,7 +2270,7 @@ void drawFluffyHangRight(Position pos,
 
     glm::mat4 tmp_model = glm::mat4(1.0f);
     glm::mat4 std_model = glm::mat4(1.0f);
-    std_model = glm::translate(std_model, glm::vec3(pos.x * d, pos.y * d, pos.z * d));
+    std_model = glm::translate(std_model, glm::vec3(pos.x() * d, pos.y() * d, pos.z() * d));
     std_model = glm::translate(std_model, glm::vec3(0.0, (d / 2.0) * 0.20, 0.0));
     std_model = glm::rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
@@ -2554,7 +2555,7 @@ void drawFluffyHangLeft(Position pos,
 
     glm::mat4 tmp_model = glm::mat4(1.0f);
     glm::mat4 std_model = glm::mat4(1.0f);
-    std_model = glm::translate(std_model, glm::vec3(pos.x * d, pos.y * d, pos.z * d));
+    std_model = glm::translate(std_model, glm::vec3(pos.x() * d, pos.y() * d, pos.z() * d));
     std_model = glm::translate(std_model, glm::vec3(0.0, (d / 2.0) * 0.20, 0.0));
     std_model = glm::rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
