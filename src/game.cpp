@@ -3,9 +3,8 @@
 
 #include <game.hpp>
 
-Game::Game(): window(), data()
+Game::Game(): config(new Configuration), window(), data()
 {
-	config = new Configuration();
 	graphicsHelper = new GraphicsHelper(data);
 }
 

@@ -12,10 +12,11 @@
 class ResourceManager
 {
 private:
-    ~ResourceManager();
     std::map<std::string, GLuint> textures;
 public:
-    GLuint loadTexture(const char *filePath, const int height, const int width, const std::string& name);
+    ~ResourceManager();
+
+    GLuint loadTexture(const char *filePath, int height, int width, const std::string& name);
     GLuint getTexture(const std::string& name) const;
 };
 

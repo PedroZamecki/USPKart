@@ -70,7 +70,7 @@ private:
      * Display the frames per second on the screen.
      * @param renderer The renderer to display the FPS.
      */
-    void displayText(std::string message, SDL_Color color, int x, int y, int size) const;
+    void displayText(const std::string& message, SDL_Color color, int x, int y, int size) const;
     void drawWindow(const Camera* cam, unsigned int shaderProgram, float deltaTime) const;
 
     /*
@@ -78,7 +78,7 @@ private:
      */
     void calculateFPS();
 
-    SDL_bool manageInputs(SDL_Event event);
+    SDL_bool manageInputs(const SDL_Event& event) const;
 
     /*
      * Generate a shader program with the specified vertex and fragment shaders.
@@ -88,7 +88,7 @@ private:
      */
     static void generateShaders(GLuint &programID, const char *vertexShader, const char *fragmentShader);
 
-    void stop();
+    void stop() const;
 };
 
 #endif

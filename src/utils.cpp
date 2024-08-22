@@ -12,53 +12,53 @@ Data::~Data()
 
 Position::Position()
 {
-    x = 0.0f;
-    y = 0.0f;
-    z = 0.0f;
+    x_ = 0.0f;
+    y_ = 0.0f;
+    z_ = 0.0f;
 }
 
-Position::Position(float x, float y, float z)
+Position::Position(const float x, const  float y, const float z)
 {
-    this->x = x;
-    this->y = y;
-    this->z = z;
+    this->x_ = x;
+    this->y_ = y;
+    this->z_ = z;
 }
 
-void Position::setPos(float x, float y, float z)
+void Position::setPos(const float x, const float y, const float z)
 {
-    this->x = x;
-    this->y = y;
-    this->z = z;
+    this->x_ = x;
+    this->y_ = y;
+    this->z_ = z;
 }
 
-Position Position::operator+(Position pos)
+Position Position::operator+(Position const pos) const
 {
-    return Position(x + pos.x, y + pos.y, z + pos.z);
+    return {x_ + pos.x(), y_ + pos.y(), z_ + pos.z()};
 }
 
-Position Position::operator-(Position pos)
+Position Position::operator-(Position const pos) const
 {
-    return Position(x - pos.x, y - pos.y, z - pos.z);
+    return {x_ - pos.x(), y_ - pos.y(), z_ - pos.z()};
 }
 
-Position Position::operator*(float scalar)
+Position Position::operator*(float const scalar) const
 {
-    return Position(x * scalar, y * scalar, z * scalar);
+    return {x_ * scalar, y_ * scalar, z_ * scalar};
 }
 
-Position Position::operator/(float scalar)
+Position Position::operator/(float const scalar) const
 {
-    return Position(x / scalar, y / scalar, z / scalar);
+    return {x_ / scalar, y_ / scalar, z_ / scalar};
 }
 
-float Position::dot(Position pos)
+float Position::dot(Position const pos) const
 {
-    return x * pos.x + y * pos.y + z * pos.z;
+    return {x_ * pos.x() + y_ * pos.y() + z_ * pos.z()};
 }
 
-Position Position::cross(Position pos)
+Position Position::cross(Position const pos) const
 {
-    return Position(y * pos.z - z * pos.y, z * pos.x - x * pos.z, x * pos.y - y * pos.x);
+    return {y_ * pos.z() - z_ * pos.y(), z_ * pos.x() - x_ * pos.z(), x_ * pos.y() - y_ * pos.x()};
 }
 
 Camera::Camera()
@@ -75,16 +75,16 @@ Camera::Camera()
     this->far = 4096;
 }
 
-Camera::Camera( Position pos,
-                Position target,
-                float targetDist,
-                float pitch,
-                float yaw,
-                float roll,
-                float fov,
-                float aspectRatio,
-                float near,
-                float far)
+Camera::Camera( Position const pos,
+                Position const target,
+                float const targetDist,
+                float const pitch,
+                float const yaw,
+                float const roll,
+                float const fov,
+                float const aspectRatio,
+                float const near,
+                float const far)
 {
     this->pos = pos;
     this->target = target;

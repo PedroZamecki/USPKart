@@ -17,11 +17,11 @@ class Configuration {
 		bool borderless;
 
 	public:
-		explicit Configuration(	int width = 800,
-			                       int height = 600,
-			                       bool resizable = false,
-			                       bool fullScreen = false,
-			                       bool borderless = false) : width(width), height(height), resizable(resizable), fullScreen(fullScreen), borderless(borderless) {
+		explicit Configuration(	const int width = 800,
+								const int height = 600,
+			                    const bool resizable = false,
+			                    const bool fullScreen = false,
+								const bool borderless = false) : width(width), height(height), resizable(resizable), fullScreen(fullScreen), borderless(borderless) {
 			readConfigurationFile();
 		}
 		~Configuration() {
@@ -32,11 +32,11 @@ class Configuration {
 		bool isResizable() const { return resizable; }
 		bool isFullScreen() const { return fullScreen; }
 		bool isBorderless() const { return borderless; }
-		void setWidth(int width) { this->width = width; }
-		void setHeight(int height) { this->height = height; }
-		void setResizable(bool resizable) { this->resizable = resizable; }
-		void setFullScreen(bool fullScreen) { this->fullScreen = fullScreen; }
-		void setBorderless(bool borderless) { this->borderless = borderless; }
+		void setWidth(const int width) { this->width = width; }
+		void setHeight(const int height) { this->height = height; }
+		void setResizable(const bool resizable) { this->resizable = resizable; }
+		void setFullScreen(const bool fullScreen) { this->fullScreen = fullScreen; }
+		void setBorderless(const bool borderless) { this->borderless = borderless; }
 
 		void readConfigurationFile();
 		void writeConfigurationFile();
