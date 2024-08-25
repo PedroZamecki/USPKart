@@ -48,8 +48,7 @@ private:
     Camera *cam = new Camera();
     SDL_GLContext glContext{};
     Configuration *config{};
-    unsigned int shaderProgram{};
-    SDL_Renderer *renderer{};
+    GLuint shaderProgram{};
     SDL_Window *window{};
     std::string session;
     ResourceManager *rm{};
@@ -66,12 +65,8 @@ private:
      */
     void setupOpenGL() const;
 
-    /*
-     * Display the frames per second on the screen.
-     * @param renderer The renderer to display the FPS.
-     */
-    void displayText(const std::string& message, SDL_Color color, int x, int y, int size) const;
-    void drawWindow(const Camera* cam, unsigned int shaderProgram, float deltaTime) const;
+    void drawWindow(const Camera* cam, GLuint shaderProgram, float deltaTime) const;
+    void drawInterface(const Camera* cam, GLuint shaderProgram, GLuint interfaceTexture);
 
     /*
      * Calculate the frames per second.

@@ -18,7 +18,7 @@ void Game::run() const
 {
 	graphicsHelper->configureEnvironment();
 
-	graphicsHelper->createWindow("USPKart v0.0.1", config);
+	graphicsHelper->createWindow("USPKart v0.0.2", config);
 
 	graphicsHelper->manageWindow();
 }
@@ -28,4 +28,5 @@ int main()
 	const auto game = new Game();
 	game->run();
 	delete game;
+	return 0;
 }

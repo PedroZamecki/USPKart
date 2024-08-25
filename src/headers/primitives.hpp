@@ -12,8 +12,12 @@ float magnitude(const float A[3]);
 
 unsigned int createSquareY(float sx, float sz,
                              float R, float G, float B);
+unsigned int createSquareZ(float sy, float sz,
+                             float R, float G, float B);
 
 void drawSquareY(unsigned int VAO,
+                   GLuint tex);
+void drawSquareZ(unsigned int VAO,
                    GLuint tex);
 
 unsigned int createEllipseSectorZ(float a, float b,

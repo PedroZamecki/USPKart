@@ -3,6 +3,9 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 #define SQUARE(x) ((x)*(x))
 #define ROUND(x) ((x < 0)?(int)(x-0.5):(int)(x+0.5))
 #define SIGN(x) ((x >= 0)?1:-1)
@@ -63,6 +66,9 @@ class Camera
         float fov = 20;
         float aspectRatio = 1;
         float near = 0, far = 0;
+
+        glm::mat4 getViewMatrix() const;
+        glm::mat4 getProjectionMatrix() const;
 };
 
 
