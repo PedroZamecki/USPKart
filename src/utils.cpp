@@ -97,3 +97,15 @@ Camera::Camera( Position const pos,
     this->near = near;
     this->far = far;
 }
+
+glm::mat4 Camera::getViewMatrix() const
+{
+    return lookAt(glm::vec3(pos.x(), pos.y(), pos.z()),
+                                 glm::vec3(target.x(), target.y(), target.z()),
+                                 glm::vec3(0, 1, 0));
+}
+
+glm::mat4 Camera::getProjectionMatrix() const
+{
+    return glm::perspective(glm::radians(fov), aspectRatio, near, far);
+}

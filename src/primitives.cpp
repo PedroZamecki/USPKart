@@ -5,8 +5,8 @@ float magnitude(const float A[3])
     return sqrtf(A[0] * A[0] + A[1] * A[1] + A[2] * A[2]);
 }
 
-unsigned int createSquareY(float sx, float sz,
-                             float R, float G, float B)
+unsigned int createSquareY(const float sx, const float sz,
+                           const float R, const float G, const float B)
 {
     float vertices[] = {
         // positions         // colors          // texture coords  //normals
@@ -40,7 +40,7 @@ unsigned int createSquareY(float sx, float sz,
 
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
-                          (void *)0);
+                          static_cast<void*>(nullptr));
     glEnableVertexAttribArray(0);
     // color attribute
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
@@ -58,18 +58,18 @@ unsigned int createSquareY(float sx, float sz,
     return VAO;
 }
 
-void drawSquareY(unsigned int VAO,
-                   GLuint tex)
+void drawSquareY(const unsigned int VAO,
+                 const GLuint tex)
 {
     glBindVertexArray(VAO);
     glBindTexture(GL_TEXTURE_2D, tex);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
-unsigned int createEllipseSectorZ(float a, float b,
-                                     float R, float G, float B,
-                                     int angle1, int angle2,
-                                     int dangle)
+unsigned int createEllipseSectorZ(const float a, const float b,
+                                  const float R, const float G, const float B,
+                                  const int angle1, const int angle2,
+                                  const int dangle)
 {
     float angle, cos_angle, sin_angle;
     float x, y, z = 0.0;
@@ -79,10 +79,10 @@ unsigned int createEllipseSectorZ(float a, float b,
     unsigned int VBO;
     n = ((angle2 - angle1) / dangle + 2) * 11;
     k = 0;
-    vertices = (float *)calloc(n, sizeof(float));
+    vertices = static_cast<float*>(calloc(n, sizeof(float)));
     for (j = angle1; j <= angle2; j += dangle)
     {
-        angle = (float)j * (PI / 180.0f);
+        angle = static_cast<float>(j) * (PI / 180.0f);
         cos_angle = cosf(angle);
         sin_angle = sinf(angle);
         x = a * cos_angle;
@@ -129,7 +129,7 @@ unsigned int createEllipseSectorZ(float a, float b,
 
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
-                          (void *)0);
+                          static_cast<void*>(nullptr));
     glEnableVertexAttribArray(0);
     // color attribute
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
@@ -148,17 +148,78 @@ unsigned int createEllipseSectorZ(float a, float b,
     return VAO;
 }
 
-void draw_ellipse_sector_z(unsigned int VAO,
-                           int angle1, int angle2,
-                           int dangle)
+unsigned int createSquareZ(float sx, float sy,
+                 float R, float G, float B){
+    float vertices[] = {
+        // positions         // colors          // texture coords  //normals
+        -0.5f,  -0.5f, 0.0f, 1.0f, 1.0f, 1.0f,  0.0f, 1.0f,        0.0f,  0.0f,  1.0f,
+         0.5f,  -0.5f, 0.0f, 1.0f, 1.0f, 1.0f,  1.0f, 1.0f,        0.0f,  0.0f,  1.0f,
+         0.5f,   0.5f, 0.0f, 1.0f, 1.0f, 1.0f,  1.0f, 0.0f,        0.0f,  0.0f,  1.0f,
+         0.5f,   0.5f, 0.0f, 1.0f, 1.0f, 1.0f,  1.0f, 0.0f,        0.0f,  0.0f,  1.0f,
+        -0.5f,   0.5f, 0.0f, 1.0f, 1.0f, 1.0f,  0.0f, 0.0f,        0.0f,  0.0f,  1.0f,
+        -0.5f,  -0.5f, 0.0f, 1.0f, 1.0f, 1.0f,  0.0f, 1.0f,        0.0f,  0.0f,  1.0f
+      };
+    int i;
+    unsigned int VAO;
+    unsigned int VBO;
+
+    for(i = 0; i < 6; i++){
+        vertices[i*11 + 0] *= sx;
+        vertices[i*11 + 1] *= sy;
+
+        vertices[i*11 + 3] = R;
+        vertices[i*11 + 4] = G;
+        vertices[i*11 + 5] = B;
+    }
+
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
+              (void*)0);
+    glEnableVertexAttribArray(0);
+    // color attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
+              (void*)(3* sizeof(float)));
+    glEnableVertexAttribArray(1);
+    // texture attribute
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
+              (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+    // normal attribute
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
+              (void*)(8 * sizeof(float)));
+    glEnableVertexAttribArray(3);
+
+    return VAO;
+}
+
+
+
+void drawSquareZ(unsigned int VAO,
+           GLuint tex){
+    glBindVertexArray(VAO);
+    glBindTexture(GL_TEXTURE_2D, tex);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+void draw_ellipse_sector_z(const unsigned int VAO,
+                           const int angle1, const int angle2,
+                           const int dangle)
 {
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLE_FAN, 0, (angle2 - angle1) / dangle + 2);
 }
 
-unsigned int create_ellipse_z(float a, float b,
-                              float R, float G, float B,
-                              int dangle)
+unsigned int create_ellipse_z(const float a, const float b,
+                              const float R, const float G, const float B,
+                              const int dangle)
 {
     float angle, cos_angle, sin_angle;
     float x, y, z = 0.0;
@@ -168,10 +229,10 @@ unsigned int create_ellipse_z(float a, float b,
     unsigned int VBO;
     n = (360 / dangle + 2) * 11;
     k = 0;
-    vertices = (float *)calloc(n, sizeof(float));
+    vertices = static_cast<float*>(calloc(n, sizeof(float)));
     for (j = 0; j <= 360; j += dangle)
     {
-        angle = (float)j * (PI / 180.0f);
+        angle = static_cast<float>(j) * (PI / 180.0f);
         cos_angle = cosf(angle);
         sin_angle = sinf(angle);
         x = a * cos_angle;
@@ -218,7 +279,7 @@ unsigned int create_ellipse_z(float a, float b,
 
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
-                          (void *)0);
+                          static_cast<void*>(nullptr));
     glEnableVertexAttribArray(0);
     // color attribute
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
@@ -237,15 +298,15 @@ unsigned int create_ellipse_z(float a, float b,
     return VAO;
 }
 
-void draw_ellipse_z(unsigned int VAO,
-                    int dangle)
+void draw_ellipse_z(const unsigned int VAO,
+                    const int dangle)
 {
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 360 / dangle + 2);
 }
 
-unsigned int create_rectangular_cuboid(float sx, float sy, float sz,
-                                       float R, float G, float B)
+unsigned int create_rectangular_cuboid(const float sx, const float sy, const float sz,
+                                       const float R, const float G, const float B)
 {
     float vertices[] = {
         // positions         // colors          // texture coords  //normals
@@ -315,7 +376,7 @@ unsigned int create_rectangular_cuboid(float sx, float sy, float sz,
 
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
-                          (void *)0);
+                          static_cast<void*>(nullptr));
     glEnableVertexAttribArray(0);
     // color attribute
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
@@ -333,7 +394,7 @@ unsigned int create_rectangular_cuboid(float sx, float sy, float sz,
     return VAO;
 }
 
-void draw_rectangular_cuboid(unsigned int VAO,
+void draw_rectangular_cuboid(const unsigned int VAO,
                              GLuint tex[6])
 {
     int i;
@@ -348,10 +409,10 @@ void draw_rectangular_cuboid(unsigned int VAO,
 //--------------------------------------
 
 unsigned int create_rounded_rectangular_cuboid(float sx, float sy, float sz,
-                                               float radius,
-                                               float Rt, float Gt, float Bt,
-                                               float Rm, float Gm, float Bm,
-                                               float Rb, float Gb, float Bb)
+                                               const float radius,
+                                               const float Rt, const float Gt, const float Bt,
+                                               const float Rm, const float Gm, const float Bm,
+                                               const float Rb, const float Gb, const float Bb)
 {
     float vertices[] = {
         // positions         // colors          // texture coords  //normals
@@ -744,7 +805,7 @@ unsigned int create_rounded_rectangular_cuboid(float sx, float sy, float sz,
 
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
-                          (void *)0);
+                          static_cast<void*>(nullptr));
     glEnableVertexAttribArray(0);
     // color attribute
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
@@ -762,7 +823,7 @@ unsigned int create_rounded_rectangular_cuboid(float sx, float sy, float sz,
     return VAO;
 }
 
-void draw_rounded_rectangular_cuboid(unsigned int VAO,
+void draw_rounded_rectangular_cuboid(const unsigned int VAO,
                                      GLuint tex[7])
 {
     int i;
@@ -779,9 +840,9 @@ void draw_rounded_rectangular_cuboid(unsigned int VAO,
 
 //--------------------------------------
 
-unsigned int create_ellipsoid(float a, float b, float c,
-                              float R, float G, float B,
-                              int slices)
+unsigned int create_ellipsoid(const float a, const float b, const float c,
+                              const float R, const float G, const float B,
+                              const int slices)
 {
     unsigned int VAO;
     unsigned int VBO;
@@ -795,11 +856,11 @@ unsigned int create_ellipsoid(float a, float b, float c,
 
     n = slices * (360 / dangle + 1) * 2 * 11;
     k = 0;
-    vertices = (float *)calloc(n, sizeof(float));
+    vertices = static_cast<float*>(calloc(n, sizeof(float)));
     for (i = 0; i < slices; i++)
     {
-        w0 = (float)i / (float)slices;
-        w1 = (float)(i + 1) / (float)slices;
+        w0 = static_cast<float>(i) / static_cast<float>(slices);
+        w1 = static_cast<float>(i + 1) / static_cast<float>(slices);
 
         z0 = (-c) * (1.0 - w0) + c * w0;
         z1 = (-c) * (1.0 - w1) + c * w1;
@@ -813,7 +874,7 @@ unsigned int create_ellipsoid(float a, float b, float c,
         // glBegin(GL_TRIANGLE_STRIP);
         for (j = 0; j <= 360; j += dangle)
         {
-            angle = (float)j * (PI / 180.0f);
+            angle = static_cast<float>(j) * (PI / 180.0f);
             cos_angle = cosf(angle);
             sin_angle = sinf(angle);
             x0 = a0 * cos_angle;
@@ -915,7 +976,7 @@ unsigned int create_ellipsoid(float a, float b, float c,
 
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
-                          (void *)0);
+                          static_cast<void*>(nullptr));
     glEnableVertexAttribArray(0);
     // color attribute
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
@@ -934,8 +995,8 @@ unsigned int create_ellipsoid(float a, float b, float c,
     return VAO;
 }
 
-void draw_ellipsoid(unsigned int VAO,
-                    int slices)
+void draw_ellipsoid(const unsigned int VAO,
+                    const int slices)
 {
     int i, k, dangle = 1; // 2;
 
@@ -951,11 +1012,11 @@ void draw_ellipsoid(unsigned int VAO,
 //-------------------------------
 
 // lune_z
-unsigned int create_ellipsoid_lune_cap_z(float a, float b, float c,
-                                         float z_0, float z_1,
-                                         int angle1, int angle2,
-                                         float R, float G, float B,
-                                         int slices)
+unsigned int create_ellipsoid_lune_cap_z(const float a, const float b, const float c,
+                                         const float z_0, const float z_1,
+                                         const int angle1, const int angle2,
+                                         const float R, const float G, const float B,
+                                         const int slices)
 {
     unsigned int VAO;
     unsigned int VBO;
@@ -969,11 +1030,11 @@ unsigned int create_ellipsoid_lune_cap_z(float a, float b, float c,
 
     n = slices * (angle2 - angle1 + 1) * 2 * 11;
     k = 0;
-    vertices = (float *)calloc(n, sizeof(float));
+    vertices = static_cast<float*>(calloc(n, sizeof(float)));
     for (i = 0; i < slices; i++)
     {
-        w0 = (float)i / (float)slices;
-        w1 = (float)(i + 1) / (float)slices;
+        w0 = static_cast<float>(i) / static_cast<float>(slices);
+        w1 = static_cast<float>(i + 1) / static_cast<float>(slices);
 
         z0 = z_0 * (1.0 - w0) + z_1 * w0;
         z1 = z_0 * (1.0 - w1) + z_1 * w1;
@@ -987,7 +1048,7 @@ unsigned int create_ellipsoid_lune_cap_z(float a, float b, float c,
         // glBegin(GL_QUAD_STRIP);
         for (j = angle1; j <= angle2; j++)
         {
-            angle = (float)j * (PI / 180.0f);
+            angle = static_cast<float>(j) * (PI / 180.0f);
             cos_angle = cosf(angle);
             sin_angle = sinf(angle);
             x0 = a0 * cos_angle;
@@ -1089,7 +1150,7 @@ unsigned int create_ellipsoid_lune_cap_z(float a, float b, float c,
 
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
-                          (void *)0);
+                          static_cast<void*>(nullptr));
     glEnableVertexAttribArray(0);
     // color attribute
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
@@ -1108,9 +1169,9 @@ unsigned int create_ellipsoid_lune_cap_z(float a, float b, float c,
     return VAO;
 }
 
-void draw_ellipsoid_lune_cap_z(unsigned int VAO,
-                               int angle1, int angle2,
-                               int slices)
+void draw_ellipsoid_lune_cap_z(const unsigned int VAO,
+                               const int angle1, const int angle2,
+                               const int slices)
 {
     int i, k;
 
@@ -1126,10 +1187,10 @@ void draw_ellipsoid_lune_cap_z(unsigned int VAO,
 //-------------------------------
 
 // lune_z
-unsigned int create_ellipsoid_lune_z(float a, float b, float c,
-                                     int angle1, int angle2,
-                                     float R, float G, float B,
-                                     int slices)
+unsigned int create_ellipsoid_lune_z(const float a, const float b, const float c,
+                                     const int angle1, const int angle2,
+                                     const float R, const float G, const float B,
+                                     const int slices)
 {
     unsigned int VAO;
     unsigned int VBO;
@@ -1143,11 +1204,11 @@ unsigned int create_ellipsoid_lune_z(float a, float b, float c,
 
     n = slices * (angle2 - angle1 + 1) * 2 * 11;
     k = 0;
-    vertices = (float *)calloc(n, sizeof(float));
+    vertices = static_cast<float*>(calloc(n, sizeof(float)));
     for (i = 0; i < slices; i++)
     {
-        w0 = (float)i / (float)slices;
-        w1 = (float)(i + 1) / (float)slices;
+        w0 = static_cast<float>(i) / static_cast<float>(slices);
+        w1 = static_cast<float>(i + 1) / static_cast<float>(slices);
 
         z0 = (-c) * (1.0 - w0) + c * w0;
         z1 = (-c) * (1.0 - w1) + c * w1;
@@ -1161,7 +1222,7 @@ unsigned int create_ellipsoid_lune_z(float a, float b, float c,
         // glBegin(GL_QUAD_STRIP);
         for (j = angle1; j <= angle2; j++)
         {
-            angle = (float)j * (PI / 180.0f);
+            angle = static_cast<float>(j) * (PI / 180.0f);
             cos_angle = cosf(angle);
             sin_angle = sinf(angle);
             x0 = a0 * cos_angle;
@@ -1263,7 +1324,7 @@ unsigned int create_ellipsoid_lune_z(float a, float b, float c,
 
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
-                          (void *)0);
+                          static_cast<void*>(nullptr));
     glEnableVertexAttribArray(0);
     // color attribute
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
@@ -1282,9 +1343,9 @@ unsigned int create_ellipsoid_lune_z(float a, float b, float c,
     return VAO;
 }
 
-void draw_ellipsoid_lune_z(unsigned int VAO,
-                           int angle1, int angle2,
-                           int slices)
+void draw_ellipsoid_lune_z(const unsigned int VAO,
+                           const int angle1, const int angle2,
+                           const int slices)
 {
     int i, k;
 
@@ -1299,10 +1360,10 @@ void draw_ellipsoid_lune_z(unsigned int VAO,
 
 //-----------------------------------------
 
-unsigned int create_ellipsoid_lune_x(float a, float b, float c,
-                                     int angle1, int angle2,
-                                     float R, float G, float B,
-                                     int slices)
+unsigned int create_ellipsoid_lune_x(const float a, const float b, const float c,
+                                     const int angle1, const int angle2,
+                                     const float R, const float G, const float B,
+                                     const int slices)
 {
     unsigned int VAO;
     unsigned int VBO;
@@ -1316,11 +1377,11 @@ unsigned int create_ellipsoid_lune_x(float a, float b, float c,
 
     n = slices * (angle2 - angle1 + 1) * 2 * 11;
     k = 0;
-    vertices = (float *)calloc(n, sizeof(float));
+    vertices = static_cast<float*>(calloc(n, sizeof(float)));
     for (i = 0; i < slices; i++)
     {
-        w0 = (float)i / (float)slices;
-        w1 = (float)(i + 1) / (float)slices;
+        w0 = static_cast<float>(i) / static_cast<float>(slices);
+        w1 = static_cast<float>(i + 1) / static_cast<float>(slices);
 
         x0 = (-a) * (1.0 - w0) + a * w0;
         x1 = (-a) * (1.0 - w1) + a * w1;
@@ -1334,7 +1395,7 @@ unsigned int create_ellipsoid_lune_x(float a, float b, float c,
         // glBegin(GL_QUAD_STRIP);
         for (j = angle1; j <= angle2; j++)
         {
-            angle = (float)j * (PI / 180.0f);
+            angle = static_cast<float>(j) * (PI / 180.0f);
             cos_angle = cosf(angle);
             sin_angle = sinf(angle);
             z0 = c0 * cos_angle;
@@ -1436,7 +1497,7 @@ unsigned int create_ellipsoid_lune_x(float a, float b, float c,
 
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
-                          (void *)0);
+                          static_cast<void*>(nullptr));
     glEnableVertexAttribArray(0);
     // color attribute
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
@@ -1455,9 +1516,9 @@ unsigned int create_ellipsoid_lune_x(float a, float b, float c,
     return VAO;
 }
 
-void draw_ellipsoid_lune_x(unsigned int VAO,
-                           int angle1, int angle2,
-                           int slices)
+void draw_ellipsoid_lune_x(const unsigned int VAO,
+                           const int angle1, const int angle2,
+                           const int slices)
 {
     int i, k;
 
@@ -1472,11 +1533,11 @@ void draw_ellipsoid_lune_x(unsigned int VAO,
 
 //-----------------------------------------
 
-unsigned int create_ellipsoid_lune_cap_x(float a, float b, float c,
-                                         float x_0, float x_1,
-                                         int angle1, int angle2,
-                                         float R, float G, float B,
-                                         int slices)
+unsigned int create_ellipsoid_lune_cap_x(const float a, const float b, const float c,
+                                         const float x_0, const float x_1,
+                                         const int angle1, const int angle2,
+                                         const float R, const float G, const float B,
+                                         const int slices)
 {
     unsigned int VAO;
     unsigned int VBO;
@@ -1490,11 +1551,11 @@ unsigned int create_ellipsoid_lune_cap_x(float a, float b, float c,
 
     n = slices * (angle2 - angle1 + 1) * 2 * 11;
     k = 0;
-    vertices = (float *)calloc(n, sizeof(float));
+    vertices = static_cast<float*>(calloc(n, sizeof(float)));
     for (i = 0; i < slices; i++)
     {
-        w0 = (float)i / (float)slices;
-        w1 = (float)(i + 1) / (float)slices;
+        w0 = static_cast<float>(i) / static_cast<float>(slices);
+        w1 = static_cast<float>(i + 1) / static_cast<float>(slices);
 
         x0 = x_0 * (1.0 - w0) + x_1 * w0;
         x1 = x_0 * (1.0 - w1) + x_1 * w1;
@@ -1508,7 +1569,7 @@ unsigned int create_ellipsoid_lune_cap_x(float a, float b, float c,
         // glBegin(GL_QUAD_STRIP);
         for (j = angle1; j <= angle2; j++)
         {
-            angle = (float)j * (PI / 180.0f);
+            angle = static_cast<float>(j) * (PI / 180.0f);
             cos_angle = cosf(angle);
             sin_angle = sinf(angle);
             z0 = c0 * cos_angle;
@@ -1610,7 +1671,7 @@ unsigned int create_ellipsoid_lune_cap_x(float a, float b, float c,
 
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
-                          (void *)0);
+                          static_cast<void*>(nullptr));
     glEnableVertexAttribArray(0);
     // color attribute
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
@@ -1629,9 +1690,9 @@ unsigned int create_ellipsoid_lune_cap_x(float a, float b, float c,
     return VAO;
 }
 
-void draw_ellipsoid_lune_cap_x(unsigned int VAO,
-                               int angle1, int angle2,
-                               int slices)
+void draw_ellipsoid_lune_cap_x(const unsigned int VAO,
+                               const int angle1, const int angle2,
+                               const int slices)
 {
     int i, k;
 
@@ -1668,14 +1729,14 @@ unsigned int create_curved_cylinder_x(float radius0,
 
     n = slices * (360 / delta + 1) * 2 * 11;
     k = 0;
-    vertices = (float *)calloc(n, sizeof(float));
+    vertices = static_cast<float*>(calloc(n, sizeof(float)));
 
     bend_ang0 *= (PI / 180.0f);
     bend_ang1 *= (PI / 180.0f);
     for (i = 0; i < slices; i++)
     {
-        w0 = (float)i / (float)slices;
-        w1 = (float)(i + 1) / (float)slices;
+        w0 = static_cast<float>(i) / static_cast<float>(slices);
+        w1 = static_cast<float>(i + 1) / static_cast<float>(slices);
         ang0 = bend_ang0 * (1.0 - w0) + bend_ang1 * w0;
         ang1 = bend_ang0 * (1.0 - w1) + bend_ang1 * w1;
 
@@ -1690,7 +1751,7 @@ unsigned int create_curved_cylinder_x(float radius0,
         // glBegin(GL_QUAD_STRIP);
         for (j = 0; j <= 360; j += delta)
         {
-            angle = (float)j * (PI / 180.0f);
+            angle = static_cast<float>(j) * (PI / 180.0f);
             cos_angle = cosf(angle);
             sin_angle = sinf(angle);
             y0 = rad0 * cos_angle + bend_radius;
@@ -1796,7 +1857,7 @@ unsigned int create_curved_cylinder_x(float radius0,
 
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
-                          (void *)0);
+                          static_cast<void*>(nullptr));
     glEnableVertexAttribArray(0);
     // color attribute
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
@@ -1815,9 +1876,9 @@ unsigned int create_curved_cylinder_x(float radius0,
     return VAO;
 }
 
-void draw_curved_cylinder_x(unsigned int VAO,
-                            int slices,
-                            int delta)
+void draw_curved_cylinder_x(const unsigned int VAO,
+                            const int slices,
+                            const int delta)
 {
     int i, k;
     glBindVertexArray(VAO);
@@ -1832,11 +1893,11 @@ void draw_curved_cylinder_x(unsigned int VAO,
 //-----------------------------------------
 
 // plane zy (rotation axis = x)
-unsigned int create_torus_x(float radius,
-                            float bend_radius,
-                            float R, float G, float B,
-                            int slices,
-                            int delta)
+unsigned int create_torus_x(const float radius,
+                            const float bend_radius,
+                            const float R, const float G, const float B,
+                            const int slices,
+                            const int delta)
 {
     return create_curved_cylinder_x(radius, radius,
                                     bend_radius,
@@ -1845,9 +1906,9 @@ unsigned int create_torus_x(float radius,
                                     slices, delta);
 }
 
-void draw_torus_x(unsigned int VAO,
-                  int slices,
-                  int delta)
+void draw_torus_x(const unsigned int VAO,
+                  const int slices,
+                  const int delta)
 {
     draw_curved_cylinder_x(VAO,
                            slices,
@@ -1878,14 +1939,14 @@ unsigned int create_curved_cylinder_y(float radius0,
 
     n = slices * (360 / delta + 1) * 2 * 11;
     k = 0;
-    vertices = (float *)calloc(n, sizeof(float));
+    vertices = static_cast<float*>(calloc(n, sizeof(float)));
 
     bend_ang0 *= (PI / 180.0f);
     bend_ang1 *= (PI / 180.0f);
     for (i = 0; i < slices; i++)
     {
-        w0 = (float)i / (float)slices;
-        w1 = (float)(i + 1) / (float)slices;
+        w0 = static_cast<float>(i) / static_cast<float>(slices);
+        w1 = static_cast<float>(i + 1) / static_cast<float>(slices);
         ang0 = bend_ang0 * (1.0 - w0) + bend_ang1 * w0;
         ang1 = bend_ang0 * (1.0 - w1) + bend_ang1 * w1;
 
@@ -1900,7 +1961,7 @@ unsigned int create_curved_cylinder_y(float radius0,
         // glBegin(GL_QUAD_STRIP);
         for (j = 0; j <= 360; j += delta)
         {
-            angle = (float)j * (PI / 180.0f);
+            angle = static_cast<float>(j) * (PI / 180.0f);
             cos_angle = cosf(angle);
             sin_angle = sinf(angle);
             x0 = rad0 * cos_angle + bend_radius;
@@ -2006,7 +2067,7 @@ unsigned int create_curved_cylinder_y(float radius0,
 
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
-                          (void *)0);
+                          static_cast<void*>(nullptr));
     glEnableVertexAttribArray(0);
     // color attribute
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
@@ -2025,9 +2086,9 @@ unsigned int create_curved_cylinder_y(float radius0,
     return VAO;
 }
 
-void draw_curved_cylinder_y(unsigned int VAO,
-                            int slices,
-                            int delta)
+void draw_curved_cylinder_y(const unsigned int VAO,
+                            const int slices,
+                            const int delta)
 {
     int i, k;
     glBindVertexArray(VAO);
@@ -2042,11 +2103,11 @@ void draw_curved_cylinder_y(unsigned int VAO,
 //-----------------------------------------------
 
 // plane zx (rotation axis = y)
-unsigned int create_torus_y(float radius,
-                            float bend_radius,
-                            float R, float G, float B,
-                            int slices,
-                            int delta)
+unsigned int create_torus_y(const float radius,
+                            const float bend_radius,
+                            const float R, const float G, const float B,
+                            const int slices,
+                            const int delta)
 {
     return create_curved_cylinder_y(radius, radius,
                                     bend_radius,
@@ -2055,9 +2116,9 @@ unsigned int create_torus_y(float radius,
                                     slices, delta);
 }
 
-void draw_torus_y(unsigned int VAO,
-                  int slices,
-                  int delta)
+void draw_torus_y(const unsigned int VAO,
+                  const int slices,
+                  const int delta)
 {
     draw_curved_cylinder_y(VAO,
                            slices,
@@ -2066,12 +2127,12 @@ void draw_torus_y(unsigned int VAO,
 
 //-----------------------------------------
 
-unsigned int create_cylinder_z(float radius0,
-                               float radius1,
-                               float z0,
-                               float z1,
-                               float R, float G, float B,
-                               int delta)
+unsigned int create_cylinder_z(const float radius0,
+                               const float radius1,
+                               const float z0,
+                               const float z1,
+                               const float R, const float G, const float B,
+                               const int delta)
 {
     unsigned int VAO;
     unsigned int VBO;
@@ -2084,12 +2145,12 @@ unsigned int create_cylinder_z(float radius0,
 
     n = (360 / delta + 1) * 2 * 11;
     k = 0;
-    vertices = (float *)calloc(n, sizeof(float));
+    vertices = static_cast<float*>(calloc(n, sizeof(float)));
 
     // glBegin(GL_QUAD_STRIP);
     for (j = 0; j <= 360; j += delta)
     {
-        angle = (float)j * (PI / 180.0f);
+        angle = static_cast<float>(j) * (PI / 180.0f);
         cos_angle = cosf(angle);
         sin_angle = sinf(angle);
         y0 = radius0 * cos_angle;
@@ -2191,7 +2252,7 @@ unsigned int create_cylinder_z(float radius0,
 
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
-                          (void *)0);
+                          static_cast<void*>(nullptr));
     glEnableVertexAttribArray(0);
     // color attribute
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
@@ -2210,8 +2271,8 @@ unsigned int create_cylinder_z(float radius0,
     return VAO;
 }
 
-void draw_cylinder_z(unsigned int VAO,
-                     int delta)
+void draw_cylinder_z(const unsigned int VAO,
+                     const int delta)
 {
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, (360 / delta + 1) * 2);
@@ -2219,12 +2280,12 @@ void draw_cylinder_z(unsigned int VAO,
 
 //-----------------------------------------
 
-unsigned int create_cylinder_y(float radius0,
-                               float radius1,
-                               float y0,
-                               float y1,
-                               float R, float G, float B,
-                               int delta)
+unsigned int create_cylinder_y(const float radius0,
+                               const float radius1,
+                               const float y0,
+                               const float y1,
+                               const float R, const float G, const float B,
+                               const int delta)
 {
     unsigned int VAO;
     unsigned int VBO;
@@ -2237,12 +2298,12 @@ unsigned int create_cylinder_y(float radius0,
 
     n = (360 / delta + 1) * 2 * 11;
     k = 0;
-    vertices = (float *)calloc(n, sizeof(float));
+    vertices = static_cast<float*>(calloc(n, sizeof(float)));
 
     // glBegin(GL_QUAD_STRIP);
     for (j = 0; j <= 360; j += delta)
     {
-        angle = (float)j * (PI / 180.0f);
+        angle = static_cast<float>(j) * (PI / 180.0f);
         cos_angle = cosf(angle);
         sin_angle = sinf(angle);
         z0 = radius0 * cos_angle;
@@ -2344,7 +2405,7 @@ unsigned int create_cylinder_y(float radius0,
 
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
-                          (void *)0);
+                          static_cast<void*>(nullptr));
     glEnableVertexAttribArray(0);
     // color attribute
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
@@ -2363,16 +2424,16 @@ unsigned int create_cylinder_y(float radius0,
     return VAO;
 }
 
-void draw_cylinder_y(unsigned int VAO,
-                     int delta)
+void draw_cylinder_y(const unsigned int VAO,
+                     const int delta)
 {
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, (360 / delta + 1) * 2);
 }
 
-void draw_cylinder_y(unsigned int VAO,
-                     int delta,
-                     GLuint tex)
+void draw_cylinder_y(const unsigned int VAO,
+                     const int delta,
+                     const GLuint tex)
 {
     glBindVertexArray(VAO);
     glBindTexture(GL_TEXTURE_2D, tex);
@@ -2381,12 +2442,12 @@ void draw_cylinder_y(unsigned int VAO,
 
 //--------------------------------------------
 
-unsigned int create_elliptic_cylinder_z(float a0, float b0,
-                                        float a1, float b1,
-                                        float z0,
-                                        float z1,
-                                        float R, float G, float B,
-                                        int delta)
+unsigned int create_elliptic_cylinder_z(const float a0, const float b0,
+                                        const float a1, const float b1,
+                                        const float z0,
+                                        const float z1,
+                                        const float R, const float G, const float B,
+                                        const int delta)
 {
     unsigned int VAO;
     unsigned int VBO;
@@ -2400,12 +2461,12 @@ unsigned int create_elliptic_cylinder_z(float a0, float b0,
 
     n = (360 / delta + 1) * 2 * 11;
     k = 0;
-    vertices = (float *)calloc(n, sizeof(float));
+    vertices = static_cast<float*>(calloc(n, sizeof(float)));
 
     // glBegin(GL_QUAD_STRIP);
     for (j = 0; j <= 360; j += delta)
     {
-        angle = (float)j * (PI / 180.0f);
+        angle = static_cast<float>(j) * (PI / 180.0f);
         cos_angle = cosf(angle);
         sin_angle = sinf(angle);
         y0 = b0 * cos_angle;
@@ -2510,7 +2571,7 @@ unsigned int create_elliptic_cylinder_z(float a0, float b0,
 
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
-                          (void *)0);
+                          static_cast<void*>(nullptr));
     glEnableVertexAttribArray(0);
     // color attribute
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float),
@@ -2529,8 +2590,8 @@ unsigned int create_elliptic_cylinder_z(float a0, float b0,
     return VAO;
 }
 
-void draw_elliptic_cylinder_z(unsigned int VAO,
-                              int delta)
+void draw_elliptic_cylinder_z(const unsigned int VAO,
+                              const int delta)
 {
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, (360 / delta + 1) * 2);

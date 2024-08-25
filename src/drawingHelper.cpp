@@ -1,9 +1,9 @@
 #include <drawingHelper.hpp>
 
-unsigned int createHairyEllipsoid(float R, float G, float B)
+unsigned int createHairyEllipsoid(const float R, const float G, const float B)
 {
     float th0, th1;
-    float hair_R = 8.0;
+    constexpr float hair_R = 8.0;
     th0 = 90.0;
     th1 = 180.0;
     return create_curved_cylinder_x(3.0,
@@ -14,11 +14,11 @@ unsigned int createHairyEllipsoid(float R, float G, float B)
                                     20, 4);
 }
 
-void drawHairyEllipsoid(unsigned int VAO,
+void drawHairyEllipsoid(const unsigned int VAO,
                         glm::mat4 std_model, glm::mat4 std_normal,
-                        unsigned int modelLoc, unsigned int normalLoc,
-                        float a, float b, float c,
-                        int slices)
+                        const unsigned int modelLoc, const unsigned int normalLoc,
+                        const float a, const float b, const float c,
+                        const int slices)
 {
     glm::mat4 model = glm::mat4(1.0f);
     glm::mat4 normal = glm::mat4(1.0f);
@@ -80,16 +80,16 @@ void drawHairyEllipsoid(unsigned int VAO,
 
             model = std_model;
             normal = std_normal;
-            model = glm::translate(model,
+            model = translate(model,
                                    glm::vec3(x0 - C[0] * 2,
                                              y0 - C[1] * 2 - s_th0 * hair_R,
                                              z0 - C[2] * 2 - c_th0 * hair_R));
-            model = glm::rotate(model, glm::radians(hair_theta),
+            model = rotate(model, glm::radians(hair_theta),
                                 glm::vec3(0.0, 1.0, 0.0));
-            normal = glm::rotate(normal, glm::radians(hair_theta),
+            normal = rotate(normal, glm::radians(hair_theta),
                                  glm::vec3(0.0, 1.0, 0.0));
-            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-            glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+            glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
             draw_curved_cylinder_x(VAO, 20, 4);
 
             C[0] = (2.0 * x1) / (a * a); // b1*cos_angle;
@@ -107,8 +107,8 @@ void drawHairyEllipsoid(unsigned int VAO,
 
 void drawFluffyProfessorSkin(Position pos,
                              const float a, const float b, const float c,
-                             unsigned int modelLoc,
-                             unsigned int normalLoc,
+                             const unsigned int modelLoc,
+                             const unsigned int normalLoc,
                              const glm::mat4& std_model,
                              const glm::mat4& std_normal,
                              float deltaTime)
@@ -116,7 +116,7 @@ void drawFluffyProfessorSkin(Position pos,
     static bool firstTime = true;
     glm::mat4 model;
     glm::mat4 normal;
-    float thickness = b * 0.04;
+    const float thickness = b * 0.04;
     //------------Glasses:--------------------------
     static unsigned int glasses_VAO[4];
     if (firstTime)
@@ -140,67 +140,67 @@ void drawFluffyProfessorSkin(Position pos,
     }
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(0.0, b * 0.15, c * 1.05));
-    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(0.0, b * 0.15, c * 1.05));
+    model = rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_x(glasses_VAO[0], 20, 4);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(-a * 0.35, b * 0.35, c * 1.05));
-    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(-a * 0.35, b * 0.35, c * 1.05));
+    model = rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_x(glasses_VAO[1], 20, 4);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(a * 0.35, b * 0.35, c * 1.05));
-    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(a * 0.35, b * 0.35, c * 1.05));
+    model = rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_x(glasses_VAO[1], 20, 4);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(a * 0.35 + b * 0.2, b * 0.35, c * 1.05));
-    model = glm::rotate(model, glm::radians(155.0f), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(155.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(a * 0.35 + b * 0.2, b * 0.35, c * 1.05));
+    model = rotate(model, glm::radians(155.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(155.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_cylinder_z(glasses_VAO[2], 5);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(-a * 0.35 - b * 0.2, b * 0.35, c * 1.05));
-    model = glm::rotate(model, glm::radians(-155.0f), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-155.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(-a * 0.35 - b * 0.2, b * 0.35, c * 1.05));
+    model = rotate(model, glm::radians(-155.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(-155.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_cylinder_z(glasses_VAO[2], 5);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(-a * 0.35 - b * 0.2, b * 0.15, c * 1.05));
-    model = glm::rotate(model, glm::radians(180.0f - 155.0f), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(180.0f - 155.0f), glm::vec3(0.0, 1.0, 0.0));
-    model = glm::translate(model, glm::vec3(0.0, 0.0, -b / 2.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(-a * 0.35 - b * 0.2, b * 0.15, c * 1.05));
+    model = rotate(model, glm::radians(180.0f - 155.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(180.0f - 155.0f), glm::vec3(0.0, 1.0, 0.0));
+    model = translate(model, glm::vec3(0.0, 0.0, -b / 2.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_x(glasses_VAO[3], 20, 4);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(a * 0.35 + b * 0.2, b * 0.15, c * 1.05));
-    model = glm::rotate(model, glm::radians(-180.0f + 155.0f), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-180.0f + 155.0f), glm::vec3(0.0, 1.0, 0.0));
-    model = glm::translate(model, glm::vec3(0.0, 0.0, -b / 2.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(a * 0.35 + b * 0.2, b * 0.15, c * 1.05));
+    model = rotate(model, glm::radians(-180.0f + 155.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(-180.0f + 155.0f), glm::vec3(0.0, 1.0, 0.0));
+    model = translate(model, glm::vec3(0.0, 0.0, -b / 2.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_x(glasses_VAO[3], 20, 4);
     //------------Moustache:------------------------
     static unsigned int moustache_VAO[2];
@@ -217,34 +217,34 @@ void drawFluffyProfessorSkin(Position pos,
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(-b * 0.10, -b * 0.30, c * 1.05));
-    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(-b * 0.10, -b * 0.30, c * 1.05));
+    model = rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_x(moustache_VAO[0], 20, 4);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(b * 0.10, -b * 0.30, c * 1.05));
-    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(b * 0.10, -b * 0.30, c * 1.05));
+    model = rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_x(moustache_VAO[0], 20, 4);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(-b * 0.10, b * 0.00, c * 1.05));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(-b * 0.10, b * 0.00, c * 1.05));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(moustache_VAO[1], 10);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(b * 0.10, b * 0.00, c * 1.05));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(b * 0.10, b * 0.00, c * 1.05));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(moustache_VAO[1], 10);
     //----------------------------------------------
     static unsigned int top_hat_VAO[4];
@@ -270,36 +270,36 @@ void drawFluffyProfessorSkin(Position pos,
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(0.0, b * 0.9, 0.1 * c));
-    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-90.0f), glm::vec3(1.0, 0.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(0.0, b * 0.9, 0.1 * c));
+    model = rotate(model, glm::radians(-90.0f), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(-90.0f), glm::vec3(1.0, 0.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_cylinder_z(top_hat_VAO[0], 5);
     draw_cylinder_z(top_hat_VAO[1], 5);
     draw_cylinder_z(top_hat_VAO[2], 5);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(0.0, b * (0.9 + 0.4), 0.1 * c));
-    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-90.0f), glm::vec3(1.0, 0.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(0.0, b * (0.9 + 0.4), 0.1 * c));
+    model = rotate(model, glm::radians(-90.0f), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(-90.0f), glm::vec3(1.0, 0.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_cylinder_z(top_hat_VAO[3], 5);
     //----------------------------------------------
     firstTime = false;
 }
 
-void drawFluffyBody(Position pos,
-                    float a, float b, float c,
-                    unsigned int modelLoc,
-                    unsigned int normalLoc,
+void drawFluffyBody(const Position pos,
+                    const float a, const float b, const float c,
+                    const unsigned int modelLoc,
+                    const unsigned int normalLoc,
                     glm::mat4 std_model,
                     glm::mat4 std_normal,
-                    float deltaTime,
-                    unsigned int texture,
-                    unsigned int skin)
+                    const float deltaTime,
+                    const unsigned int texture,
+                    const unsigned int skin)
 {
     static bool firstTime = true;
     glm::mat4 model;
@@ -345,11 +345,11 @@ void drawFluffyBody(Position pos,
                                               40);
     }
     normal = std_normal;
-    normal = glm::rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
     model = std_model;
-    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid_lune_z(body_VAO[0], -5, 340, 40);
     draw_ellipsoid_lune_z(body_VAO[1], -16, 0, 40);
     draw_ellipsoid_lune_z(body_VAO[2], -40, -18, 40);
@@ -376,11 +376,11 @@ void drawFluffyBody(Position pos,
                                                40);
     }
     model = std_model;
-    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
+    model = rotate(model, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
     normal = std_normal;
-    normal = glm::rotate(normal, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    normal = rotate(normal, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid_lune_z(cheek_VAO[0], 0, 60, 40);
     draw_ellipsoid_lune_z(cheek_VAO[1], 120, 180, 40);
     draw_ellipsoid_lune_z(cheek_VAO[2], 55, 65, 40);
@@ -396,27 +396,27 @@ void drawFluffyBody(Position pos,
     }
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(0.0, b * 0.9, c * 0.15));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(0.0, b * 0.9, c * 0.15));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_x(tuft_VAO, 20, 4);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(-5.0, b * 0.9, c * 0.15));
-    model = glm::rotate(model, glm::radians(30.0f), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(30.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(-5.0, b * 0.9, c * 0.15));
+    model = rotate(model, glm::radians(30.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(30.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_x(tuft_VAO, 20, 4);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(5.0, b * 0.9, c * 0.15));
-    model = glm::rotate(model, glm::radians(-30.0f), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-30.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(5.0, b * 0.9, c * 0.15));
+    model = rotate(model, glm::radians(-30.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(-30.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_x(tuft_VAO, 20, 4);
 
     //------------Tail:--------------------------------
@@ -427,9 +427,9 @@ void drawFluffyBody(Position pos,
                                     10);
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(0.0, 0.0, -c * 1.05));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(0.0, 0.0, -c * 1.05));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(tail_VAO, 10);
     //------------Eyebrow:-----------------------------
     static unsigned int eyebrow_VAO[2];
@@ -439,13 +439,13 @@ void drawFluffyBody(Position pos,
                                           10);
     normal = std_normal;
     model = std_model;
-    normal = glm::rotate(normal, glm::radians(-35.0f), glm::vec3(0.0, 0.0, 1.0));
-    normal = glm::rotate(normal, glm::radians(-30.0f), glm::vec3(0.0, 1.0, 0.0));
-    model = glm::translate(model, glm::vec3(-a * 0.15, b * 0.55, c * 0.75));
-    model = glm::rotate(model, glm::radians(-35.0f), glm::vec3(0.0, 0.0, 1.0));
-    model = glm::rotate(model, glm::radians(-30.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    normal = rotate(normal, glm::radians(-35.0f), glm::vec3(0.0, 0.0, 1.0));
+    normal = rotate(normal, glm::radians(-30.0f), glm::vec3(0.0, 1.0, 0.0));
+    model = translate(model, glm::vec3(-a * 0.15, b * 0.55, c * 0.75));
+    model = rotate(model, glm::radians(-35.0f), glm::vec3(0.0, 0.0, 1.0));
+    model = rotate(model, glm::radians(-30.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(eyebrow_VAO[0], 10);
 
     if (firstTime)
@@ -454,17 +454,17 @@ void drawFluffyBody(Position pos,
                                           10);
     normal = std_normal;
     model = std_model;
-    normal = glm::rotate(normal, glm::radians(35.0f), glm::vec3(0.0, 0.0, 1.0));
-    normal = glm::rotate(normal, glm::radians(30.0f), glm::vec3(0.0, 1.0, 0.0));
-    model = glm::translate(model, glm::vec3(a * 0.15, b * 0.55, c * 0.75));
-    model = glm::rotate(model, glm::radians(35.0f), glm::vec3(0.0, 0.0, 1.0));
-    model = glm::rotate(model, glm::radians(30.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    normal = rotate(normal, glm::radians(35.0f), glm::vec3(0.0, 0.0, 1.0));
+    normal = rotate(normal, glm::radians(30.0f), glm::vec3(0.0, 1.0, 0.0));
+    model = translate(model, glm::vec3(a * 0.15, b * 0.55, c * 0.75));
+    model = rotate(model, glm::radians(35.0f), glm::vec3(0.0, 0.0, 1.0));
+    model = rotate(model, glm::radians(30.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(eyebrow_VAO[1], 10);
     //------------Eyes:--------------------------------
     static unsigned int eyes_VAO[2];
-    int eye_opening = 180;
+    constexpr int eye_opening = 180;
     int angle_r1, angle_r2;
     int angle_l1, angle_l2;
     angle_r1 = 270 - eye_opening / 2;
@@ -484,13 +484,13 @@ void drawFluffyBody(Position pos,
     }
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(0.0, b * 0.25, c * 0.5));
-    model = glm::rotate(model, glm::radians(eye_angle), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(eye_angle), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(0.0, b * 0.25, c * 0.5));
+    model = rotate(model, glm::radians(eye_angle), glm::vec3(1.0, 0.0, 0.0));
+    model = rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(eye_angle), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid_lune_z(eyes_VAO[0], angle_r1, angle_r2, 10);
     draw_ellipsoid_lune_z(eyes_VAO[1], angle_l1, angle_l2, 10);
 
@@ -514,21 +514,21 @@ void drawFluffyBody(Position pos,
                                     10);
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(0.0, b * 0.15, c * 1.05));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(0.0, b * 0.15, c * 1.05));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(nose_VAO, 10);
     //-----------------------------------------------
     firstTime = false;
 }
 
-void drawFluffyNormal(Position pos,
-                float playerAngle,
-                unsigned int shaderProgram,
-                float deltaTime,
-                bool restart,
-                unsigned int texture,
-                unsigned int skin)
+void drawFluffyNormal(const Position pos,
+                      const float playerAngle,
+                      const unsigned int shaderProgram,
+                      const float deltaTime,
+                      bool restart,
+                      const unsigned int texture,
+                      const unsigned int skin)
 {
     float constexpr d = 60.0;
     float a, b, c;
@@ -565,14 +565,14 @@ void drawFluffyNormal(Position pos,
                                               40);
     }
     normal = std_normal;
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     model = std_model;
-    model = glm::translate(model, glm::vec3(a * 0.35, -b, c * 0.2));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    model = translate(model, glm::vec3(a * 0.35, -b, c * 0.2));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
     draw_ellipsoid_lune_z(feet_VAO[0], 0, 180, 40);
     model = std_model;
-    model = glm::translate(model, glm::vec3(-a * 0.35, -b, c * 0.2));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    model = translate(model, glm::vec3(-a * 0.35, -b, c * 0.2));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
     draw_ellipsoid_lune_z(feet_VAO[1], 0, 180, 40);
     //------------Hands:------------------------------
     static unsigned int hands_VAO[6];
@@ -583,32 +583,32 @@ void drawFluffyNormal(Position pos,
                                         40);
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(a * 0.95, 0.0, c * 0.75));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(a * 0.95, 0.0, c * 0.75));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[0], 40);
 
     if (firstTime)
         hands_VAO[1] = create_ellipsoid(a * 0.18, b * 0.26, c * 0.20,
                                         1.0, 0.0, 0.0,
                                         40);
-    model = glm::translate(model, glm::vec3(-a * 0.06, 0.0, c * 0.21));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    model = translate(model, glm::vec3(-a * 0.06, 0.0, c * 0.21));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
     draw_ellipsoid(hands_VAO[1], 40);
-    model = glm::translate(model, glm::vec3(a * 0.06, 0.0, -c * 0.21));
+    model = translate(model, glm::vec3(a * 0.06, 0.0, -c * 0.21));
 
     if (firstTime)
         hands_VAO[2] = create_ellipsoid(a * 0.10, b * 0.10, c * 0.30,
                                         1.0, 0.0, 0.0,
                                         40);
     normal = std_normal;
-    normal = glm::rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-12.0f), glm::vec3(0.0, 1.0, 0.0));
-    model = glm::translate(model, glm::vec3(-a * 0.045, b * 0.2, -c * 0.1));
-    model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::rotate(model, glm::radians(-12.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    normal = rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(-12.0f), glm::vec3(0.0, 1.0, 0.0));
+    model = translate(model, glm::vec3(-a * 0.045, b * 0.2, -c * 0.1));
+    model = rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    model = rotate(model, glm::radians(-12.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[2], 40);
     //------------Right hand:--------------------------
     if (firstTime)
@@ -617,51 +617,51 @@ void drawFluffyNormal(Position pos,
                                         40);
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(-a * 0.95, 0.0, c * 0.75));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(-a * 0.95, 0.0, c * 0.75));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[3], 40);
 
     if (firstTime)
         hands_VAO[4] = create_ellipsoid(a * 0.18, b * 0.26, c * 0.20,
                                         1.0, 0.0, 0.0,
                                         40);
-    model = glm::translate(model, glm::vec3(a * 0.06, 0.0, c * 0.21));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    model = translate(model, glm::vec3(a * 0.06, 0.0, c * 0.21));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
     draw_ellipsoid(hands_VAO[4], 40);
-    model = glm::translate(model, glm::vec3(-a * 0.06, 0.0, -c * 0.21));
+    model = translate(model, glm::vec3(-a * 0.06, 0.0, -c * 0.21));
 
     if (firstTime)
         hands_VAO[5] = create_ellipsoid(a * 0.10, b * 0.10, c * 0.30,
                                         1.0, 0.0, 0.0,
                                         40);
     normal = std_normal;
-    normal = glm::rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(12.0f), glm::vec3(0.0, 1.0, 0.0));
-    model = glm::translate(model, glm::vec3(a * 0.045, b * 0.2, -c * 0.1));
-    model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::rotate(model, glm::radians(12.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    normal = rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(12.0f), glm::vec3(0.0, 1.0, 0.0));
+    model = translate(model, glm::vec3(a * 0.045, b * 0.2, -c * 0.1));
+    model = rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    model = rotate(model, glm::radians(12.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[5], 40);
     //-------------------------------------------------
     firstTime = false;
 }
 
-void drawFluffyWalk(Position pos,
-                    unsigned int shaderProgram,
-                    float deltaTime,
-                    bool restart,
-                    float playerAngle,
-                    unsigned int texture,
-                    unsigned int skin)
+void drawFluffyWalk(const Position pos,
+                    const unsigned int shaderProgram,
+                    const float deltaTime,
+                    const bool restart,
+                    const float playerAngle,
+                    const unsigned int texture,
+                    const unsigned int skin)
 {
     float d = 60.0, a, b, c;
     static bool firstTime = true;
     glm::mat4 model = glm::mat4(1.0f);
-    unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
+    const unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
     glm::mat4 normal = glm::mat4(1.0f);
-    unsigned int normalLoc = glGetUniformLocation(shaderProgram, "normal");
+    const unsigned int normalLoc = glGetUniformLocation(shaderProgram, "normal");
     static float foot_angle = 0.0;
     static float foot_angle_step = 300.0 * deltaTime;
     foot_angle_step = SIGN(foot_angle_step) * 300.0 * deltaTime;
@@ -672,11 +672,11 @@ void drawFluffyWalk(Position pos,
     }
 
     glm::mat4 std_model = glm::mat4(1.0f);
-    std_model = glm::translate(std_model, glm::vec3(pos.x() * d, pos.y() * d, pos.z() * d));
-    std_model = glm::rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
+    std_model = translate(std_model, glm::vec3(pos.x() * d, pos.y() * d, pos.z() * d));
+    std_model = rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
     glm::mat4 std_normal = glm::mat4(1.0f);
-    std_normal = glm::rotate(std_normal, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
+    std_normal = rotate(std_normal, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
     a = 0.8 * d / 2.0;
     b = d / 2.0;
@@ -699,20 +699,20 @@ void drawFluffyWalk(Position pos,
     }
     normal = std_normal;
     model = std_model;
-    normal = glm::rotate(normal, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::rotate(model, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::translate(model, glm::vec3(a * 0.35, -b, c * 0.2));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    normal = rotate(normal, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
+    model = rotate(model, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
+    model = translate(model, glm::vec3(a * 0.35, -b, c * 0.2));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid_lune_z(feet_VAO[0], 0, 180, 40);
 
     normal = std_normal;
     model = std_model;
-    normal = glm::rotate(normal, glm::radians(-foot_angle), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::rotate(model, glm::radians(-foot_angle), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::translate(model, glm::vec3(-a * 0.35, -b, c * 0.2));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    normal = rotate(normal, glm::radians(-foot_angle), glm::vec3(1.0, 0.0, 0.0));
+    model = rotate(model, glm::radians(-foot_angle), glm::vec3(1.0, 0.0, 0.0));
+    model = translate(model, glm::vec3(-a * 0.35, -b, c * 0.2));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid_lune_z(feet_VAO[1], 0, 180, 40);
 
     foot_angle += foot_angle_step;
@@ -736,32 +736,32 @@ void drawFluffyWalk(Position pos,
                                         40);
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(a * 0.95, 0.0, c * 0.75));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(a * 0.95, 0.0, c * 0.75));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[0], 40);
 
     if (firstTime)
         hands_VAO[1] = create_ellipsoid(a * 0.18, b * 0.26, c * 0.20,
                                         1.0, 0.0, 0.0,
                                         40);
-    model = glm::translate(model, glm::vec3(-a * 0.06, 0.0, c * 0.21));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    model = translate(model, glm::vec3(-a * 0.06, 0.0, c * 0.21));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
     draw_ellipsoid(hands_VAO[1], 40);
-    model = glm::translate(model, glm::vec3(a * 0.06, 0.0, -c * 0.21));
+    model = translate(model, glm::vec3(a * 0.06, 0.0, -c * 0.21));
 
     if (firstTime)
         hands_VAO[2] = create_ellipsoid(a * 0.10, b * 0.10, c * 0.30,
                                         1.0, 0.0, 0.0,
                                         40);
     normal = std_normal;
-    normal = glm::rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-12.0f), glm::vec3(0.0, 1.0, 0.0));
-    model = glm::translate(model, glm::vec3(-a * 0.045, b * 0.2, -c * 0.1));
-    model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::rotate(model, glm::radians(-12.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    normal = rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(-12.0f), glm::vec3(0.0, 1.0, 0.0));
+    model = translate(model, glm::vec3(-a * 0.045, b * 0.2, -c * 0.1));
+    model = rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    model = rotate(model, glm::radians(-12.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[2], 40);
     //------------Right hand:--------------------------
     if (firstTime)
@@ -770,51 +770,51 @@ void drawFluffyWalk(Position pos,
                                         40);
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(-a * 0.95, 0.0, c * 0.75));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(-a * 0.95, 0.0, c * 0.75));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[3], 40);
 
     if (firstTime)
         hands_VAO[4] = create_ellipsoid(a * 0.18, b * 0.26, c * 0.20,
                                         1.0, 0.0, 0.0,
                                         40);
-    model = glm::translate(model, glm::vec3(a * 0.06, 0.0, c * 0.21));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    model = translate(model, glm::vec3(a * 0.06, 0.0, c * 0.21));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
     draw_ellipsoid(hands_VAO[4], 40);
-    model = glm::translate(model, glm::vec3(-a * 0.06, 0.0, -c * 0.21));
+    model = translate(model, glm::vec3(-a * 0.06, 0.0, -c * 0.21));
 
     if (firstTime)
         hands_VAO[5] = create_ellipsoid(a * 0.10, b * 0.10, c * 0.30,
                                         1.0, 0.0, 0.0,
                                         40);
     normal = std_normal;
-    normal = glm::rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(12.0f), glm::vec3(0.0, 1.0, 0.0));
-    model = glm::translate(model, glm::vec3(a * 0.045, b * 0.2, -c * 0.1));
-    model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::rotate(model, glm::radians(12.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    normal = rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(12.0f), glm::vec3(0.0, 1.0, 0.0));
+    model = translate(model, glm::vec3(a * 0.045, b * 0.2, -c * 0.1));
+    model = rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    model = rotate(model, glm::radians(12.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[5], 40);
     //-------------------------------------------------
     firstTime = false;
 }
 
-void drawFluffyPush(Position pos,
-                    unsigned int shaderProgram,
-                    float deltaTime,
-                    bool restart,
-                    float playerAngle,
-                    unsigned int texture,
-                    unsigned int skin)
+void drawFluffyPush(const Position pos,
+                    const unsigned int shaderProgram,
+                    const float deltaTime,
+                    const bool restart,
+                    const float playerAngle,
+                    const unsigned int texture,
+                    const unsigned int skin)
 {
     float d = 60.0, a, b, c;
     static bool firstTime = true;
     glm::mat4 model = glm::mat4(1.0f);
-    unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
+    const unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
     glm::mat4 normal = glm::mat4(1.0f);
-    unsigned int normalLoc = glGetUniformLocation(shaderProgram, "normal");
+    const unsigned int normalLoc = glGetUniformLocation(shaderProgram, "normal");
     static float length_forearm = 0.0;
     static float step_forearm = 5.0 * deltaTime;
     step_forearm = SIGN(step_forearm) * 5.0 * deltaTime;
@@ -825,11 +825,11 @@ void drawFluffyPush(Position pos,
     }
 
     glm::mat4 std_model = glm::mat4(1.0f);
-    std_model = glm::translate(std_model, glm::vec3(pos.x() * d, pos.y() * d, pos.z() * d));
-    std_model = glm::rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
+    std_model = translate(std_model, glm::vec3(pos.x() * d, pos.y() * d, pos.z() * d));
+    std_model = rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
     glm::mat4 std_normal = glm::mat4(1.0f);
-    std_normal = glm::rotate(std_normal, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
+    std_normal = rotate(std_normal, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
     a = 0.8 * d / 2.0;
     b = d / 2.0;
@@ -851,14 +851,14 @@ void drawFluffyPush(Position pos,
                                               40);
     }
     normal = std_normal;
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     model = std_model;
-    model = glm::translate(model, glm::vec3(a * 0.35, -b, c * 0.2));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    model = translate(model, glm::vec3(a * 0.35, -b, c * 0.2));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
     draw_ellipsoid_lune_z(feet_VAO[0], 0, 180, 40);
     model = std_model;
-    model = glm::translate(model, glm::vec3(-a * 0.35, -b, c * 0.2));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    model = translate(model, glm::vec3(-a * 0.35, -b, c * 0.2));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
     draw_ellipsoid_lune_z(feet_VAO[1], 0, 180, 40);
     //------------Hands:------------------------------
     static unsigned int hands_VAO[6];
@@ -870,8 +870,8 @@ void drawFluffyPush(Position pos,
                                             1.0, 1.0, 1.0,
                                             20, 4);
     model = std_model;
-    model = glm::translate(model, glm::vec3(a * 0.95 - 0.27 * d / 2.0, -c * 0.25, c * 0.75 - a * 0.10));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    model = translate(model, glm::vec3(a * 0.95 - 0.27 * d / 2.0, -c * 0.25, c * 0.75 - a * 0.10));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
     draw_curved_cylinder_y(lArmVAO, 20, 4);
     //------------Left forearm:-----------------------
     static unsigned int lForeArmVAO;
@@ -884,10 +884,10 @@ void drawFluffyPush(Position pos,
     {
         normal = std_normal;
         model = std_model;
-        model = glm::translate(model, glm::vec3(a * 0.95, -c * 0.25, c * 0.75 - a * 0.10));
-        model = glm::scale(model, glm::vec3(1.0, 1.0, length_forearm));
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+        model = translate(model, glm::vec3(a * 0.95, -c * 0.25, c * 0.75 - a * 0.10));
+        model = scale(model, glm::vec3(1.0, 1.0, length_forearm));
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+        glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
         draw_cylinder_z(lForeArmVAO, 5);
     }
     //------------Left hand:--------------------------
@@ -897,35 +897,35 @@ void drawFluffyPush(Position pos,
                                         40);
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(a * 0.95, 0.0, c * 0.75 + (d / 2.0) * length_forearm));
-    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
-    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
-    normal = glm::rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(a * 0.95, 0.0, c * 0.75 + (d / 2.0) * length_forearm));
+    model = rotate(model, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
+    model = rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
+    normal = rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[0], 40);
 
     if (firstTime)
         hands_VAO[1] = create_ellipsoid(a * 0.18, b * 0.26, c * 0.20,
                                         1.0, 0.0, 0.0,
                                         40);
-    model = glm::translate(model, glm::vec3(-a * 0.06, 0.0, c * 0.21));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    model = translate(model, glm::vec3(-a * 0.06, 0.0, c * 0.21));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
     draw_ellipsoid(hands_VAO[1], 40);
-    model = glm::translate(model, glm::vec3(a * 0.06, 0.0, -c * 0.21));
+    model = translate(model, glm::vec3(a * 0.06, 0.0, -c * 0.21));
 
     if (firstTime)
         hands_VAO[2] = create_ellipsoid(a * 0.10, b * 0.10, c * 0.30,
                                         1.0, 0.0, 0.0,
                                         40);
-    normal = glm::rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-12.0f), glm::vec3(0.0, 1.0, 0.0));
-    model = glm::translate(model, glm::vec3(-a * 0.045, b * 0.2, -c * 0.1));
-    model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::rotate(model, glm::radians(-12.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    normal = rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(-12.0f), glm::vec3(0.0, 1.0, 0.0));
+    model = translate(model, glm::vec3(-a * 0.045, b * 0.2, -c * 0.1));
+    model = rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    model = rotate(model, glm::radians(-12.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[2], 40);
     //------------Right arm:---------------------------
     static unsigned int rArmVAO;
@@ -936,9 +936,9 @@ void drawFluffyPush(Position pos,
                                             20, 4);
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(-a * 0.95 + 0.27 * d / 2.0, -c * 0.25, c * 0.75 - a * 0.10));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(-a * 0.95 + 0.27 * d / 2.0, -c * 0.25, c * 0.75 - a * 0.10));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_y(rArmVAO, 20, 4);
     //------------Right forearm:-----------------------
     static unsigned int rForeArmVAO;
@@ -951,10 +951,10 @@ void drawFluffyPush(Position pos,
     {
         normal = std_normal;
         model = std_model;
-        model = glm::translate(model, glm::vec3(-a * 0.95, -c * 0.25, c * 0.75 - a * 0.10));
-        model = glm::scale(model, glm::vec3(1.0, 1.0, length_forearm));
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+        model = translate(model, glm::vec3(-a * 0.95, -c * 0.25, c * 0.75 - a * 0.10));
+        model = scale(model, glm::vec3(1.0, 1.0, length_forearm));
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+        glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
         draw_cylinder_z(rForeArmVAO, 5);
     }
     //------------Right hand:--------------------------
@@ -964,35 +964,35 @@ void drawFluffyPush(Position pos,
                                         40);
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(-a * 0.95, 0.0, c * 0.75 + (d / 2.0) * length_forearm));
-    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 0.0, 1.0));
-    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 0.0, 1.0));
-    normal = glm::rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(-a * 0.95, 0.0, c * 0.75 + (d / 2.0) * length_forearm));
+    model = rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 0.0, 1.0));
+    model = rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 0.0, 1.0));
+    normal = rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[3], 40);
 
     if (firstTime)
         hands_VAO[4] = create_ellipsoid(a * 0.18, b * 0.26, c * 0.20,
                                         1.0, 0.0, 0.0,
                                         40);
-    model = glm::translate(model, glm::vec3(a * 0.06, 0.0, c * 0.21));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    model = translate(model, glm::vec3(a * 0.06, 0.0, c * 0.21));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
     draw_ellipsoid(hands_VAO[4], 40);
-    model = glm::translate(model, glm::vec3(-a * 0.06, 0.0, -c * 0.21));
+    model = translate(model, glm::vec3(-a * 0.06, 0.0, -c * 0.21));
 
     if (firstTime)
         hands_VAO[5] = create_ellipsoid(a * 0.10, b * 0.10, c * 0.30,
                                         1.0, 0.0, 0.0,
                                         40);
-    normal = glm::rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(12.0f), glm::vec3(0.0, 1.0, 0.0));
-    model = glm::translate(model, glm::vec3(a * 0.045, b * 0.2, -c * 0.1));
-    model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::rotate(model, glm::radians(12.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    normal = rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(12.0f), glm::vec3(0.0, 1.0, 0.0));
+    model = translate(model, glm::vec3(a * 0.045, b * 0.2, -c * 0.1));
+    model = rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    model = rotate(model, glm::radians(12.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[5], 40);
 
     length_forearm += step_forearm;
@@ -1010,20 +1010,20 @@ void drawFluffyPush(Position pos,
     firstTime = false;
 }
 
-void drawFluffyPull(Position pos,
-                    unsigned int shaderProgram,
-                    float deltaTime,
-                    bool restart,
-                    float playerAngle,
-                    unsigned int texture,
-                    unsigned int skin)
+void drawFluffyPull(const Position pos,
+                    const unsigned int shaderProgram,
+                    const float deltaTime,
+                    const bool restart,
+                    const float playerAngle,
+                    const unsigned int texture,
+                    const unsigned int skin)
 {
     float d = 60.0, a, b, c;
     static bool firstTime = true;
     glm::mat4 model = glm::mat4(1.0f);
-    unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
+    const unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
     glm::mat4 normal = glm::mat4(1.0f);
-    unsigned int normalLoc = glGetUniformLocation(shaderProgram, "normal");
+    const unsigned int normalLoc = glGetUniformLocation(shaderProgram, "normal");
     static float length_forearm = 0.3;
     static float step_forearm = 0.0;
     static float foot_angle = 0.0;
@@ -1036,11 +1036,11 @@ void drawFluffyPull(Position pos,
     }
 
     glm::mat4 std_model = glm::mat4(1.0f);
-    std_model = glm::translate(std_model, glm::vec3(pos.x() * d, pos.y() * d, pos.z() * d));
-    std_model = glm::rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
+    std_model = translate(std_model, glm::vec3(pos.x() * d, pos.y() * d, pos.z() * d));
+    std_model = rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
     glm::mat4 std_normal = glm::mat4(1.0f);
-    std_normal = glm::rotate(std_normal, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
+    std_normal = rotate(std_normal, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
     a = 0.8 * d / 2.0;
     b = d / 2.0;
@@ -1063,20 +1063,20 @@ void drawFluffyPull(Position pos,
     }
     normal = std_normal;
     model = std_model;
-    normal = glm::rotate(normal, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::rotate(model, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::translate(model, glm::vec3(a * 0.35, -b, c * 0.2));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    normal = rotate(normal, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
+    model = rotate(model, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
+    model = translate(model, glm::vec3(a * 0.35, -b, c * 0.2));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid_lune_z(feet_VAO[0], 0, 180, 40);
 
     normal = std_normal;
     model = std_model;
-    normal = glm::rotate(normal, glm::radians(-foot_angle), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::rotate(model, glm::radians(-foot_angle), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::translate(model, glm::vec3(-a * 0.35, -b, c * 0.2));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    normal = rotate(normal, glm::radians(-foot_angle), glm::vec3(1.0, 0.0, 0.0));
+    model = rotate(model, glm::radians(-foot_angle), glm::vec3(1.0, 0.0, 0.0));
+    model = translate(model, glm::vec3(-a * 0.35, -b, c * 0.2));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid_lune_z(feet_VAO[1], 0, 180, 40);
 
     foot_angle += foot_angle_step;
@@ -1102,9 +1102,9 @@ void drawFluffyPull(Position pos,
                                             20, 4);
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(a * 1.0 - 0.27 * d / 2.0, -c * 0.25, c * 0.75 - a * 0.10));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(a * 1.0 - 0.27 * d / 2.0, -c * 0.25, c * 0.75 - a * 0.10));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_y(lArmVAO, 20, 4);
     //------------Left forearm:-----------------------
     static unsigned int lForeArmVAO;
@@ -1117,10 +1117,10 @@ void drawFluffyPull(Position pos,
     {
         normal = std_normal;
         model = std_model;
-        model = glm::translate(model, glm::vec3(a * 1.0, -c * 0.25, c * 0.75 - a * 0.10));
-        model = glm::scale(model, glm::vec3(1.0, 1.0, length_forearm));
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+        model = translate(model, glm::vec3(a * 1.0, -c * 0.25, c * 0.75 - a * 0.10));
+        model = scale(model, glm::vec3(1.0, 1.0, length_forearm));
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+        glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
         draw_cylinder_z(lForeArmVAO, 5);
     }
     //------------Left hand:--------------------------
@@ -1130,38 +1130,38 @@ void drawFluffyPull(Position pos,
                                         40);
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(a * 1.15, -b * 0.05, c * 0.75 + (d / 2.0) * length_forearm));
-    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
-    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
-    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
-    normal = glm::rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(a * 1.15, -b * 0.05, c * 0.75 + (d / 2.0) * length_forearm));
+    model = rotate(model, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
+    model = rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
+    model = rotate(model, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
+    normal = rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[0], 40);
 
     if (firstTime)
         hands_VAO[1] = create_ellipsoid(a * 0.18, b * 0.26, c * 0.20,
                                         1.0, 0.0, 0.0,
                                         40);
-    model = glm::translate(model, glm::vec3(-a * 0.06, 0.0, c * 0.21));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    model = translate(model, glm::vec3(-a * 0.06, 0.0, c * 0.21));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
     draw_ellipsoid(hands_VAO[1], 40);
-    model = glm::translate(model, glm::vec3(a * 0.06, 0.0, -c * 0.21));
+    model = translate(model, glm::vec3(a * 0.06, 0.0, -c * 0.21));
 
     if (firstTime)
         hands_VAO[2] = create_ellipsoid(a * 0.10, b * 0.10, c * 0.30,
                                         1.0, 0.0, 0.0,
                                         40);
     // normal = std_normal;
-    normal = glm::rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-12.0f), glm::vec3(0.0, 1.0, 0.0));
-    model = glm::translate(model, glm::vec3(-a * 0.045, b * 0.2, -c * 0.1));
-    model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::rotate(model, glm::radians(-12.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    normal = rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(-12.0f), glm::vec3(0.0, 1.0, 0.0));
+    model = translate(model, glm::vec3(-a * 0.045, b * 0.2, -c * 0.1));
+    model = rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    model = rotate(model, glm::radians(-12.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[2], 40);
     //------------Right arm:---------------------------
     static unsigned int rArmVAO;
@@ -1172,9 +1172,9 @@ void drawFluffyPull(Position pos,
                                             20, 4);
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(-a * 1.0 + 0.27 * d / 2.0, -c * 0.25, c * 0.75 - a * 0.10));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(-a * 1.0 + 0.27 * d / 2.0, -c * 0.25, c * 0.75 - a * 0.10));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_y(rArmVAO, 20, 4);
     //------------Right forearm:-----------------------
     static unsigned int rForeArmVAO;
@@ -1187,10 +1187,10 @@ void drawFluffyPull(Position pos,
     {
         normal = std_normal;
         model = std_model;
-        model = glm::translate(model, glm::vec3(-a * 1.0, -c * 0.25, c * 0.75 - a * 0.10));
-        model = glm::scale(model, glm::vec3(1.0, 1.0, length_forearm));
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+        model = translate(model, glm::vec3(-a * 1.0, -c * 0.25, c * 0.75 - a * 0.10));
+        model = scale(model, glm::vec3(1.0, 1.0, length_forearm));
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+        glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
         draw_cylinder_z(rForeArmVAO, 5);
     }
     //------------Right hand:--------------------------
@@ -1200,63 +1200,63 @@ void drawFluffyPull(Position pos,
                                         40);
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(-a * 1.15, -b * 0.05, c * 0.75 + (d / 2.0) * length_forearm));
-    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 0.0, 1.0));
-    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
-    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 0.0, 1.0));
-    normal = glm::rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(-a * 1.15, -b * 0.05, c * 0.75 + (d / 2.0) * length_forearm));
+    model = rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 0.0, 1.0));
+    model = rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
+    model = rotate(model, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 0.0, 1.0));
+    normal = rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[3], 40);
 
     if (firstTime)
         hands_VAO[4] = create_ellipsoid(a * 0.18, b * 0.26, c * 0.20,
                                         1.0, 0.0, 0.0,
                                         40);
-    model = glm::translate(model, glm::vec3(a * 0.06, 0.0, c * 0.21));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    model = translate(model, glm::vec3(a * 0.06, 0.0, c * 0.21));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
     draw_ellipsoid(hands_VAO[4], 40);
-    model = glm::translate(model, glm::vec3(-a * 0.06, 0.0, -c * 0.21));
+    model = translate(model, glm::vec3(-a * 0.06, 0.0, -c * 0.21));
 
     if (firstTime)
         hands_VAO[5] = create_ellipsoid(a * 0.10, b * 0.10, c * 0.30,
                                         1.0, 0.0, 0.0,
                                         40);
     // normal = std_normal;
-    normal = glm::rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(12.0f), glm::vec3(0.0, 1.0, 0.0));
-    model = glm::translate(model, glm::vec3(a * 0.045, b * 0.2, -c * 0.1));
-    model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::rotate(model, glm::radians(12.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    normal = rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(12.0f), glm::vec3(0.0, 1.0, 0.0));
+    model = translate(model, glm::vec3(a * 0.045, b * 0.2, -c * 0.1));
+    model = rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    model = rotate(model, glm::radians(12.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[5], 40);
     //-------------------------------------------------
     firstTime = false;
 }
 
-void drawTrack(Position pos,
-               unsigned int shaderProgram,
+void drawTrack(const Position pos,
+               const unsigned int shaderProgram,
                float deltaTime,
                float playerAngle,
-               unsigned int texture)
+               const unsigned int texture)
 {
-    float d = 60.0;
+    constexpr float d = 60.0;
     static bool firstTime = true;
     glm::mat4 model = glm::mat4(1.0f);
-    unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
+    const unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
     glm::mat4 normal = glm::mat4(1.0f);
-    unsigned int normalLoc = glGetUniformLocation(shaderProgram, "normal");
-    unsigned int lightMinLoc = glGetUniformLocation(shaderProgram, "lightMin");
+    const unsigned int normalLoc = glGetUniformLocation(shaderProgram, "normal");
+    const unsigned int lightMinLoc = glGetUniformLocation(shaderProgram, "lightMin");
     glUniform3f(lightMinLoc, 1.0, 1.0, 1.0);
 
     glm::mat4 std_model = glm::mat4(1.0f);
-    std_model = glm::translate(std_model, glm::vec3(0.0 * d, pos.y() * d, 0.0 * d));
+    std_model = translate(std_model, glm::vec3(0.0 * d, pos.y() * d, 0.0 * d));
     // std_model = glm::rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
-    glm::mat4 std_normal = glm::mat4(1.0f);
+    constexpr glm::mat4 std_normal = glm::mat4(1.0f);
     // std_normal = glm::rotate(std_normal, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
     //-------------------------------------------------
     static unsigned int track_VAO;
@@ -1266,35 +1266,35 @@ void drawTrack(Position pos,
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(d * 0.0, -d * 0.5, d * 0.0));
+    model = translate(model, glm::vec3(d * 0.0, -d * 0.5, d * 0.0));
     // model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
     // normal = glm::rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     drawSquareY(track_VAO, texture);
     glUniform3f(lightMinLoc, 0.0, 0.0, 0.0);
     //-------------------------------------------------
     firstTime = false;
 }
 
-void drawBackground(Position pos,
-                    unsigned int shaderProgram,
+void drawBackground(const Position pos,
+                    const unsigned int shaderProgram,
                     float deltaTime,
-                    unsigned int texture)
+                    const unsigned int texture)
 {
-    float d = 60.0;
+    constexpr float d = 60.0;
     static bool firstTime = true;
     glm::mat4 model = glm::mat4(1.0f);
-    unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
+    const unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
     glm::mat4 normal = glm::mat4(1.0f);
-    unsigned int normalLoc = glGetUniformLocation(shaderProgram, "normal");
-    unsigned int lightMinLoc = glGetUniformLocation(shaderProgram, "lightMin");
+    const unsigned int normalLoc = glGetUniformLocation(shaderProgram, "normal");
+    const unsigned int lightMinLoc = glGetUniformLocation(shaderProgram, "lightMin");
     glUniform3f(lightMinLoc, 1.0, 1.0, 1.0);
 
     glm::mat4 std_model = glm::mat4(1.0f);
-    std_model = glm::translate(std_model, glm::vec3(0.0 * d, pos.y() * d, 0.0 * d));
+    std_model = translate(std_model, glm::vec3(0.0 * d, pos.y() * d, 0.0 * d));
 
-    glm::mat4 std_normal = glm::mat4(1.0f);
+    constexpr glm::mat4 std_normal = glm::mat4(1.0f);
     //-------------------------------------------------
     static unsigned int background_VAO;
     if (firstTime)
@@ -1306,11 +1306,11 @@ void drawBackground(Position pos,
                                            10);
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(d * 0.0, -d * 0.5, d * 0.0));
+    model = translate(model, glm::vec3(d * 0.0, -d * 0.5, d * 0.0));
     // model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
     // normal = glm::rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_cylinder_y(background_VAO, 10, texture);
     glUniform3f(lightMinLoc, 0.0, 0.0, 0.0);
     //-------------------------------------------------
@@ -1337,11 +1337,11 @@ void drawKart(Position pos,
     unsigned int normalLoc = glGetUniformLocation(shaderProgram, "normal");
 
     glm::mat4 std_model = glm::mat4(1.0f);
-    std_model = glm::translate(std_model, glm::vec3(pos.x() * d, pos.y() * d + 0.20 * d, pos.z() * d + d * 0.60));
-    std_model = glm::rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
+    std_model = translate(std_model, glm::vec3(pos.x() * d, pos.y() * d + 0.20 * d, pos.z() * d + d * 0.60));
+    std_model = rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
     glm::mat4 std_normal = glm::mat4(1.0f);
-    std_normal = glm::rotate(std_normal, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
+    std_normal = rotate(std_normal, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
     //----------------wheel-----------------------
     static unsigned int wheel_VAO[5];
     if (firstTime)
@@ -1371,85 +1371,85 @@ void drawKart(Position pos,
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(d * 0.4, -d * 0.5 + (d / 4.0 - d / 5.0), -d * 0.60));
-    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(d * 0.4, -d * 0.5 + (d / 4.0 - d / 5.0), -d * 0.60));
+    model = rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_cylinder_z(wheel_VAO[0], 5);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(-d * 0.4 - d / 3.0, -d * 0.5 + (d / 4.0 - d / 5.0), -d * 0.60));
-    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(-d * 0.4 - d / 3.0, -d * 0.5 + (d / 4.0 - d / 5.0), -d * 0.60));
+    model = rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_cylinder_z(wheel_VAO[0], 5);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(d * 0.4, -d * 0.5, d * 0.65));
-    model = glm::rotate(model, glm::radians(90.0f + steeringAngle), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(90.0f + steeringAngle), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(d * 0.4, -d * 0.5, d * 0.65));
+    model = rotate(model, glm::radians(90.0f + steeringAngle), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(90.0f + steeringAngle), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_cylinder_z(wheel_VAO[1], 5);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(-d * 0.4, -d * 0.5, d * 0.65));
-    model = glm::rotate(model, glm::radians(-90.0f + steeringAngle), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-90.0f + steeringAngle), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(-d * 0.4, -d * 0.5, d * 0.65));
+    model = rotate(model, glm::radians(-90.0f + steeringAngle), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(-90.0f + steeringAngle), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_cylinder_z(wheel_VAO[1], 5);
 
     glBindTexture(GL_TEXTURE_2D, wheelTexture);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(d * 0.4, -d * 0.5 + (d / 4.0 - d / 5.0), -d * 0.60));
-    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(d * 0.4, -d * 0.5 + (d / 4.0 - d / 5.0), -d * 0.60));
+    model = rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipse_z(wheel_VAO[2], 5);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(d * 0.4 + d / 3.0, -d * 0.5 + (d / 4.0 - d / 5.0), -d * 0.60));
-    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(d * 0.4 + d / 3.0, -d * 0.5 + (d / 4.0 - d / 5.0), -d * 0.60));
+    model = rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipse_z(wheel_VAO[2], 5);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(-d * 0.4 - d / 3.0, -d * 0.5 + (d / 4.0 - d / 5.0), -d * 0.60));
-    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(-d * 0.4 - d / 3.0, -d * 0.5 + (d / 4.0 - d / 5.0), -d * 0.60));
+    model = rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipse_z(wheel_VAO[2], 5);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(-d * 0.4, -d * 0.5 + (d / 4.0 - d / 5.0), -d * 0.60));
-    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(-d * 0.4, -d * 0.5 + (d / 4.0 - d / 5.0), -d * 0.60));
+    model = rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipse_z(wheel_VAO[2], 5);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(d * 0.4, -d * 0.5, d * 0.65));
-    model = glm::rotate(model, glm::radians(-90.0f + steeringAngle), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-90.0f + steeringAngle), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(d * 0.4, -d * 0.5, d * 0.65));
+    model = rotate(model, glm::radians(-90.0f + steeringAngle), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(-90.0f + steeringAngle), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipse_z(wheel_VAO[3], 5);
 
     float cos_sa;
@@ -1459,49 +1459,49 @@ void drawKart(Position pos,
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(d * 0.4 + cos_sa * d / 3.0, -d * 0.5, d * 0.65 - sin_sa * d / 3.0));
-    model = glm::rotate(model, glm::radians(90.0f + steeringAngle), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(90.0f + steeringAngle), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(d * 0.4 + cos_sa * d / 3.0, -d * 0.5, d * 0.65 - sin_sa * d / 3.0));
+    model = rotate(model, glm::radians(90.0f + steeringAngle), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(90.0f + steeringAngle), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipse_z(wheel_VAO[3], 5);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(-d * 0.4 - cos_sa * d / 3.0, -d * 0.5, d * 0.65 + sin_sa * d / 3.0));
-    model = glm::rotate(model, glm::radians(-90.0f + steeringAngle), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-90.0f + steeringAngle), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(-d * 0.4 - cos_sa * d / 3.0, -d * 0.5, d * 0.65 + sin_sa * d / 3.0));
+    model = rotate(model, glm::radians(-90.0f + steeringAngle), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(-90.0f + steeringAngle), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipse_z(wheel_VAO[3], 5);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(-d * 0.4, -d * 0.5, d * 0.65));
-    model = glm::rotate(model, glm::radians(90.0f + steeringAngle), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(90.0f + steeringAngle), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(-d * 0.4, -d * 0.5, d * 0.65));
+    model = rotate(model, glm::radians(90.0f + steeringAngle), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(90.0f + steeringAngle), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipse_z(wheel_VAO[3], 5);
 
     glBindTexture(GL_TEXTURE_2D, nullTexture);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(d * 0.0, -d * 0.5 + (d / 4.0 - d / 5.0), -d * 0.60));
-    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(d * 0.0, -d * 0.5 + (d / 4.0 - d / 5.0), -d * 0.60));
+    model = rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_cylinder_z(wheel_VAO[4], 15);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(d * 0.0, -d * 0.5, d * 0.65));
-    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(d * 0.0, -d * 0.5, d * 0.65));
+    model = rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_cylinder_z(wheel_VAO[4], 15);
 
     //-----------------exhaust-----------------------------
@@ -1521,30 +1521,30 @@ void drawKart(Position pos,
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(d * 0.2, -d * 0.10, -d * 1.2));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(d * 0.2, -d * 0.10, -d * 1.2));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_cylinder_z(exhaust_VAO[0], 5);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(-d * 0.2, -d * 0.10, -d * 1.2));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(-d * 0.2, -d * 0.10, -d * 1.2));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_cylinder_z(exhaust_VAO[0], 5);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(d * 0.2, -d * 0.10 - d * 0.3, -d * 1.20 + d / 3.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(d * 0.2, -d * 0.10 - d * 0.3, -d * 1.20 + d / 3.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_y(exhaust_VAO[1], 40, 5);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(-d * 0.2, -d * 0.10 - d * 0.3, -d * 1.20 + d / 3.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(-d * 0.2, -d * 0.10 - d * 0.3, -d * 1.20 + d / 3.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_y(exhaust_VAO[1], 40, 5);
     //-----------steering wheel--------------------
     static unsigned int steering_VAO[2];
@@ -1562,18 +1562,18 @@ void drawKart(Position pos,
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(0.0, d * 0.0, d * 0.60));
-    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(0.0, d * 0.0, d * 0.60));
+    model = rotate(model, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_torus_y(steering_VAO[0], 40, 5);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(0.0, d * 0.0, d * 0.60));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(0.0, d * 0.0, d * 0.60));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_cylinder_z(steering_VAO[1], 15);
     //----------------front------------------------
     static unsigned int front_VAO[8];
@@ -1629,66 +1629,66 @@ void drawKart(Position pos,
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(0.0, -d * 0.45, d * 1.05));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(0.0, -d * 0.45, d * 1.05));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid_lune_x(front_VAO[0], 0, 90, 40);
     draw_ellipsoid_lune_x(front_VAO[1], 90, 180, 40);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(0.0, -d * 0.1, d * 1.00));
-    model = glm::rotate(model, glm::radians(35.0f), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(35.0f), glm::vec3(1.0, 0.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(0.0, -d * 0.1, d * 1.00));
+    model = rotate(model, glm::radians(35.0f), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(35.0f), glm::vec3(1.0, 0.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid_lune_z(front_VAO[2], 0, 180, 40);
 
     glBindTexture(GL_TEXTURE_2D, fluffyTexture);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(0.0, -d * 0.1 + 0.81915 * d * 0.105, d * 1.00 + d * 0.105 * 0.57357));
-    model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-55.0f), glm::vec3(1.0, 0.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(0.0, -d * 0.1 + 0.81915 * d * 0.105, d * 1.00 + d * 0.105 * 0.57357));
+    model = rotate(model, glm::radians(-55.0f), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(-55.0f), glm::vec3(1.0, 0.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipse_z(front_VAO[3], 15);
 
     glBindTexture(GL_TEXTURE_2D, nullTexture);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(0.0, -d * 0.1, d * 1.00));
-    model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-55.0f), glm::vec3(1.0, 0.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(0.0, -d * 0.1, d * 1.00));
+    model = rotate(model, glm::radians(-55.0f), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(-55.0f), glm::vec3(1.0, 0.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_cylinder_z(front_VAO[4], 15);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(0.0, -d * 0.45, d * 1.05));
-    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(0.0, -d * 0.45, d * 1.05));
+    model = rotate(model, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_elliptic_cylinder_z(front_VAO[5], 5);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(d * 0.0, -d * 0.30, d * 0.70));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(d * 0.0, -d * 0.30, d * 0.70));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_y(front_VAO[6], 40, 5);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(0.0, -d * 0.1, d * 1.00));
-    model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-55.0f), glm::vec3(1.0, 0.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(0.0, -d * 0.1, d * 1.00));
+    model = rotate(model, glm::radians(-55.0f), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(-55.0f), glm::vec3(1.0, 0.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipse_z(front_VAO[7], 5);
 
     //-----------------side--------------------------------
@@ -1709,16 +1709,16 @@ void drawKart(Position pos,
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(-d * 0.55, -d * 0.4, d * 0.05));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(-d * 0.55, -d * 0.4, d * 0.05));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_rounded_rectangular_cuboid(side_VAO[0], tex);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(d * 0.55, -d * 0.4, d * 0.05));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(d * 0.55, -d * 0.4, d * 0.05));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_rounded_rectangular_cuboid(side_VAO[0], tex);
 
     //-----------------back--------------------------------
@@ -1732,9 +1732,9 @@ void drawKart(Position pos,
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(0.0, -d * 0.4, -d * 0.7));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(0.0, -d * 0.4, -d * 0.7));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_rectangular_cuboid(back_VAO, tex);
     //-----------------seat----------------------------
     static unsigned int seat_VAO[2];
@@ -1753,20 +1753,20 @@ void drawKart(Position pos,
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(0.0, -d * 0.3, -d * 0.40));
-    model = glm::rotate(model, glm::radians(50.0f), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(50.0f), glm::vec3(1.0, 0.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(0.0, -d * 0.3, -d * 0.40));
+    model = rotate(model, glm::radians(50.0f), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(50.0f), glm::vec3(1.0, 0.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_y(seat_VAO[0], 40, 5);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(0.0, -d * 0.3 - 0.6427876 * d * 0.05, -d * 0.40 - 0.7660444 * d * 0.05));
-    model = glm::rotate(model, glm::radians(-40.0f), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-40.0f), glm::vec3(1.0, 0.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(0.0, -d * 0.3 - 0.6427876 * d * 0.05, -d * 0.40 - 0.7660444 * d * 0.05));
+    model = rotate(model, glm::radians(-40.0f), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(-40.0f), glm::vec3(1.0, 0.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipse_sector_z(seat_VAO[1], 0, 180, 5);
     //------------------bottom-------------------------
     static unsigned int bottom_VAO[3];
@@ -1784,56 +1784,56 @@ void drawKart(Position pos,
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(d * 0.0, -d * 0.5, d * 0.15));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(d * 0.0, -d * 0.5, d * 0.15));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_rectangular_cuboid(bottom_VAO[0], tex);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(d * 0.0, -d * 0.5, d * 0.05));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(d * 0.0, -d * 0.5, d * 0.05));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_rectangular_cuboid(bottom_VAO[1], tex);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(d * 0.0, -d * 0.35, d * 0.45));
-    model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(d * 0.0, -d * 0.35, d * 0.45));
+    model = rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_rectangular_cuboid(bottom_VAO[2], tex);
 
     //-------------------------------------------------
     firstTime = false;
 }
 
-void drawFluffySeated(Position pos,
-                      unsigned int shaderProgram,
-                      float deltaTime,
+void drawFluffySeated(const Position pos,
+                      const unsigned int shaderProgram,
+                      const float deltaTime,
                       bool restart,
-                      float playerAngle,
-                      unsigned int texture,
-                      unsigned int skin)
+                      const float playerAngle,
+                      const unsigned int texture,
+                      const unsigned int skin)
 {
     float d = 60.0, a, b, c;
     static bool firstTime = true;
     glm::mat4 model = glm::mat4(1.0f);
-    unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
+    const unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
     glm::mat4 normal = glm::mat4(1.0f);
-    unsigned int normalLoc = glGetUniformLocation(shaderProgram, "normal");
+    const unsigned int normalLoc = glGetUniformLocation(shaderProgram, "normal");
     static float length_forearm = 0.3;
     static float step_forearm = 0.0;
     static float foot_angle = -45.0;
     static float foot_angle_step = 0.0;
 
     glm::mat4 std_model = glm::mat4(1.0f);
-    std_model = glm::translate(std_model, glm::vec3(pos.x() * d, pos.y() * d + 0.20 * d, pos.z() * d + d * 0.60));
-    std_model = glm::rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
+    std_model = translate(std_model, glm::vec3(pos.x() * d, pos.y() * d + 0.20 * d, pos.z() * d + d * 0.60));
+    std_model = rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
     glm::mat4 std_normal = glm::mat4(1.0f);
-    std_normal = glm::rotate(std_normal, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
+    std_normal = rotate(std_normal, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
     a = 0.8 * d / 2.0;
     b = d / 2.0;
@@ -1856,23 +1856,23 @@ void drawFluffySeated(Position pos,
     }
     normal = std_normal;
     model = std_model;
-    normal = glm::rotate(normal, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::rotate(model, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::translate(model, glm::vec3(a * 0.35, -b, c * 0.2));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    normal = rotate(normal, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
+    model = rotate(model, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
+    model = translate(model, glm::vec3(a * 0.35, -b, c * 0.2));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid_lune_z(feet_VAO[0], 0, 180, 40);
 
     normal = std_normal;
     model = std_model;
-    normal = glm::rotate(normal, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::rotate(model, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::translate(model, glm::vec3(-a * 0.35, -b, c * 0.2));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    normal = rotate(normal, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
+    model = rotate(model, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
+    model = translate(model, glm::vec3(-a * 0.35, -b, c * 0.2));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid_lune_z(feet_VAO[1], 0, 180, 40);
 
-    float R = 0.60 * d / 2.0; // 0.27*d/2.0;
+    const float R = 0.60 * d / 2.0; // 0.27*d/2.0;
     //------------Hands:------------------------------
     static unsigned int hands_VAO[6];
     //------------Left arm:---------------------------
@@ -1884,9 +1884,9 @@ void drawFluffySeated(Position pos,
                                             20, 4);
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(a * 1.0 - R, -c * 0.25, c * 0.75 - a * 0.10));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(a * 1.0 - R, -c * 0.25, c * 0.75 - a * 0.10));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_y(lArmVAO, 20, 4);
     //------------Left forearm:-----------------------
     static unsigned int lForeArmVAO;
@@ -1905,10 +1905,10 @@ void drawFluffySeated(Position pos,
     {
         normal = std_normal;
         model = std_model;
-        model = glm::translate(model, glm::vec3(a * 1.0 - R, -c * 0.25, c * 0.75 - a * 0.10));
+        model = translate(model, glm::vec3(a * 1.0 - R, -c * 0.25, c * 0.75 - a * 0.10));
         // model = glm::scale(model, glm::vec3(1.0, 1.0, length_forearm));
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+        glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
         draw_curved_cylinder_y(lForeArmVAO, 20, 4);
         // draw_cylinder_z(lForeArmVAO, 5);
     }
@@ -1919,34 +1919,34 @@ void drawFluffySeated(Position pos,
                                         40);
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(a * 0.95 - R * 0.60, -b * 0.10, c * 0.75 + R));
-    model = glm::rotate(model, glm::radians(-30.0f), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-30.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(a * 0.95 - R * 0.60, -b * 0.10, c * 0.75 + R));
+    model = rotate(model, glm::radians(-30.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(-30.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[0], 40);
 
     if (firstTime)
         hands_VAO[1] = create_ellipsoid(a * 0.18, b * 0.26, c * 0.20,
                                         1.0, 0.0, 0.0,
                                         40);
-    model = glm::translate(model, glm::vec3(-a * 0.06, 0.0, c * 0.21));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    model = translate(model, glm::vec3(-a * 0.06, 0.0, c * 0.21));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
     draw_ellipsoid(hands_VAO[1], 40);
-    model = glm::translate(model, glm::vec3(a * 0.06, 0.0, -c * 0.21));
+    model = translate(model, glm::vec3(a * 0.06, 0.0, -c * 0.21));
 
     if (firstTime)
         hands_VAO[2] = create_ellipsoid(a * 0.10, b * 0.10, c * 0.30,
                                         1.0, 0.0, 0.0,
                                         40);
     // normal = std_normal;
-    normal = glm::rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-12.0f), glm::vec3(0.0, 1.0, 0.0));
-    model = glm::translate(model, glm::vec3(-a * 0.045, b * 0.2, -c * 0.1));
-    model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::rotate(model, glm::radians(-12.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    normal = rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(-12.0f), glm::vec3(0.0, 1.0, 0.0));
+    model = translate(model, glm::vec3(-a * 0.045, b * 0.2, -c * 0.1));
+    model = rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    model = rotate(model, glm::radians(-12.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[2], 40);
     //------------Right arm:---------------------------
     static unsigned int rArmVAO;
@@ -1957,9 +1957,9 @@ void drawFluffySeated(Position pos,
                                             20, 4);
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(-a * 1.0 + R, -c * 0.25, c * 0.75 - a * 0.10));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(-a * 1.0 + R, -c * 0.25, c * 0.75 - a * 0.10));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_y(rArmVAO, 20, 4);
     //------------Right forearm:-----------------------
     static unsigned int rForeArmVAO;
@@ -1973,10 +1973,10 @@ void drawFluffySeated(Position pos,
     {
         normal = std_normal;
         model = std_model;
-        model = glm::translate(model, glm::vec3(-a * 1.0 + R, -c * 0.25, c * 0.75 - a * 0.10));
+        model = translate(model, glm::vec3(-a * 1.0 + R, -c * 0.25, c * 0.75 - a * 0.10));
         // model = glm::scale(model, glm::vec3(1.0, 1.0, length_forearm));
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+        glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
         // draw_cylinder_z(rForeArmVAO, 5);
         draw_curved_cylinder_y(rForeArmVAO, 20, 4);
     }
@@ -1988,63 +1988,63 @@ void drawFluffySeated(Position pos,
     normal = std_normal;
     model = std_model;
     // model = glm::translate(model, glm::vec3(-a*1.15, -b*0.05,  c*0.75 + (d/2.0)*length_forearm));
-    model = glm::translate(model, glm::vec3(-a * 0.95 + R * 0.60, -b * 0.10, c * 0.75 + R));
-    model = glm::rotate(model, glm::radians(30.0f), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(30.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(-a * 0.95 + R * 0.60, -b * 0.10, c * 0.75 + R));
+    model = rotate(model, glm::radians(30.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(30.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[3], 40);
 
     if (firstTime)
         hands_VAO[4] = create_ellipsoid(a * 0.18, b * 0.26, c * 0.20,
                                         1.0, 0.0, 0.0,
                                         40);
-    model = glm::translate(model, glm::vec3(a * 0.06, 0.0, c * 0.21));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    model = translate(model, glm::vec3(a * 0.06, 0.0, c * 0.21));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
     draw_ellipsoid(hands_VAO[4], 40);
-    model = glm::translate(model, glm::vec3(-a * 0.06, 0.0, -c * 0.21));
+    model = translate(model, glm::vec3(-a * 0.06, 0.0, -c * 0.21));
 
     if (firstTime)
         hands_VAO[5] = create_ellipsoid(a * 0.10, b * 0.10, c * 0.30,
                                         1.0, 0.0, 0.0,
                                         40);
     // normal = std_normal;
-    normal = glm::rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(12.0f), glm::vec3(0.0, 1.0, 0.0));
-    model = glm::translate(model, glm::vec3(a * 0.045, b * 0.2, -c * 0.1));
-    model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::rotate(model, glm::radians(12.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    normal = rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(12.0f), glm::vec3(0.0, 1.0, 0.0));
+    model = translate(model, glm::vec3(a * 0.045, b * 0.2, -c * 0.1));
+    model = rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    model = rotate(model, glm::radians(12.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[5], 40);
     //-------------------------------------------------
     firstTime = false;
 }
 
-void drawFluffyHang(Position pos,
-                    unsigned int shaderProgram,
-                    float deltaTime,
+void drawFluffyHang(const Position pos,
+                    const unsigned int shaderProgram,
+                    const float deltaTime,
                     bool restart,
-                    float playerAngle,
-                    unsigned int texture,
-                    unsigned int skin)
+                    const float playerAngle,
+                    const unsigned int texture,
+                    const unsigned int skin)
 {
     float d = 60.0, a, b, c;
     static bool firstTime = true;
     glm::mat4 model = glm::mat4(1.0f);
-    unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
+    const unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
     glm::mat4 normal = glm::mat4(1.0f);
-    unsigned int normalLoc = glGetUniformLocation(shaderProgram, "normal");
+    const unsigned int normalLoc = glGetUniformLocation(shaderProgram, "normal");
     static float length_forearm = 0.75;
     static float foot_angle = 25.0;
 
     glm::mat4 std_model = glm::mat4(1.0f);
-    std_model = glm::translate(std_model, glm::vec3(pos.x() * d, pos.y() * d, pos.z() * d));
-    std_model = glm::translate(std_model, glm::vec3(0.0, (d / 2.0) * 0.20, 0.0));
-    std_model = glm::rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
+    std_model = translate(std_model, glm::vec3(pos.x() * d, pos.y() * d, pos.z() * d));
+    std_model = translate(std_model, glm::vec3(0.0, (d / 2.0) * 0.20, 0.0));
+    std_model = rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
     glm::mat4 std_normal = glm::mat4(1.0f);
-    std_normal = glm::rotate(std_normal, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
+    std_normal = rotate(std_normal, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
     a = 0.8 * d / 2.0;
     b = d / 2.0;
@@ -2067,20 +2067,20 @@ void drawFluffyHang(Position pos,
     }
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(a * 0.35, -b, c * 0.2));
-    model = glm::rotate(model, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(a * 0.35, -b, c * 0.2));
+    model = rotate(model, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid_lune_z(feet_VAO[0], 0, 180, 40);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(-a * 0.35, -b, c * 0.2));
-    model = glm::rotate(model, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(-a * 0.35, -b, c * 0.2));
+    model = rotate(model, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid_lune_z(feet_VAO[1], 0, 180, 40);
     //------------Hands:------------------------------
     static unsigned int hands_VAO[6];
@@ -2093,13 +2093,13 @@ void drawFluffyHang(Position pos,
                                             20, 5);
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(a * 0.95 - 0.27 * d / 2.0,
+    model = translate(model, glm::vec3(a * 0.95 - 0.27 * d / 2.0,
                                             -c * 0.10,
                                             c * 0.75 - a * 0.25));
-    model = glm::rotate(model, glm::radians(-50.0f), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-50.0f), glm::vec3(1.0, 0.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = rotate(model, glm::radians(-50.0f), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(-50.0f), glm::vec3(1.0, 0.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_y(lArmVAO, 20, 5);
     //------------Left forearm:-----------------------
     static unsigned int lForeArmVAO;
@@ -2112,14 +2112,14 @@ void drawFluffyHang(Position pos,
     {
         normal = std_normal;
         model = std_model;
-        model = glm::translate(model, glm::vec3(a * 0.95,
+        model = translate(model, glm::vec3(a * 0.95,
                                                 -c * 0.10,
                                                 c * 0.75 - a * 0.25));
-        model = glm::rotate(model, glm::radians(-50.0f), glm::vec3(1.0, 0.0, 0.0));
-        normal = glm::rotate(normal, glm::radians(-50.0f), glm::vec3(1.0, 0.0, 0.0));
-        model = glm::scale(model, glm::vec3(1.0, 1.0, length_forearm));
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+        model = rotate(model, glm::radians(-50.0f), glm::vec3(1.0, 0.0, 0.0));
+        normal = rotate(normal, glm::radians(-50.0f), glm::vec3(1.0, 0.0, 0.0));
+        model = scale(model, glm::vec3(1.0, 1.0, length_forearm));
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+        glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
         draw_cylinder_z(lForeArmVAO, 5);
     }
     //------------Left hand:--------------------------
@@ -2129,35 +2129,35 @@ void drawFluffyHang(Position pos,
                                         40);
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(a * 0.95, b * 0.7, c * 0.75 + (d / 2.0) * 0.3));
-    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
-    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
-    normal = glm::rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(a * 0.95, b * 0.7, c * 0.75 + (d / 2.0) * 0.3));
+    model = rotate(model, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
+    model = rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
+    normal = rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[0], 40);
 
     if (firstTime)
         hands_VAO[1] = create_ellipsoid(a * 0.18, b * 0.26, c * 0.20,
                                         1.0, 0.0, 0.0,
                                         40);
-    model = glm::translate(model, glm::vec3(-a * 0.06, 0.0, c * 0.21));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    model = translate(model, glm::vec3(-a * 0.06, 0.0, c * 0.21));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
     draw_ellipsoid(hands_VAO[1], 40);
-    model = glm::translate(model, glm::vec3(a * 0.06, 0.0, -c * 0.21));
+    model = translate(model, glm::vec3(a * 0.06, 0.0, -c * 0.21));
 
     if (firstTime)
         hands_VAO[2] = create_ellipsoid(a * 0.10, b * 0.10, c * 0.30,
                                         1.0, 0.0, 0.0,
                                         40);
-    normal = glm::rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-12.0f), glm::vec3(0.0, 1.0, 0.0));
-    model = glm::translate(model, glm::vec3(-a * 0.045, b * 0.2, -c * 0.1));
-    model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::rotate(model, glm::radians(-12.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    normal = rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(-12.0f), glm::vec3(0.0, 1.0, 0.0));
+    model = translate(model, glm::vec3(-a * 0.045, b * 0.2, -c * 0.1));
+    model = rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    model = rotate(model, glm::radians(-12.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[2], 40);
     //------------Right arm:---------------------------
     static unsigned int rArmVAO;
@@ -2168,13 +2168,13 @@ void drawFluffyHang(Position pos,
                                             20, 5);
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(-a * 0.95 + 0.27 * d / 2.0,
+    model = translate(model, glm::vec3(-a * 0.95 + 0.27 * d / 2.0,
                                             -c * 0.10,
                                             c * 0.75 - a * 0.25));
-    model = glm::rotate(model, glm::radians(-50.0f), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-50.0f), glm::vec3(1.0, 0.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = rotate(model, glm::radians(-50.0f), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(-50.0f), glm::vec3(1.0, 0.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_y(rArmVAO, 20, 5);
     //------------Right forearm:-----------------------
     static unsigned int rForeArmVAO;
@@ -2187,14 +2187,14 @@ void drawFluffyHang(Position pos,
     {
         normal = std_normal;
         model = std_model;
-        model = glm::translate(model, glm::vec3(-a * 0.95,
+        model = translate(model, glm::vec3(-a * 0.95,
                                                 -c * 0.10,
                                                 c * 0.75 - a * 0.25));
-        model = glm::rotate(model, glm::radians(-50.0f), glm::vec3(1.0, 0.0, 0.0));
-        normal = glm::rotate(normal, glm::radians(-50.0f), glm::vec3(1.0, 0.0, 0.0));
-        model = glm::scale(model, glm::vec3(1.0, 1.0, length_forearm));
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+        model = rotate(model, glm::radians(-50.0f), glm::vec3(1.0, 0.0, 0.0));
+        normal = rotate(normal, glm::radians(-50.0f), glm::vec3(1.0, 0.0, 0.0));
+        model = scale(model, glm::vec3(1.0, 1.0, length_forearm));
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+        glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
         draw_cylinder_z(rForeArmVAO, 5);
     }
     //------------Right hand:--------------------------
@@ -2204,35 +2204,35 @@ void drawFluffyHang(Position pos,
                                         40);
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(-a * 0.95, b * 0.7, c * 0.75 + (d / 2.0) * 0.3));
-    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 0.0, 1.0));
-    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 0.0, 1.0));
-    normal = glm::rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(-a * 0.95, b * 0.7, c * 0.75 + (d / 2.0) * 0.3));
+    model = rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 0.0, 1.0));
+    model = rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 0.0, 1.0));
+    normal = rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[3], 40);
 
     if (firstTime)
         hands_VAO[4] = create_ellipsoid(a * 0.18, b * 0.26, c * 0.20,
                                         1.0, 0.0, 0.0,
                                         40);
-    model = glm::translate(model, glm::vec3(a * 0.06, 0.0, c * 0.21));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    model = translate(model, glm::vec3(a * 0.06, 0.0, c * 0.21));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
     draw_ellipsoid(hands_VAO[4], 40);
-    model = glm::translate(model, glm::vec3(-a * 0.06, 0.0, -c * 0.21));
+    model = translate(model, glm::vec3(-a * 0.06, 0.0, -c * 0.21));
 
     if (firstTime)
         hands_VAO[5] = create_ellipsoid(a * 0.10, b * 0.10, c * 0.30,
                                         1.0, 0.0, 0.0,
                                         40);
-    normal = glm::rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(12.0f), glm::vec3(0.0, 1.0, 0.0));
-    model = glm::translate(model, glm::vec3(a * 0.045, b * 0.2, -c * 0.1));
-    model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::rotate(model, glm::radians(12.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    normal = rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(12.0f), glm::vec3(0.0, 1.0, 0.0));
+    model = translate(model, glm::vec3(a * 0.045, b * 0.2, -c * 0.1));
+    model = rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    model = rotate(model, glm::radians(12.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[5], 40);
     //-------------------------------------------------
     firstTime = false;
@@ -2270,12 +2270,12 @@ void drawFluffyHangRight(Position pos,
 
     glm::mat4 tmp_model = glm::mat4(1.0f);
     glm::mat4 std_model = glm::mat4(1.0f);
-    std_model = glm::translate(std_model, glm::vec3(pos.x() * d, pos.y() * d, pos.z() * d));
-    std_model = glm::translate(std_model, glm::vec3(0.0, (d / 2.0) * 0.20, 0.0));
-    std_model = glm::rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
+    std_model = translate(std_model, glm::vec3(pos.x() * d, pos.y() * d, pos.z() * d));
+    std_model = translate(std_model, glm::vec3(0.0, (d / 2.0) * 0.20, 0.0));
+    std_model = rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
     glm::mat4 std_normal = glm::mat4(1.0f);
-    std_normal = glm::rotate(std_normal, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
+    std_normal = rotate(std_normal, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
     a = 0.8 * d / 2.0;
     b = d / 2.0;
@@ -2298,20 +2298,20 @@ void drawFluffyHangRight(Position pos,
     }
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(a * 0.35, -b, c * 0.2));
-    model = glm::rotate(model, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(a * 0.35, -b, c * 0.2));
+    model = rotate(model, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid_lune_z(feet_VAO[0], 0, 180, 40);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(-a * 0.35, -b, c * 0.2));
-    model = glm::rotate(model, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(-a * 0.35, -b, c * 0.2));
+    model = rotate(model, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid_lune_z(feet_VAO[1], 0, 180, 40);
     //------------Hands:------------------------------
     static unsigned int hands_VAO[6];
@@ -2366,15 +2366,15 @@ void drawFluffyHangRight(Position pos,
                                             20, 5);
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(a * 0.95 - 0.27 * d / 2.0,
+    model = translate(model, glm::vec3(a * 0.95 - 0.27 * d / 2.0,
                                             -c * 0.10,
                                             c * 0.75 - a * 0.25));
-    model = glm::rotate(model, glm::radians(arm_angle_left), glm::vec3(0.0, 0.0, 1.0));
-    normal = glm::rotate(normal, glm::radians(arm_angle_left), glm::vec3(0.0, 0.0, 1.0));
-    model = glm::rotate(model, glm::radians(-(50.0f + gamma_left)), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-(50.0f + gamma_left)), glm::vec3(1.0, 0.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = rotate(model, glm::radians(arm_angle_left), glm::vec3(0.0, 0.0, 1.0));
+    normal = rotate(normal, glm::radians(arm_angle_left), glm::vec3(0.0, 0.0, 1.0));
+    model = rotate(model, glm::radians(-(50.0f + gamma_left)), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(-(50.0f + gamma_left)), glm::vec3(1.0, 0.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_y(lArmVAO, 20, 5);
     //------------Left forearm:-----------------------
     static unsigned int lForeArmVAO;
@@ -2385,15 +2385,15 @@ void drawFluffyHangRight(Position pos,
                                          5);
     if (length_forearm > 0.0)
     {
-        model = glm::rotate(model, glm::radians(50.0f + gamma_right), glm::vec3(1.0, 0.0, 0.0));
-        normal = glm::rotate(normal, glm::radians(50.0f + gamma_right), glm::vec3(1.0, 0.0, 0.0));
-        model = glm::translate(model, glm::vec3(0.27 * d / 2.0, 0.0, 0.0));
-        model = glm::rotate(model, glm::radians(-(50.0f + gamma_right)), glm::vec3(1.0, 0.0, 0.0));
-        normal = glm::rotate(normal, glm::radians(-(50.0f + gamma_right)), glm::vec3(1.0, 0.0, 0.0));
+        model = rotate(model, glm::radians(50.0f + gamma_right), glm::vec3(1.0, 0.0, 0.0));
+        normal = rotate(normal, glm::radians(50.0f + gamma_right), glm::vec3(1.0, 0.0, 0.0));
+        model = translate(model, glm::vec3(0.27 * d / 2.0, 0.0, 0.0));
+        model = rotate(model, glm::radians(-(50.0f + gamma_right)), glm::vec3(1.0, 0.0, 0.0));
+        normal = rotate(normal, glm::radians(-(50.0f + gamma_right)), glm::vec3(1.0, 0.0, 0.0));
         tmp_model = model;
-        model = glm::scale(model, glm::vec3(1.0, 1.0, L_left));
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+        model = scale(model, glm::vec3(1.0, 1.0, L_left));
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+        glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
         draw_cylinder_z(lForeArmVAO, 5);
         model = tmp_model;
     }
@@ -2402,42 +2402,42 @@ void drawFluffyHangRight(Position pos,
         hands_VAO[0] = create_ellipsoid(a * 0.15, b * 0.30, c * 0.40,
                                         1.0, 0.0, 0.0,
                                         40);
-    model = glm::translate(model, glm::vec3(0.0, 0.0, (d / 2.0) * L_left));
-    model = glm::rotate(model, glm::radians(50.0f + gamma_left), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(50.0f + gamma_left), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::translate(model, glm::vec3(0.0, c * 0.26, a * 0.02));
+    model = translate(model, glm::vec3(0.0, 0.0, (d / 2.0) * L_left));
+    model = rotate(model, glm::radians(50.0f + gamma_left), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(50.0f + gamma_left), glm::vec3(1.0, 0.0, 0.0));
+    model = translate(model, glm::vec3(0.0, c * 0.26, a * 0.02));
 
-    model = glm::rotate(model, glm::radians(-arm_angle_left), glm::vec3(0.0, 0.0, 1.0));
-    normal = glm::rotate(normal, glm::radians(-arm_angle_left), glm::vec3(0.0, 0.0, 1.0));
+    model = rotate(model, glm::radians(-arm_angle_left), glm::vec3(0.0, 0.0, 1.0));
+    normal = rotate(normal, glm::radians(-arm_angle_left), glm::vec3(0.0, 0.0, 1.0));
 
-    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
-    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
-    normal = glm::rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = rotate(model, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
+    model = rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
+    normal = rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[0], 40);
 
     if (firstTime)
         hands_VAO[1] = create_ellipsoid(a * 0.18, b * 0.26, c * 0.20,
                                         1.0, 0.0, 0.0,
                                         40);
-    model = glm::translate(model, glm::vec3(-a * 0.06, 0.0, c * 0.21));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    model = translate(model, glm::vec3(-a * 0.06, 0.0, c * 0.21));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
     draw_ellipsoid(hands_VAO[1], 40);
-    model = glm::translate(model, glm::vec3(a * 0.06, 0.0, -c * 0.21));
+    model = translate(model, glm::vec3(a * 0.06, 0.0, -c * 0.21));
 
     if (firstTime)
         hands_VAO[2] = create_ellipsoid(a * 0.10, b * 0.10, c * 0.30,
                                         1.0, 0.0, 0.0,
                                         40);
-    normal = glm::rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-12.0f), glm::vec3(0.0, 1.0, 0.0));
-    model = glm::translate(model, glm::vec3(-a * 0.045, b * 0.2, -c * 0.1));
-    model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::rotate(model, glm::radians(-12.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    normal = rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(-12.0f), glm::vec3(0.0, 1.0, 0.0));
+    model = translate(model, glm::vec3(-a * 0.045, b * 0.2, -c * 0.1));
+    model = rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    model = rotate(model, glm::radians(-12.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[2], 40);
     //------------Right arm:---------------------------
     static unsigned int rArmVAO;
@@ -2448,15 +2448,15 @@ void drawFluffyHangRight(Position pos,
                                             20, 5);
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(-a * 0.95 + 0.27 * d / 2.0,
+    model = translate(model, glm::vec3(-a * 0.95 + 0.27 * d / 2.0,
                                             -c * 0.10,
                                             c * 0.75 - a * 0.25));
-    model = glm::rotate(model, glm::radians(arm_angle_right), glm::vec3(0.0, 0.0, 1.0));
-    normal = glm::rotate(normal, glm::radians(arm_angle_right), glm::vec3(0.0, 0.0, 1.0));
-    model = glm::rotate(model, glm::radians(-(50.0f + gamma_right)), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-(50.0f + gamma_right)), glm::vec3(1.0, 0.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = rotate(model, glm::radians(arm_angle_right), glm::vec3(0.0, 0.0, 1.0));
+    normal = rotate(normal, glm::radians(arm_angle_right), glm::vec3(0.0, 0.0, 1.0));
+    model = rotate(model, glm::radians(-(50.0f + gamma_right)), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(-(50.0f + gamma_right)), glm::vec3(1.0, 0.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_y(rArmVAO, 20, 5);
     //------------Right forearm:-----------------------
     static unsigned int rForeArmVAO;
@@ -2467,15 +2467,15 @@ void drawFluffyHangRight(Position pos,
                                          5);
     if (length_forearm > 0.0)
     {
-        model = glm::rotate(model, glm::radians(50.0f + gamma_right), glm::vec3(1.0, 0.0, 0.0));
-        normal = glm::rotate(normal, glm::radians(50.0f + gamma_right), glm::vec3(1.0, 0.0, 0.0));
-        model = glm::translate(model, glm::vec3(-0.27 * d / 2.0, 0.0, 0.0));
-        model = glm::rotate(model, glm::radians(-(50.0f + gamma_right)), glm::vec3(1.0, 0.0, 0.0));
-        normal = glm::rotate(normal, glm::radians(-(50.0f + gamma_right)), glm::vec3(1.0, 0.0, 0.0));
+        model = rotate(model, glm::radians(50.0f + gamma_right), glm::vec3(1.0, 0.0, 0.0));
+        normal = rotate(normal, glm::radians(50.0f + gamma_right), glm::vec3(1.0, 0.0, 0.0));
+        model = translate(model, glm::vec3(-0.27 * d / 2.0, 0.0, 0.0));
+        model = rotate(model, glm::radians(-(50.0f + gamma_right)), glm::vec3(1.0, 0.0, 0.0));
+        normal = rotate(normal, glm::radians(-(50.0f + gamma_right)), glm::vec3(1.0, 0.0, 0.0));
         tmp_model = model;
-        model = glm::scale(model, glm::vec3(1.0, 1.0, L_right));
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+        model = scale(model, glm::vec3(1.0, 1.0, L_right));
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+        glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
         draw_cylinder_z(rForeArmVAO, 5);
         model = tmp_model;
     }
@@ -2484,40 +2484,40 @@ void drawFluffyHangRight(Position pos,
         hands_VAO[3] = create_ellipsoid(a * 0.15, b * 0.30, c * 0.40,
                                         1.0, 0.0, 0.0,
                                         40);
-    model = glm::translate(model, glm::vec3(0.0, 0.0, (d / 2.0) * L_right));
-    model = glm::rotate(model, glm::radians(50.0f + gamma_right), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(50.0f + gamma_right), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::translate(model, glm::vec3(0.0, c * 0.26, a * 0.02));
-    model = glm::rotate(model, glm::radians(-arm_angle_right), glm::vec3(0.0, 0.0, 1.0));
-    normal = glm::rotate(normal, glm::radians(-arm_angle_right), glm::vec3(0.0, 0.0, 1.0));
-    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 0.0, 1.0));
-    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 0.0, 1.0));
-    normal = glm::rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(0.0, 0.0, (d / 2.0) * L_right));
+    model = rotate(model, glm::radians(50.0f + gamma_right), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(50.0f + gamma_right), glm::vec3(1.0, 0.0, 0.0));
+    model = translate(model, glm::vec3(0.0, c * 0.26, a * 0.02));
+    model = rotate(model, glm::radians(-arm_angle_right), glm::vec3(0.0, 0.0, 1.0));
+    normal = rotate(normal, glm::radians(-arm_angle_right), glm::vec3(0.0, 0.0, 1.0));
+    model = rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 0.0, 1.0));
+    model = rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 0.0, 1.0));
+    normal = rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[3], 40);
 
     if (firstTime)
         hands_VAO[4] = create_ellipsoid(a * 0.18, b * 0.26, c * 0.20,
                                         1.0, 0.0, 0.0,
                                         40);
-    model = glm::translate(model, glm::vec3(a * 0.06, 0.0, c * 0.21));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    model = translate(model, glm::vec3(a * 0.06, 0.0, c * 0.21));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
     draw_ellipsoid(hands_VAO[4], 40);
-    model = glm::translate(model, glm::vec3(-a * 0.06, 0.0, -c * 0.21));
+    model = translate(model, glm::vec3(-a * 0.06, 0.0, -c * 0.21));
 
     if (firstTime)
         hands_VAO[5] = create_ellipsoid(a * 0.10, b * 0.10, c * 0.30,
                                         1.0, 0.0, 0.0,
                                         40);
-    normal = glm::rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(12.0f), glm::vec3(0.0, 1.0, 0.0));
-    model = glm::translate(model, glm::vec3(a * 0.045, b * 0.2, -c * 0.1));
-    model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::rotate(model, glm::radians(12.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    normal = rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(12.0f), glm::vec3(0.0, 1.0, 0.0));
+    model = translate(model, glm::vec3(a * 0.045, b * 0.2, -c * 0.1));
+    model = rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    model = rotate(model, glm::radians(12.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[5], 40);
     //-------------------------------------------------
     firstTime = false;
@@ -2555,12 +2555,12 @@ void drawFluffyHangLeft(Position pos,
 
     glm::mat4 tmp_model = glm::mat4(1.0f);
     glm::mat4 std_model = glm::mat4(1.0f);
-    std_model = glm::translate(std_model, glm::vec3(pos.x() * d, pos.y() * d, pos.z() * d));
-    std_model = glm::translate(std_model, glm::vec3(0.0, (d / 2.0) * 0.20, 0.0));
-    std_model = glm::rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
+    std_model = translate(std_model, glm::vec3(pos.x() * d, pos.y() * d, pos.z() * d));
+    std_model = translate(std_model, glm::vec3(0.0, (d / 2.0) * 0.20, 0.0));
+    std_model = rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
     glm::mat4 std_normal = glm::mat4(1.0f);
-    std_normal = glm::rotate(std_normal, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
+    std_normal = rotate(std_normal, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
     a = 0.8 * d / 2.0;
     b = d / 2.0;
@@ -2583,20 +2583,20 @@ void drawFluffyHangLeft(Position pos,
     }
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(a * 0.35, -b, c * 0.2));
-    model = glm::rotate(model, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(a * 0.35, -b, c * 0.2));
+    model = rotate(model, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid_lune_z(feet_VAO[0], 0, 180, 40);
 
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(-a * 0.35, -b, c * 0.2));
-    model = glm::rotate(model, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(-a * 0.35, -b, c * 0.2));
+    model = rotate(model, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(foot_angle), glm::vec3(1.0, 0.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid_lune_z(feet_VAO[1], 0, 180, 40);
     //------------Hands:------------------------------
     static unsigned int hands_VAO[6];
@@ -2655,15 +2655,15 @@ void drawFluffyHangLeft(Position pos,
                                             20, 5);
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(a * 0.95 - 0.27 * d / 2.0,
+    model = translate(model, glm::vec3(a * 0.95 - 0.27 * d / 2.0,
                                             -c * 0.10,
                                             c * 0.75 - a * 0.25));
-    model = glm::rotate(model, glm::radians(arm_angle_left), glm::vec3(0.0, 0.0, 1.0));
-    normal = glm::rotate(normal, glm::radians(arm_angle_left), glm::vec3(0.0, 0.0, 1.0));
-    model = glm::rotate(model, glm::radians(-(50.0f + gamma_left)), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-(50.0f + gamma_left)), glm::vec3(1.0, 0.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = rotate(model, glm::radians(arm_angle_left), glm::vec3(0.0, 0.0, 1.0));
+    normal = rotate(normal, glm::radians(arm_angle_left), glm::vec3(0.0, 0.0, 1.0));
+    model = rotate(model, glm::radians(-(50.0f + gamma_left)), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(-(50.0f + gamma_left)), glm::vec3(1.0, 0.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_y(lArmVAO, 20, 5);
     //------------Left forearm:-----------------------
     static unsigned int lForeArmVAO;
@@ -2674,15 +2674,15 @@ void drawFluffyHangLeft(Position pos,
                                          5);
     if (length_forearm > 0.0)
     {
-        model = glm::rotate(model, glm::radians(50.0f + gamma_right), glm::vec3(1.0, 0.0, 0.0));
-        normal = glm::rotate(normal, glm::radians(50.0f + gamma_right), glm::vec3(1.0, 0.0, 0.0));
-        model = glm::translate(model, glm::vec3(0.27 * d / 2.0, 0.0, 0.0));
-        model = glm::rotate(model, glm::radians(-(50.0f + gamma_right)), glm::vec3(1.0, 0.0, 0.0));
-        normal = glm::rotate(normal, glm::radians(-(50.0f + gamma_right)), glm::vec3(1.0, 0.0, 0.0));
+        model = rotate(model, glm::radians(50.0f + gamma_right), glm::vec3(1.0, 0.0, 0.0));
+        normal = rotate(normal, glm::radians(50.0f + gamma_right), glm::vec3(1.0, 0.0, 0.0));
+        model = translate(model, glm::vec3(0.27 * d / 2.0, 0.0, 0.0));
+        model = rotate(model, glm::radians(-(50.0f + gamma_right)), glm::vec3(1.0, 0.0, 0.0));
+        normal = rotate(normal, glm::radians(-(50.0f + gamma_right)), glm::vec3(1.0, 0.0, 0.0));
         tmp_model = model;
-        model = glm::scale(model, glm::vec3(1.0, 1.0, L_left));
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+        model = scale(model, glm::vec3(1.0, 1.0, L_left));
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+        glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
         draw_cylinder_z(lForeArmVAO, 5);
         model = tmp_model;
     }
@@ -2691,42 +2691,42 @@ void drawFluffyHangLeft(Position pos,
         hands_VAO[0] = create_ellipsoid(a * 0.15, b * 0.30, c * 0.40,
                                         1.0, 0.0, 0.0,
                                         40);
-    model = glm::translate(model, glm::vec3(0.0, 0.0, (d / 2.0) * L_left));
-    model = glm::rotate(model, glm::radians(50.0f + gamma_left), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(50.0f + gamma_left), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::translate(model, glm::vec3(0.0, c * 0.26, a * 0.02));
+    model = translate(model, glm::vec3(0.0, 0.0, (d / 2.0) * L_left));
+    model = rotate(model, glm::radians(50.0f + gamma_left), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(50.0f + gamma_left), glm::vec3(1.0, 0.0, 0.0));
+    model = translate(model, glm::vec3(0.0, c * 0.26, a * 0.02));
 
-    model = glm::rotate(model, glm::radians(-arm_angle_left), glm::vec3(0.0, 0.0, 1.0));
-    normal = glm::rotate(normal, glm::radians(-arm_angle_left), glm::vec3(0.0, 0.0, 1.0));
+    model = rotate(model, glm::radians(-arm_angle_left), glm::vec3(0.0, 0.0, 1.0));
+    normal = rotate(normal, glm::radians(-arm_angle_left), glm::vec3(0.0, 0.0, 1.0));
 
-    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
-    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
-    normal = glm::rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = rotate(model, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
+    model = rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
+    normal = rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[0], 40);
 
     if (firstTime)
         hands_VAO[1] = create_ellipsoid(a * 0.18, b * 0.26, c * 0.20,
                                         1.0, 0.0, 0.0,
                                         40);
-    model = glm::translate(model, glm::vec3(-a * 0.06, 0.0, c * 0.21));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    model = translate(model, glm::vec3(-a * 0.06, 0.0, c * 0.21));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
     draw_ellipsoid(hands_VAO[1], 40);
-    model = glm::translate(model, glm::vec3(a * 0.06, 0.0, -c * 0.21));
+    model = translate(model, glm::vec3(a * 0.06, 0.0, -c * 0.21));
 
     if (firstTime)
         hands_VAO[2] = create_ellipsoid(a * 0.10, b * 0.10, c * 0.30,
                                         1.0, 0.0, 0.0,
                                         40);
-    normal = glm::rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-12.0f), glm::vec3(0.0, 1.0, 0.0));
-    model = glm::translate(model, glm::vec3(-a * 0.045, b * 0.2, -c * 0.1));
-    model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::rotate(model, glm::radians(-12.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    normal = rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(-12.0f), glm::vec3(0.0, 1.0, 0.0));
+    model = translate(model, glm::vec3(-a * 0.045, b * 0.2, -c * 0.1));
+    model = rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    model = rotate(model, glm::radians(-12.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[2], 40);
     //------------Right arm:---------------------------
     static unsigned int rArmVAO;
@@ -2737,15 +2737,15 @@ void drawFluffyHangLeft(Position pos,
                                             20, 5);
     normal = std_normal;
     model = std_model;
-    model = glm::translate(model, glm::vec3(-a * 0.95 + 0.27 * d / 2.0,
+    model = translate(model, glm::vec3(-a * 0.95 + 0.27 * d / 2.0,
                                             -c * 0.10,
                                             c * 0.75 - a * 0.25));
-    model = glm::rotate(model, glm::radians(arm_angle_right), glm::vec3(0.0, 0.0, 1.0));
-    normal = glm::rotate(normal, glm::radians(arm_angle_right), glm::vec3(0.0, 0.0, 1.0));
-    model = glm::rotate(model, glm::radians(-(50.0f + gamma_right)), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-(50.0f + gamma_right)), glm::vec3(1.0, 0.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = rotate(model, glm::radians(arm_angle_right), glm::vec3(0.0, 0.0, 1.0));
+    normal = rotate(normal, glm::radians(arm_angle_right), glm::vec3(0.0, 0.0, 1.0));
+    model = rotate(model, glm::radians(-(50.0f + gamma_right)), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(-(50.0f + gamma_right)), glm::vec3(1.0, 0.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_y(rArmVAO, 20, 5);
     //------------Right forearm:-----------------------
     static unsigned int rForeArmVAO;
@@ -2756,15 +2756,15 @@ void drawFluffyHangLeft(Position pos,
                                          5);
     if (length_forearm > 0.0)
     {
-        model = glm::rotate(model, glm::radians(50.0f + gamma_right), glm::vec3(1.0, 0.0, 0.0));
-        normal = glm::rotate(normal, glm::radians(50.0f + gamma_right), glm::vec3(1.0, 0.0, 0.0));
-        model = glm::translate(model, glm::vec3(-0.27 * d / 2.0, 0.0, 0.0));
-        model = glm::rotate(model, glm::radians(-(50.0f + gamma_right)), glm::vec3(1.0, 0.0, 0.0));
-        normal = glm::rotate(normal, glm::radians(-(50.0f + gamma_right)), glm::vec3(1.0, 0.0, 0.0));
+        model = rotate(model, glm::radians(50.0f + gamma_right), glm::vec3(1.0, 0.0, 0.0));
+        normal = rotate(normal, glm::radians(50.0f + gamma_right), glm::vec3(1.0, 0.0, 0.0));
+        model = translate(model, glm::vec3(-0.27 * d / 2.0, 0.0, 0.0));
+        model = rotate(model, glm::radians(-(50.0f + gamma_right)), glm::vec3(1.0, 0.0, 0.0));
+        normal = rotate(normal, glm::radians(-(50.0f + gamma_right)), glm::vec3(1.0, 0.0, 0.0));
         tmp_model = model;
-        model = glm::scale(model, glm::vec3(1.0, 1.0, L_right));
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+        model = scale(model, glm::vec3(1.0, 1.0, L_right));
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+        glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
         draw_cylinder_z(rForeArmVAO, 5);
         model = tmp_model;
     }
@@ -2773,40 +2773,40 @@ void drawFluffyHangLeft(Position pos,
         hands_VAO[3] = create_ellipsoid(a * 0.15, b * 0.30, c * 0.40,
                                         1.0, 0.0, 0.0,
                                         40);
-    model = glm::translate(model, glm::vec3(0.0, 0.0, (d / 2.0) * L_right));
-    model = glm::rotate(model, glm::radians(50.0f + gamma_right), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(50.0f + gamma_right), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::translate(model, glm::vec3(0.0, c * 0.26, a * 0.02));
-    model = glm::rotate(model, glm::radians(-arm_angle_right), glm::vec3(0.0, 0.0, 1.0));
-    normal = glm::rotate(normal, glm::radians(-arm_angle_right), glm::vec3(0.0, 0.0, 1.0));
-    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 0.0, 1.0));
-    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 0.0, 1.0));
-    normal = glm::rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    model = translate(model, glm::vec3(0.0, 0.0, (d / 2.0) * L_right));
+    model = rotate(model, glm::radians(50.0f + gamma_right), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(50.0f + gamma_right), glm::vec3(1.0, 0.0, 0.0));
+    model = translate(model, glm::vec3(0.0, c * 0.26, a * 0.02));
+    model = rotate(model, glm::radians(-arm_angle_right), glm::vec3(0.0, 0.0, 1.0));
+    normal = rotate(normal, glm::radians(-arm_angle_right), glm::vec3(0.0, 0.0, 1.0));
+    model = rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 0.0, 1.0));
+    model = rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
+    normal = rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 0.0, 1.0));
+    normal = rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[3], 40);
 
     if (firstTime)
         hands_VAO[4] = create_ellipsoid(a * 0.18, b * 0.26, c * 0.20,
                                         1.0, 0.0, 0.0,
                                         40);
-    model = glm::translate(model, glm::vec3(a * 0.06, 0.0, c * 0.21));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    model = translate(model, glm::vec3(a * 0.06, 0.0, c * 0.21));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
     draw_ellipsoid(hands_VAO[4], 40);
-    model = glm::translate(model, glm::vec3(-a * 0.06, 0.0, -c * 0.21));
+    model = translate(model, glm::vec3(-a * 0.06, 0.0, -c * 0.21));
 
     if (firstTime)
         hands_VAO[5] = create_ellipsoid(a * 0.10, b * 0.10, c * 0.30,
                                         1.0, 0.0, 0.0,
                                         40);
-    normal = glm::rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    normal = glm::rotate(normal, glm::radians(12.0f), glm::vec3(0.0, 1.0, 0.0));
-    model = glm::translate(model, glm::vec3(a * 0.045, b * 0.2, -c * 0.1));
-    model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
-    model = glm::rotate(model, glm::radians(12.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    normal = rotate(normal, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    normal = rotate(normal, glm::radians(12.0f), glm::vec3(0.0, 1.0, 0.0));
+    model = translate(model, glm::vec3(a * 0.045, b * 0.2, -c * 0.1));
+    model = rotate(model, glm::radians(-45.0f), glm::vec3(1.0, 0.0, 0.0));
+    model = rotate(model, glm::radians(12.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[5], 40);
     //-------------------------------------------------
     firstTime = false;

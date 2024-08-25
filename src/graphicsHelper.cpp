@@ -14,9 +14,9 @@ std::string readShader(const std::string &filename)
     return buffer.str();
 }
 
-unsigned int compileShader(GLenum const type, const std::string &source)
+GLuint compileShader(GLenum const type, const std::string &source)
 {
-    const unsigned int shader = glCreateShader(type);
+    const GLuint shader = glCreateShader(type);
     const char *src = source.c_str();
     glShaderSource(shader, 1, &src, nullptr);
     glCompileShader(shader);
@@ -36,9 +36,9 @@ unsigned int compileShader(GLenum const type, const std::string &source)
     return shader;
 }
 
-unsigned int createShaderProgram(const std::vector<unsigned int> &shaders)
+GLuint createShaderProgram(const std::vector<GLuint> &shaders)
 {
-    const unsigned int program = glCreateProgram();
+    const GLuint program = glCreateProgram();
     for (const auto shader : shaders)
     {
         glAttachShader(program, shader);
@@ -60,15 +60,15 @@ unsigned int createShaderProgram(const std::vector<unsigned int> &shaders)
     return program;
 }
 
-unsigned int loadShaders()
+GLuint loadShaders()
 {
     const std::string vertexShaderSource = readShader("shaders/shader.vs");
     const std::string fragmentShaderSource = readShader("shaders/shader.fs");
 
-    unsigned int vertexShader = compileShader(GL_VERTEX_SHADER, vertexShaderSource);
-    unsigned int fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
+    GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexShaderSource);
+    GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
 
-    const unsigned int shaderProgram = createShaderProgram({vertexShader, fragmentShader});
+    const GLuint shaderProgram = createShaderProgram({vertexShader, fragmentShader});
 
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
@@ -115,7 +115,7 @@ void GraphicsHelper::configureEnvironment()
 }
 
 GraphicsHelper::GraphicsHelper(Data *data): glContext(), config(), shaderProgram(0),
-                                            renderer(), window(), session(), rm(), font()
+                                            window(), session(), rm(), font()
 {
     this->data = data;
 }
@@ -226,7 +226,7 @@ SDL_Window *GraphicsHelper::createWindow(const char *title, Configuration *confi
     {
         std::cerr << "Error: " << Mix_GetError() << std::endl;
     }
-    Mix_VolumeMusic(MIX_MAX_VOLUME / 5);
+    Mix_VolumeMusic(2);
 
     SDL_GL_SetSwapInterval(0);
 
@@ -275,7 +275,7 @@ void GraphicsHelper::calculateFPS()
     }
 }
 
-void GraphicsHelper::drawWindow(const Camera *cam, const unsigned int shaderProgram, const float deltaTime) const
+void GraphicsHelper::drawWindow(const Camera *cam, const GLuint shaderProgram, const float deltaTime) const
 {
     constexpr float d = 60.0;
     glm::mat4 projection = glm::perspective(glm::radians(60.0f),
@@ -295,7 +295,7 @@ void GraphicsHelper::drawWindow(const Camera *cam, const unsigned int shaderProg
     direction.x = cos(glm::radians(cam->yaw)) * cos(glm::radians(cam->pitch));
     direction.y = sin(glm::radians(cam->pitch));
     direction.z = sin(glm::radians(cam->yaw)) * cos(glm::radians(cam->pitch));
-    const auto cameraFront = glm::normalize(direction);
+    const auto cameraFront = normalize(direction);
 
     glm::mat4 view = lookAt(cameraPos, cameraPos + cameraFront, up);
 
@@ -329,10 +329,51 @@ void GraphicsHelper::drawWindow(const Camera *cam, const unsigned int shaderProg
     drawBackground({0, 0, 0}, shaderProgram, deltaTime, rm->getTexture("background"));
 
     constexpr bool restart = true;
-    drawFluffy({1, 1, 1}, 45.0, shaderProgram, deltaTime, restart, rm->getTexture("null"), 0);
-    drawKart({1, 0.4, 1}, shaderProgram, deltaTime, restart, 45.0, 0.0, rm->getTexture("wheel_cap"), rm->getTexture("null"), rm->getTexture("fluffy"), rm->getTexture("ime_usp"), 0);
+    drawFluffy({10, 10, 10}, 45.0, shaderProgram, deltaTime, restart, rm->getTexture("null"), 0);
+    drawKart({10, 10, 10}, shaderProgram, deltaTime, restart, 45.0, 0.0, rm->getTexture("wheel_cap"), rm->getTexture("null"), rm->getTexture("fluffy"), rm->getTexture("ime_usp"), 0);
 
     glEnable(GL_TEXTURE_2D);
+}
+
+void GraphicsHelper::drawInterface(const Camera* cam, const GLuint shaderProgram, const GLuint interfaceTexture)
+{
+    float d = 60.0;
+    static bool firsttime = true;
+    glm::mat4 model = glm::mat4(1.0f);
+    unsigned int modelLoc = glGetUniformLocation(shaderProgram,"model");
+    glm::mat4 normal = glm::mat4(1.0f);
+    unsigned int normalLoc = glGetUniformLocation(shaderProgram,"normal");
+    float player_angle = 45 + cam->yaw;
+    float cos_angle = cosf(player_angle*(PI/180.0));
+    float sin_angle = sinf(player_angle*(PI/180.0));
+    unsigned int lightMinLoc = glGetUniformLocation(shaderProgram,"lightMin");
+    glUniform3f(lightMinLoc, 1.0, 1.0, 1.0);
+
+    glm::mat4 std_model = glm::mat4(1.0f);
+    std_model = glm::translate(std_model, glm::vec3(cam->target.x()*d + d*5.0*sin_angle - d*(-5.0)*cos_angle,
+                            cam->target.y()*d + 2.5*d,
+                            cam->target.z()*d + d*5.0*cos_angle + d*(-5.0)*sin_angle));
+    std_model = glm::rotate(std_model, glm::radians(player_angle+180.0f), glm::vec3(0.0, 1.0, 0.0));
+
+    glm::mat4 std_normal = glm::mat4(1.0f);
+    //std_normal = glm::rotate(std_normal, glm::radians(player_angle), glm::vec3(0.0, 1.0, 0.0));
+    //-------------------------------------------------
+    static unsigned int lap_VAO;
+    if(firsttime)
+        lap_VAO = createSquareZ(d*0.8*836/254, d*0.8,
+                      1.0, 1.0, 1.0);
+
+    normal = std_normal;
+    model = std_model;
+    //model = glm::translate(model, glm::vec3(d*0.0, 5*d*0.5, d*0.0));
+    model = glm::rotate(model, glm::radians(cam->pitch), glm::vec3(1.0, 0.0, 0.0));
+    //normal = glm::rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
+    glUniformMatrix4fv(modelLoc,  1, GL_FALSE, glm::value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
+    drawSquareZ(lap_VAO, interfaceTexture);
+    glUniform3f(lightMinLoc, 0.0, 0.0, 0.0);
+    //-------------------------------------------------
+    firsttime = false;
 }
 
 void GraphicsHelper::manageWindow()
@@ -358,6 +399,8 @@ void GraphicsHelper::manageWindow()
         glUseProgram(shaderProgram);
 
         drawWindow(cam, shaderProgram, deltaTime);
+
+        drawInterface(cam, shaderProgram, rm->getTexture("track"));
 
         SDL_GL_SwapWindow(window);
     }
@@ -452,16 +495,34 @@ SDL_bool GraphicsHelper::manageInputs(const SDL_Event& event) const
             case SDLK_ESCAPE:
                 return SDL_TRUE;
             case SDLK_w:
-                cam->targetDist -= 0.1f;
+                cam->targetDist -= 10.0f;
                 break;
             case SDLK_s:
-                cam->targetDist += 0.1f;
+                cam->targetDist += 10.0f;
                 break;
             case SDLK_a:
-                cam->yaw -= 1.0f;
+                cam->yaw -= 10.0f;
                 break;
             case SDLK_d:
-                cam->yaw += 1.0f;
+                cam->yaw += 10.0f;
+                break;
+            case SDLK_q:
+                cam->pitch -= 10.0f;
+                break;
+            case SDLK_e:
+                cam->pitch += 10.0f;
+                break;
+            case SDLK_UP:
+                cam->pos = cam->pos + Position(1.0f, 0.0f, 0.0f);
+                break;
+            case SDLK_DOWN:
+                cam->pos = cam->pos - Position(1.0f, 0.0f, 0.0f);
+                break;
+            case SDLK_LEFT:
+                cam->pos = cam->pos - Position(0.0f, 0.0f, 1.0f);
+                break;
+            case SDLK_RIGHT:
+                cam->pos = cam->pos + Position(0.0f, 0.0f, 1.0f);
                 break;
             default:
                 break;
@@ -479,7 +540,6 @@ void GraphicsHelper::stop() const
 {
     SDL_GL_DeleteContext(glContext);
     SDL_DestroyWindow(window);
-    SDL_DestroyRenderer(renderer);
 
     Mix_CloseAudio();
     Mix_Quit();
