@@ -284,11 +284,11 @@ void GraphicsHelper::drawWindow(const Camera *cam, const GLuint shaderProgram, c
 
     const float dist = cam->targetDist * cos(glm::radians(cam->pitch));
 
-    const float cam_z = d * cam->target.z()  - sin(glm::radians(cam->yaw)) * dist;
+    const float camZ = d * cam->target.z()  - sin(glm::radians(cam->yaw)) * dist;
     const float cam_x = d * cam->target.x()  - cos(glm::radians(cam->yaw)) * dist;
     const float cam_y = d * cam->target.y()  - sin(glm::radians(cam->pitch)) * cam->targetDist;
 
-    const auto cameraPos = glm::vec3(cam_x, cam_y, cam_z);
+    const auto cameraPos = glm::vec3(cam_x, cam_y, camZ);
     constexpr auto up = glm::vec3(0.0f, 1.0f, 0.0f);
 
     glm::vec3 direction;
@@ -425,8 +425,8 @@ void GraphicsHelper::generateShaders(GLuint &programID, const char *vertexShader
     if (infoLogLength > 0)
     {
         std::vector<char> vertexShaderErrorMessage(infoLogLength + 1);
-        glGetShaderInfoLog(vertexShaderID, infoLogLength, nullptr, &vertexShaderErrorMessage[0]);
-        std::cerr << &vertexShaderErrorMessage[0] << std::endl;
+        glGetShaderInfoLog(vertexShaderID, infoLogLength, nullptr, vertexShaderErrorMessage.data());
+        std::cerr << vertexShaderErrorMessage.data() << std::endl;
     }
 
     // Compile the fragment shader
@@ -439,8 +439,8 @@ void GraphicsHelper::generateShaders(GLuint &programID, const char *vertexShader
     if (infoLogLength > 0)
     {
         std::vector<char> fragmentShaderErrorMessage(infoLogLength + 1);
-        glGetShaderInfoLog(fragmentShaderID, infoLogLength, nullptr, &fragmentShaderErrorMessage[0]);
-        std::cerr << &fragmentShaderErrorMessage[0] << std::endl;
+        glGetShaderInfoLog(fragmentShaderID, infoLogLength, nullptr, fragmentShaderErrorMessage.data());
+        std::cerr << fragmentShaderErrorMessage.data() << std::endl;
     }
 
     // Link the program
@@ -455,8 +455,8 @@ void GraphicsHelper::generateShaders(GLuint &programID, const char *vertexShader
     if (infoLogLength > 0)
     {
         std::vector<char> programErrorMessage(infoLogLength + 1);
-        glGetProgramInfoLog(programID, infoLogLength, nullptr, &programErrorMessage[0]);
-        std::cerr << &programErrorMessage[0] << std::endl;
+        glGetProgramInfoLog(programID, infoLogLength, nullptr, programErrorMessage.data());
+        std::cerr << programErrorMessage.data() << std::endl;
     }
 
     glDeleteShader(vertexShaderID);

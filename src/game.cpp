@@ -1,6 +1,4 @@
-﻿// Game.cpp : Defines the entry point for the application.
-//
-
+﻿#define SDL_MAIN_HANDLED
 #include <game.hpp>
 
 Game::Game(): config(new Configuration), window(), data()
@@ -23,7 +21,7 @@ void Game::run() const
 	graphicsHelper->manageWindow();
 }
 
-int main()
+int main(int argc, char** argv)
 {
 	const auto game = new Game();
 	game->run();
