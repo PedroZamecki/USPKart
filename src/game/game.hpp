@@ -5,8 +5,8 @@
 
 #include <iostream>
 
-#include <utils.hpp>
-#include <graphicsHelper.hpp>
+#include <game/utils.hpp>
+#include <graphic/graphicsHelper.hpp>
 
 class Game {
     public:
