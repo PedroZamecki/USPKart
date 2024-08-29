@@ -8,8 +8,17 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <resourceManager.hpp>
 #include <utils.hpp>
 #include <cmath>
+
+void drawWindow(int height, int width, const Camera *cam, GLuint shaderProgram, float deltaTime, const ResourceManager *rm);
+
+void drawInterface( int height,
+                    int width,
+                    const Camera* cam,
+                    GLuint shaderProgram,
+                    GLuint interfaceTexture);
 
 void drawFluffy(Position pos,
                 float playerAngle,

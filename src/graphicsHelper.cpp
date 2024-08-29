@@ -275,107 +275,6 @@ void GraphicsHelper::calculateFPS()
     }
 }
 
-void GraphicsHelper::drawWindow(const Camera *cam, const GLuint shaderProgram, const float deltaTime) const
-{
-    constexpr float d = 60.0;
-    glm::mat4 projection = glm::perspective(glm::radians(60.0f),
-                                            static_cast<float>(config->getWidth()) / static_cast<float>(config->getHeight()),
-                                            1.0f, 4024.0f);
-
-    const float dist = cam->targetDist * cos(glm::radians(cam->pitch));
-
-    const float camZ = d * cam->target.z()  - sin(glm::radians(cam->yaw)) * dist;
-    const float cam_x = d * cam->target.x()  - cos(glm::radians(cam->yaw)) * dist;
-    const float cam_y = d * cam->target.y()  - sin(glm::radians(cam->pitch)) * cam->targetDist;
-
-    const auto cameraPos = glm::vec3(cam_x, cam_y, camZ);
-    constexpr auto up = glm::vec3(0.0f, 1.0f, 0.0f);
-
-    glm::vec3 direction;
-    direction.x = cos(glm::radians(cam->yaw)) * cos(glm::radians(cam->pitch));
-    direction.y = sin(glm::radians(cam->pitch));
-    direction.z = sin(glm::radians(cam->yaw)) * cos(glm::radians(cam->pitch));
-    const auto cameraFront = normalize(direction);
-
-    glm::mat4 view = lookAt(cameraPos, cameraPos + cameraFront, up);
-
-    const GLint viewLoc = glGetUniformLocation(shaderProgram, "view");
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, value_ptr(view));
-
-    const GLint projectionLoc = glGetUniformLocation(shaderProgram, "projection");
-    glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, value_ptr(projection));
-
-    glGetUniformLocation(shaderProgram, "model");
-    //--------------------------------------------------
-    auto normal = glm::mat4(1.0f);
-    const GLint normalLoc = glGetUniformLocation(shaderProgram, "normal");
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
-    //--------------------------------------------------
-    glm::vec3 lightPos = cameraPos;
-    const GLint lightPosLocation = glGetUniformLocation(shaderProgram, "lightPos");
-    glUniform3f(lightPosLocation, lightPos[0], lightPos[1], lightPos[2]);
-
-    const GLint viewPosLocation = glGetUniformLocation(shaderProgram, "viewPos");
-    glUniform3f(viewPosLocation, cameraPos[0], cameraPos[1], cameraPos[2]);
-
-    const GLint lightColorLocation = glGetUniformLocation(shaderProgram, "lightColor");
-    glUniform3f(lightColorLocation, 1.0f, 1.0f, 1.0f);
-
-    const GLint lightMinLoc = glGetUniformLocation(shaderProgram, "lightMin");
-    glUniform3f(lightMinLoc, 0.0, 0.0, 0.0);
-    //--------------------------------------------------
-
-    drawTrack({0.0f, 0.0f, 0.0f}, shaderProgram, deltaTime, 0.0f, rm->getTexture("track"));
-    drawBackground({0, 0, 0}, shaderProgram, deltaTime, rm->getTexture("background"));
-
-    constexpr bool restart = true;
-    drawFluffy({10, 10, 10}, 45.0, shaderProgram, deltaTime, restart, rm->getTexture("null"), 0);
-    drawKart({10, 10, 10}, shaderProgram, deltaTime, restart, 45.0, 0.0, rm->getTexture("wheel_cap"), rm->getTexture("null"), rm->getTexture("fluffy"), rm->getTexture("ime_usp"), 0);
-
-    glEnable(GL_TEXTURE_2D);
-}
-
-void GraphicsHelper::drawInterface(const Camera* cam, const GLuint shaderProgram, const GLuint interfaceTexture)
-{
-    float d = 60.0;
-    static bool firsttime = true;
-    glm::mat4 model = glm::mat4(1.0f);
-    unsigned int modelLoc = glGetUniformLocation(shaderProgram,"model");
-    glm::mat4 normal = glm::mat4(1.0f);
-    unsigned int normalLoc = glGetUniformLocation(shaderProgram,"normal");
-    float player_angle = 45 + cam->yaw;
-    float cos_angle = cosf(player_angle*(PI/180.0));
-    float sin_angle = sinf(player_angle*(PI/180.0));
-    unsigned int lightMinLoc = glGetUniformLocation(shaderProgram,"lightMin");
-    glUniform3f(lightMinLoc, 1.0, 1.0, 1.0);
-
-    glm::mat4 std_model = glm::mat4(1.0f);
-    std_model = glm::translate(std_model, glm::vec3(cam->target.x()*d + d*5.0*sin_angle - d*(-5.0)*cos_angle,
-                            cam->target.y()*d + 2.5*d,
-                            cam->target.z()*d + d*5.0*cos_angle + d*(-5.0)*sin_angle));
-    std_model = glm::rotate(std_model, glm::radians(player_angle+180.0f), glm::vec3(0.0, 1.0, 0.0));
-
-    glm::mat4 std_normal = glm::mat4(1.0f);
-    //std_normal = glm::rotate(std_normal, glm::radians(player_angle), glm::vec3(0.0, 1.0, 0.0));
-    //-------------------------------------------------
-    static unsigned int lap_VAO;
-    if(firsttime)
-        lap_VAO = createSquareZ(d*0.8*836/254, d*0.8,
-                      1.0, 1.0, 1.0);
-
-    normal = std_normal;
-    model = std_model;
-    //model = glm::translate(model, glm::vec3(d*0.0, 5*d*0.5, d*0.0));
-    model = glm::rotate(model, glm::radians(cam->pitch), glm::vec3(1.0, 0.0, 0.0));
-    //normal = glm::rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
-    glUniformMatrix4fv(modelLoc,  1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, glm::value_ptr(normal));
-    drawSquareZ(lap_VAO, interfaceTexture);
-    glUniform3f(lightMinLoc, 0.0, 0.0, 0.0);
-    //-------------------------------------------------
-    firsttime = false;
-}
-
 void GraphicsHelper::manageWindow()
 {
     SDL_bool done = SDL_FALSE;
@@ -398,9 +297,9 @@ void GraphicsHelper::manageWindow()
 
         glUseProgram(shaderProgram);
 
-        drawWindow(cam, shaderProgram, deltaTime);
+        drawWindow(config->getHeight(), config->getWidth(), cam, shaderProgram, deltaTime, rm);
 
-        drawInterface(cam, shaderProgram, rm->getTexture("track"));
+        drawInterface(config->getHeight(), config->getWidth(), cam, shaderProgram, rm->getTexture("track"));
 
         SDL_GL_SwapWindow(window);
     }
