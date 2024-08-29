@@ -1,11 +1,139 @@
 #include <drawingHelper.hpp>
 
-unsigned int createHairyEllipsoid(const float R, const float G, const float B)
+void drawWindow(const int height, const int width, const Camera *cam, const GLuint shaderProgram, const float deltaTime, const ResourceManager *rm)
 {
-    float th0, th1;
+    constexpr float d = 60.0;
+    glm::mat4 projection = glm::perspective(glm::radians(60.0f),
+                                            static_cast<float>(width) / static_cast<float>(height),
+                                            1.0f, 4024.0f);
+
+    const float dist = cam->targetDist * cos(glm::radians(cam->pitch));
+
+    const float camZ = d * cam->target.z()  - sin(glm::radians(cam->yaw)) * dist;
+    const float cam_x = d * cam->target.x()  - cos(glm::radians(cam->yaw)) * dist;
+    const float cam_y = d * cam->target.y()  - sin(glm::radians(cam->pitch)) * cam->targetDist;
+
+    const auto cameraPos = glm::vec3(cam_x, cam_y, camZ);
+    constexpr auto up = glm::vec3(0.0f, 1.0f, 0.0f);
+
+    glm::vec3 direction;
+    direction.x = cos(glm::radians(cam->yaw)) * cos(glm::radians(cam->pitch));
+    direction.y = sin(glm::radians(cam->pitch));
+    direction.z = sin(glm::radians(cam->yaw)) * cos(glm::radians(cam->pitch));
+    const auto cameraFront = normalize(direction);
+
+    glm::mat4 view = lookAt(cameraPos, cameraPos + cameraFront, up);
+
+    const GLint viewLoc = glGetUniformLocation(shaderProgram, "view");
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, value_ptr(view));
+
+    const GLint projectionLoc = glGetUniformLocation(shaderProgram, "projection");
+    glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, value_ptr(projection));
+
+    glGetUniformLocation(shaderProgram, "model");
+    //--------------------------------------------------
+    auto normal = glm::mat4(1.0f);
+    const GLint normalLoc = glGetUniformLocation(shaderProgram, "normal");
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
+    //--------------------------------------------------
+    glm::vec3 lightPos = cameraPos;
+    const GLint lightPosLocation = glGetUniformLocation(shaderProgram, "lightPos");
+    glUniform3f(lightPosLocation, lightPos[0], lightPos[1], lightPos[2]);
+
+    const GLint viewPosLocation = glGetUniformLocation(shaderProgram, "viewPos");
+    glUniform3f(viewPosLocation, cameraPos[0], cameraPos[1], cameraPos[2]);
+
+    const GLint lightColorLocation = glGetUniformLocation(shaderProgram, "lightColor");
+    glUniform3f(lightColorLocation, 1.0f, 1.0f, 1.0f);
+
+    const GLint lightMinLoc = glGetUniformLocation(shaderProgram, "lightMin");
+    glUniform3f(lightMinLoc, 0.0, 0.0, 0.0);
+    //--------------------------------------------------
+
+    drawTrack({0.0f, 0.0f, 0.0f}, shaderProgram, deltaTime, 0.0f, rm->getTexture("track"));
+    drawBackground({0, 0, 0}, shaderProgram, deltaTime, rm->getTexture("background"));
+
+    constexpr bool restart = true;
+    drawFluffy({0, 0, 0}, 45.0, shaderProgram, deltaTime, restart, rm->getTexture("null"), 0);
+    drawKart({0, 0, 0}, shaderProgram, deltaTime, restart, 45.0, 0.0, rm->getTexture("wheel_cap"), rm->getTexture("null"), rm->getTexture("fluffy"), rm->getTexture("ime_usp"), 0);
+
+    glEnable(GL_TEXTURE_2D);
+}
+
+void drawInterface(const int height, const int width, const Camera* cam, const GLuint shaderProgram, const GLuint interfaceTexture)
+{
+    // Save the current projection matrix
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+
+    // Set up orthographic projection
+    glOrtho(0, width, height, 0, -1, 1);
+
+    // Save the current model view matrix
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    // Disable depth testing and lighting
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_LIGHTING);
+
+    // Set up the model matrix to position the interface in front of the camera
+    constexpr float d = 60.0;
+    static bool firstTime = true;
+    auto model = glm::mat4(1.0f);
+    const GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
+    auto normal = glm::mat4(1.0f);
+    const GLint normalLoc = glGetUniformLocation(shaderProgram, "normal");
+    const GLint lightMinLoc = glGetUniformLocation(shaderProgram, "lightMin");
+    glUniform3f(lightMinLoc, 1.0, 1.0, 1.0);
+
+    auto std_model = glm::mat4(1.0f);
+    std_model = translate(std_model, glm::vec3(static_cast<float>(width) / 2.0f, static_cast<float>(height) / 2.0f, 0.0f));
+    std_model = rotate(std_model, glm::radians(cam->yaw - 90), glm::vec3(0.0f, -1.0f, 0.0f));
+    std_model = scale(std_model, glm::vec3(d * 0.08f * 836 / 254, d * 0.08f, 0.08f));
+
+    constexpr auto std_normal = glm::mat4(1.0f);
+    //-------------------------------------------------
+    static GLuint lap_VAO;
+    if (firstTime)
+        lap_VAO = createSquareZ(d * 0.8f * 836 / 254, d * 0.8f, 1.0f, 1.0f, 1.0f);
+
+    normal = std_normal;
+    model = std_model;
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+    glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
+
+    // Draw the interface
+    glBindTexture(GL_TEXTURE_2D, interfaceTexture);
+    glBindVertexArray(lap_VAO);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    glUniform3f(lightMinLoc, 0.0, 0.0, 0.0);
+    //-------------------------------------------------
+    firstTime = false;
+
+    // Restore the model view matrix
+    glPopMatrix();
+
+    // Restore the projection matrix
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+
+    // Re-enable depth testing and lighting
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_LIGHTING);
+
+    // Switch back to model view matrix mode
+    glMatrixMode(GL_MODELVIEW);
+}
+
+GLuint createHairyEllipsoid(const float R, const float G, const float B)
+{
     constexpr float hair_R = 8.0;
-    th0 = 90.0;
-    th1 = 180.0;
+    constexpr float th0 = 90.0;
+    constexpr float th1 = 180.0;
     return create_curved_cylinder_x(3.0,
                                     0.0,
                                     hair_R,
@@ -14,67 +142,63 @@ unsigned int createHairyEllipsoid(const float R, const float G, const float B)
                                     20, 4);
 }
 
-void drawHairyEllipsoid(const unsigned int VAO,
-                        glm::mat4 std_model, glm::mat4 std_normal,
-                        const unsigned int modelLoc, const unsigned int normalLoc,
+void drawHairyEllipsoid(const GLuint VAO,
+                        const glm::mat4& std_model, const glm::mat4& std_normal,
+                        const GLint modelLoc, const GLint normalLoc,
                         const float a, const float b, const float c,
                         const int slices)
 {
-    glm::mat4 model = glm::mat4(1.0f);
-    glm::mat4 normal = glm::mat4(1.0f);
-    float w1, angle, x0, y0, z0, x1, y1, z1, xb, yb, zb;
-    float cos_angle, sin_angle, hair_theta, hair_R;
-    float mag, a0, a1, b0, b1, th0, th1, c_th0, s_th0;
+    auto model = glm::mat4(1.0f);
+    auto normal = glm::mat4(1.0f);
     float C[3];
-    int i, j, dj = 0, di = 3;
-    hair_R = 8.0;
-    th0 = 90.0;
-    th1 = 180.0;
-    c_th0 = cosf(th0 * (PI / 180.0f));
-    s_th0 = sinf(th0 * (PI / 180.0f));
+    int dj = 0;
+    constexpr float th0 = 90.0;
+    const float c_th0 = cosf(th0 * (PI / 180.0f));
+    const float s_th0 = sinf(th0 * (PI / 180.0f));
 
-    for (i = 1; i < static_cast<int>(0.8 * slices + 0.5); i++)
+    for (int i = 1; i < static_cast<int>(0.8 * slices + 0.5); i++)
     {
-        if (i % di != 0)
+        if (constexpr int di = 3; i % di != 0)
             continue;
         const float w0 = static_cast<float>(i) / static_cast<float>(slices);
         const float w1 = static_cast<float>(i + 1) / static_cast<float>(slices);
 
-        z0 = (-c) * (1.0 - w0) + c * w0;
-        z1 = (-c) * (1.0 - w1) + c * w1;
+        const float z0 = -c * (1.0 - w0) + c * w0;
+        const float z1 = -c * (1.0 - w1) + c * w1;
 
-        b0 = sqrtf(b * b * (1.0 - (z0 * z0) / (c * c)));
-        b1 = sqrtf(b * b * (1.0 - (z1 * z1) / (c * c)));
+        const float b0 = sqrtf(b * b * (1.0 - z0 * z0 / (c * c)));
+        const float b1 = sqrtf(b * b * (1.0 - z1 * z1 / (c * c)));
 
-        a0 = sqrtf(a * a * (1.0 - (z0 * z0) / (c * c)));
-        a1 = sqrtf(a * a * (1.0 - (z1 * z1) / (c * c)));
+        const float a0 = sqrtf(a * a * (1.0 - z0 * z0 / (c * c)));
+        const float a1 = sqrtf(a * a * (1.0 - z1 * z1 / (c * c)));
 
         if (dj == 0)
             dj = 10;
         else
             dj = 0;
 
-        for (j = dj; j <= 360; j += 20)
+        for (int j = dj; j <= 360; j += 20)
         {
-            angle = static_cast<double>(j) * (PI / 180.0f);
-            cos_angle = cosf(angle);
-            sin_angle = sinf(angle);
-            x0 = a0 * cos_angle;
-            y0 = b0 * sin_angle;
-            x1 = a1 * cos_angle;
-            y1 = b1 * sin_angle;
+            constexpr float hair_R = 8.0;
+            const float angle = PI / 180.0f * static_cast<double>(j);
+            const float cos_angle = cosf(angle);
+            const float sin_angle = sinf(angle);
+            const float x0 = a0 * cos_angle;
+            const float y0 = b0 * sin_angle;
+            const float x1 = a1 * cos_angle;
+            const float y1 = b1 * sin_angle;
 
-            C[0] = (2.0 * x0) / (a * a); // b0*cos_angle;
-            C[1] = (2.0 * y0) / (b * b); // y0;
-            C[2] = (2.0 * z0) / (c * c); // b0*cos_angle;
-            mag = magnitude(C);
+            C[0] = 2.0 * x0 / (a * a); // b0*cos_angle;
+            C[1] = 2.0 * y0 / (b * b); // y0;
+            C[2] = 2.0 * z0 / (c * c); // b0*cos_angle;
+            float mag = magnitude(C);
             C[0] /= mag;
             C[1] /= mag;
             C[2] /= mag;
             // glNormal3f(C[0], C[1], C[2]);
             // glVertex3f( x0, y0, z0 );
 
-            hair_theta = -(atan2f(x0, -z0) * (180.0f / PI)) / 2.0;
+            const float hair_theta = -(atan2f(x0, -z0) * (180.0f / PI)) / 2.0;
             // hair_theta = -60;
             // hair_theta = 0;
 
@@ -92,9 +216,9 @@ void drawHairyEllipsoid(const unsigned int VAO,
             glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
             draw_curved_cylinder_x(VAO, 20, 4);
 
-            C[0] = (2.0 * x1) / (a * a); // b1*cos_angle;
-            C[1] = (2.0 * y1) / (b * b); // y1;
-            C[2] = (2.0 * z1) / (c * c); // b1*cos_angle;
+            C[0] = 2.0 * x1 / (a * a); // b1*cos_angle;
+            C[1] = 2.0 * y1 / (b * b); // y1;
+            C[2] = 2.0 * z1 / (c * c); // b1*cos_angle;
             mag = magnitude(C);
             C[0] /= mag;
             C[1] /= mag;
@@ -107,18 +231,16 @@ void drawHairyEllipsoid(const unsigned int VAO,
 
 void drawFluffyProfessorSkin(Position pos,
                              const float a, const float b, const float c,
-                             const unsigned int modelLoc,
-                             const unsigned int normalLoc,
+                             const GLint modelLoc,
+                             const GLint normalLoc,
                              const glm::mat4& std_model,
                              const glm::mat4& std_normal,
                              float deltaTime)
 {
     static bool firstTime = true;
-    glm::mat4 model;
-    glm::mat4 normal;
     const float thickness = b * 0.04;
     //------------Glasses:--------------------------
-    static unsigned int glasses_VAO[4];
+    static GLuint glasses_VAO[4];
     if (firstTime)
     {
         glasses_VAO[0] = create_curved_cylinder_x(thickness, thickness, b * 0.2,
@@ -138,8 +260,8 @@ void drawFluffyProfessorSkin(Position pos,
                                                   0.0, 0.0, 0.5,
                                                   20, 4);
     }
-    normal = std_normal;
-    model = std_model;
+    auto normal = std_normal;
+    auto model = std_model;
     model = translate(model, glm::vec3(0.0, b * 0.15, c * 1.05));
     model = rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
     normal = rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
@@ -203,7 +325,7 @@ void drawFluffyProfessorSkin(Position pos,
     glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_x(glasses_VAO[3], 20, 4);
     //------------Moustache:------------------------
-    static unsigned int moustache_VAO[2];
+    static GLuint moustache_VAO[2];
     if (firstTime)
     {
         moustache_VAO[0] = create_curved_cylinder_x(0.0, b * 0.1, b * 0.3,
@@ -247,7 +369,7 @@ void drawFluffyProfessorSkin(Position pos,
     glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(moustache_VAO[1], 10);
     //----------------------------------------------
-    static unsigned int top_hat_VAO[4];
+    static GLuint top_hat_VAO[4];
     if (firstTime)
     {
         top_hat_VAO[0] = create_cylinder_z(0.4 * b, 0.4 * b,
@@ -293,22 +415,20 @@ void drawFluffyProfessorSkin(Position pos,
 
 void drawFluffyBody(const Position pos,
                     const float a, const float b, const float c,
-                    const unsigned int modelLoc,
-                    const unsigned int normalLoc,
-                    glm::mat4 std_model,
-                    glm::mat4 std_normal,
+                    const GLint modelLoc,
+                    const GLint normalLoc,
+                    const glm::mat4& std_model,
+                    const glm::mat4& std_normal,
                     const float deltaTime,
-                    const unsigned int texture,
-                    const unsigned int skin)
+                    const GLuint texture,
+                    const GLuint skin)
 {
     static bool firstTime = true;
-    glm::mat4 model;
-    glm::mat4 normal;
-    static float eye_angle = -10.0; // Intervalo: [-10.0, -80.0]
-    static float eye_angle_step = 150.0 * deltaTime;
+    static float eye_angle = -10.0;
+    static float eye_angle_step = deltaTime * 150.0;
     eye_angle_step = SIGN(eye_angle_step) * 150.0 * deltaTime;
     //------------Body hair:--------------------------
-    static unsigned int hair_VAO;
+    static GLuint hair_VAO;
     if (firstTime)
         hair_VAO = createHairyEllipsoid(1.0, 1.0, 1.0);
 
@@ -324,7 +444,7 @@ void drawFluffyBody(const Position pos,
                        a, b, c,
                        40);
     //------------Body and mouth:---------------------------
-    static unsigned int body_VAO[4];
+    static GLuint body_VAO[4];
     if (firstTime)
     {
         body_VAO[0] = create_ellipsoid_lune_z(a, b, c,
@@ -344,9 +464,9 @@ void drawFluffyBody(const Position pos,
                                               0.0, 0.0, 0.0,
                                               40);
     }
-    normal = std_normal;
+    auto normal = std_normal;
     normal = rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
-    model = std_model;
+    auto model = std_model;
     model = rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
     glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
@@ -355,7 +475,7 @@ void drawFluffyBody(const Position pos,
     draw_ellipsoid_lune_z(body_VAO[2], -40, -18, 40);
     draw_ellipsoid_lune_z(body_VAO[3], -40, 0, 40);
     //------------Fix cheek:-------------------------------
-    static unsigned int cheek_VAO[4];
+    static GLuint cheek_VAO[4];
     if (firstTime)
     {
         cheek_VAO[0] = create_ellipsoid_lune_z(a, c, b,
@@ -386,7 +506,7 @@ void drawFluffyBody(const Position pos,
     draw_ellipsoid_lune_z(cheek_VAO[2], 55, 65, 40);
     draw_ellipsoid_lune_z(cheek_VAO[3], 115, 125, 40);
     //------------Tuft of hair:------------------------
-    static unsigned int tuft_VAO;
+    static GLuint tuft_VAO;
     if (firstTime)
     {
         tuft_VAO = create_curved_cylinder_x(2.0, 0.0, 8.0,
@@ -420,7 +540,7 @@ void drawFluffyBody(const Position pos,
     draw_curved_cylinder_x(tuft_VAO, 20, 4);
 
     //------------Tail:--------------------------------
-    static unsigned int tail_VAO;
+    static GLuint tail_VAO;
     if (firstTime)
         tail_VAO = create_ellipsoid(b * 0.30, b * 0.30, b * 0.30,
                                     1.0, 1.0, 1.0,
@@ -432,7 +552,7 @@ void drawFluffyBody(const Position pos,
     glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(tail_VAO, 10);
     //------------Eyebrow:-----------------------------
-    static unsigned int eyebrow_VAO[2];
+    static GLuint eyebrow_VAO[2];
     if (firstTime)
         eyebrow_VAO[0] = create_ellipsoid(b * 0.25, b * 0.15, b * 0.15,
                                           1.0, 1.0, 1.0,
@@ -463,14 +583,12 @@ void drawFluffyBody(const Position pos,
     glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(eyebrow_VAO[1], 10);
     //------------Eyes:--------------------------------
-    static unsigned int eyes_VAO[2];
+    static GLuint eyes_VAO[2];
     constexpr int eye_opening = 180;
-    int angle_r1, angle_r2;
-    int angle_l1, angle_l2;
-    angle_r1 = 270 - eye_opening / 2;
-    angle_r2 = 270 + eye_opening / 2;
-    angle_l1 = 270 + eye_opening / 2 - 360;
-    angle_l2 = 270 - eye_opening / 2;
+    constexpr int angle_r1 = 270 - eye_opening / 2;
+    constexpr int angle_r2 = 270 + eye_opening / 2;
+    constexpr int angle_l1 = 270 + eye_opening / 2 - 360;
+    constexpr int angle_l2 = 270 - eye_opening / 2;
     if (firstTime)
     {
         eyes_VAO[0] = create_ellipsoid_lune_z(b * 0.45, b * 0.45, b * 0.45,
@@ -494,7 +612,6 @@ void drawFluffyBody(const Position pos,
     draw_ellipsoid_lune_z(eyes_VAO[0], angle_r1, angle_r2, 10);
     draw_ellipsoid_lune_z(eyes_VAO[1], angle_l1, angle_l2, 10);
 
-    // Intervalo: [-10.0, -80.0]
     eye_angle += eye_angle_step;
     if (eye_angle < -80.0)
     {
@@ -507,7 +624,7 @@ void drawFluffyBody(const Position pos,
         eye_angle_step = -eye_angle_step;
     }
     //------------Nose:--------------------------------
-    static unsigned int nose_VAO;
+    static GLuint nose_VAO;
     if (firstTime)
         nose_VAO = create_ellipsoid(b * 0.20, b * 0.10, b * 0.15,
                                     0.0, 0.0, 0.0,
@@ -524,19 +641,18 @@ void drawFluffyBody(const Position pos,
 
 void drawFluffyNormal(const Position pos,
                       const float playerAngle,
-                      const unsigned int shaderProgram,
+                      const GLuint shaderProgram,
                       const float deltaTime,
                       bool restart,
-                      const unsigned int texture,
-                      const unsigned int skin)
+                      const GLuint texture,
+                      const GLuint skin)
 {
     float constexpr d = 60.0;
-    float a, b, c;
     static bool firstTime = true;
     auto model = glm::mat4(1.0f);
-    unsigned int const modelLoc = glGetUniformLocation(shaderProgram, "model");
+    GLint const modelLoc = glGetUniformLocation(shaderProgram, "model");
     auto normal = glm::mat4(1.0f);
-    unsigned int const normalLoc = glGetUniformLocation(shaderProgram, "normal");
+    GLint const normalLoc = glGetUniformLocation(shaderProgram, "normal");
 
     auto std_model = glm::mat4(1.0f);
     std_model = translate(std_model, glm::vec3(pos.x() * d, pos.y() * d, pos.z() * d));
@@ -545,14 +661,14 @@ void drawFluffyNormal(const Position pos,
     auto std_normal = glm::mat4(1.0f);
     std_normal = rotate(std_normal, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
-    a = 0.8 * d / 2.0;
-    b = d / 2.0;
-    c = 0.8 * d / 2.0;
+    constexpr float a = 0.8 * d / 2.0;
+    constexpr float b = d / 2.0;
+    constexpr float c = 0.8 * d / 2.0;
     //------------Body:------------------------------
     drawFluffyBody(pos, a, b, c, modelLoc, normalLoc, std_model,
                    std_normal, deltaTime, texture, skin);
     //------------Feet:------------------------------
-    static unsigned int feet_VAO[2];
+    static GLuint feet_VAO[2];
     if (firstTime)
     {
         feet_VAO[0] = create_ellipsoid_lune_z(a * 0.30, b * 0.10, c * 0.70,
@@ -575,7 +691,7 @@ void drawFluffyNormal(const Position pos,
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
     draw_ellipsoid_lune_z(feet_VAO[1], 0, 180, 40);
     //------------Hands:------------------------------
-    static unsigned int hands_VAO[6];
+    static GLuint hands_VAO[6];
     //------------Left hand:--------------------------
     if (firstTime)
         hands_VAO[0] = create_ellipsoid(a * 0.15, b * 0.30, c * 0.40,
@@ -649,19 +765,19 @@ void drawFluffyNormal(const Position pos,
 }
 
 void drawFluffyWalk(const Position pos,
-                    const unsigned int shaderProgram,
+                    const GLuint shaderProgram,
                     const float deltaTime,
                     const bool restart,
                     const float playerAngle,
-                    const unsigned int texture,
-                    const unsigned int skin)
+                    const GLuint texture,
+                    const GLuint skin)
 {
-    float d = 60.0, a, b, c;
+    constexpr float d = 60.0;
     static bool firstTime = true;
-    glm::mat4 model = glm::mat4(1.0f);
-    const unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
-    glm::mat4 normal = glm::mat4(1.0f);
-    const unsigned int normalLoc = glGetUniformLocation(shaderProgram, "normal");
+    auto model = glm::mat4(1.0f);
+    const GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
+    auto normal = glm::mat4(1.0f);
+    const GLint normalLoc = glGetUniformLocation(shaderProgram, "normal");
     static float foot_angle = 0.0;
     static float foot_angle_step = 300.0 * deltaTime;
     foot_angle_step = SIGN(foot_angle_step) * 300.0 * deltaTime;
@@ -671,21 +787,21 @@ void drawFluffyWalk(const Position pos,
         foot_angle = 0.0;
     }
 
-    glm::mat4 std_model = glm::mat4(1.0f);
+    auto std_model = glm::mat4(1.0f);
     std_model = translate(std_model, glm::vec3(pos.x() * d, pos.y() * d, pos.z() * d));
     std_model = rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
-    glm::mat4 std_normal = glm::mat4(1.0f);
+    auto std_normal= glm::mat4(1.0f);
     std_normal = rotate(std_normal, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
-    a = 0.8 * d / 2.0;
-    b = d / 2.0;
-    c = 0.8 * d / 2.0;
+    constexpr float a = 0.8 * d / 2.0;
+    constexpr float b = d / 2.0;
+    constexpr float c = 0.8 * d / 2.0;
     //------------Body:------------------------------
     drawFluffyBody(pos, a, b, c, modelLoc, normalLoc, std_model,
                    std_normal, deltaTime, texture, skin);
     //------------Feet:------------------------------
-    static unsigned int feet_VAO[2];
+    static GLuint feet_VAO[2];
     if (firstTime)
     {
         feet_VAO[0] = create_ellipsoid_lune_z(a * 0.30, b * 0.10, c * 0.70,
@@ -728,7 +844,7 @@ void drawFluffyWalk(const Position pos,
     }
 
     //------------Hands:------------------------------
-    static unsigned int hands_VAO[6];
+    static GLuint hands_VAO[6];
     //------------Left hand:--------------------------
     if (firstTime)
         hands_VAO[0] = create_ellipsoid(a * 0.15, b * 0.30, c * 0.40,
@@ -802,19 +918,19 @@ void drawFluffyWalk(const Position pos,
 }
 
 void drawFluffyPush(const Position pos,
-                    const unsigned int shaderProgram,
+                    const GLuint shaderProgram,
                     const float deltaTime,
                     const bool restart,
                     const float playerAngle,
-                    const unsigned int texture,
-                    const unsigned int skin)
+                    const GLuint texture,
+                    const GLuint skin)
 {
-    float d = 60.0, a, b, c;
+    constexpr float d = 60.0;
     static bool firstTime = true;
-    glm::mat4 model = glm::mat4(1.0f);
-    const unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
-    glm::mat4 normal = glm::mat4(1.0f);
-    const unsigned int normalLoc = glGetUniformLocation(shaderProgram, "normal");
+    auto model = glm::mat4(1.0f);
+    const GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
+    auto normal = glm::mat4(1.0f);
+    const GLint normalLoc = glGetUniformLocation(shaderProgram, "normal");
     static float length_forearm = 0.0;
     static float step_forearm = 5.0 * deltaTime;
     step_forearm = SIGN(step_forearm) * 5.0 * deltaTime;
@@ -824,21 +940,21 @@ void drawFluffyPush(const Position pos,
         length_forearm = 0.0;
     }
 
-    glm::mat4 std_model = glm::mat4(1.0f);
+    auto std_model = glm::mat4(1.0f);
     std_model = translate(std_model, glm::vec3(pos.x() * d, pos.y() * d, pos.z() * d));
     std_model = rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
-    glm::mat4 std_normal = glm::mat4(1.0f);
+    auto std_normal= glm::mat4(1.0f);
     std_normal = rotate(std_normal, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
-    a = 0.8 * d / 2.0;
-    b = d / 2.0;
-    c = 0.8 * d / 2.0;
+    constexpr float a = 0.8 * d / 2.0;
+    constexpr float b = d / 2.0;
+    constexpr float c = 0.8 * d / 2.0;
     //------------Body:------------------------------
     drawFluffyBody(pos, a, b, c, modelLoc, normalLoc,
                    std_model, std_normal, deltaTime, texture, skin);
     //------------Feet:------------------------------
-    static unsigned int feet_VAO[2];
+    static GLuint feet_VAO[2];
     if (firstTime)
     {
         feet_VAO[0] = create_ellipsoid_lune_z(a * 0.30, b * 0.10, c * 0.70,
@@ -861,9 +977,9 @@ void drawFluffyPush(const Position pos,
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
     draw_ellipsoid_lune_z(feet_VAO[1], 0, 180, 40);
     //------------Hands:------------------------------
-    static unsigned int hands_VAO[6];
+    static GLuint hands_VAO[6];
     //------------Left arm:---------------------------
-    static unsigned int lArmVAO;
+    static GLuint lArmVAO;
     if (firstTime)
         lArmVAO = create_curved_cylinder_y(3.0, 3.0,
                                             0.27 * d / 2.0, 90.0, 180.0,
@@ -874,7 +990,7 @@ void drawFluffyPush(const Position pos,
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
     draw_curved_cylinder_y(lArmVAO, 20, 4);
     //------------Left forearm:-----------------------
-    static unsigned int lForeArmVAO;
+    static GLuint lForeArmVAO;
     if (firstTime)
         lForeArmVAO = create_cylinder_z(3.0, 3.0,
                                          0, d / 2.0,
@@ -897,7 +1013,7 @@ void drawFluffyPush(const Position pos,
                                         40);
     normal = std_normal;
     model = std_model;
-    model = translate(model, glm::vec3(a * 0.95, 0.0, c * 0.75 + (d / 2.0) * length_forearm));
+    model = translate(model, glm::vec3(a * 0.95, 0.0, c * 0.75 + d / 2.0 * length_forearm));
     model = rotate(model, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
     model = rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
     normal = rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
@@ -928,7 +1044,7 @@ void drawFluffyPush(const Position pos,
     glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[2], 40);
     //------------Right arm:---------------------------
-    static unsigned int rArmVAO;
+    static GLuint rArmVAO;
     if (firstTime)
         rArmVAO = create_curved_cylinder_y(3.0, 3.0,
                                             0.27 * d / 2.0, 180.0, 270.0,
@@ -941,7 +1057,7 @@ void drawFluffyPush(const Position pos,
     glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_y(rArmVAO, 20, 4);
     //------------Right forearm:-----------------------
-    static unsigned int rForeArmVAO;
+    static GLuint rForeArmVAO;
     if (firstTime)
         rForeArmVAO = create_cylinder_z(3.0, 3.0,
                                          0, d / 2.0,
@@ -964,7 +1080,7 @@ void drawFluffyPush(const Position pos,
                                         40);
     normal = std_normal;
     model = std_model;
-    model = translate(model, glm::vec3(-a * 0.95, 0.0, c * 0.75 + (d / 2.0) * length_forearm));
+    model = translate(model, glm::vec3(-a * 0.95, 0.0, c * 0.75 + d / 2.0 * length_forearm));
     model = rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 0.0, 1.0));
     model = rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
     normal = rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 0.0, 1.0));
@@ -1011,23 +1127,22 @@ void drawFluffyPush(const Position pos,
 }
 
 void drawFluffyPull(const Position pos,
-                    const unsigned int shaderProgram,
+                    const GLuint shaderProgram,
                     const float deltaTime,
                     const bool restart,
                     const float playerAngle,
-                    const unsigned int texture,
-                    const unsigned int skin)
+                    const GLuint texture,
+                    const GLuint skin)
 {
-    float d = 60.0, a, b, c;
+    constexpr float d = 60.0;
     static bool firstTime = true;
-    glm::mat4 model = glm::mat4(1.0f);
-    const unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
-    glm::mat4 normal = glm::mat4(1.0f);
-    const unsigned int normalLoc = glGetUniformLocation(shaderProgram, "normal");
+    auto model = glm::mat4(1.0f);
+    const GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
+    auto normal = glm::mat4(1.0f);
+    const GLint normalLoc = glGetUniformLocation(shaderProgram, "normal");
     static float length_forearm = 0.3;
-    static float step_forearm = 0.0;
     static float foot_angle = 0.0;
-    static float foot_angle_step = 300.0 * deltaTime;
+    static float foot_angle_step = deltaTime * 300.0;
     foot_angle_step = SIGN(foot_angle_step) * 300.0 * deltaTime;
 
     if (restart)
@@ -1035,21 +1150,21 @@ void drawFluffyPull(const Position pos,
         foot_angle = 0.0;
     }
 
-    glm::mat4 std_model = glm::mat4(1.0f);
+    auto std_model = glm::mat4(1.0f);
     std_model = translate(std_model, glm::vec3(pos.x() * d, pos.y() * d, pos.z() * d));
     std_model = rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
-    glm::mat4 std_normal = glm::mat4(1.0f);
+    auto std_normal= glm::mat4(1.0f);
     std_normal = rotate(std_normal, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
-    a = 0.8 * d / 2.0;
-    b = d / 2.0;
-    c = 0.8 * d / 2.0;
+    constexpr float a = 0.8 * d / 2.0;
+    constexpr float b = d / 2.0;
+    constexpr float c = 0.8 * d / 2.0;
     //------------Body:------------------------------
     drawFluffyBody(pos, a, b, c, modelLoc, normalLoc, std_model,
                    std_normal, deltaTime, texture, skin);
     //------------Feet:------------------------------
-    static unsigned int feet_VAO[2];
+    static GLuint feet_VAO[2];
     if (firstTime)
     {
         feet_VAO[0] = create_ellipsoid_lune_z(a * 0.30, b * 0.10, c * 0.70,
@@ -1092,9 +1207,9 @@ void drawFluffyPull(const Position pos,
     }
 
     //------------Hands:------------------------------
-    static unsigned int hands_VAO[6];
+    static GLuint hands_VAO[6];
     //------------Left arm:---------------------------
-    static unsigned int lArmVAO;
+    static GLuint lArmVAO;
     if (firstTime)
         lArmVAO = create_curved_cylinder_y(3.0, 3.0,
                                             0.27 * d / 2.0, 90.0, 180.0,
@@ -1107,7 +1222,7 @@ void drawFluffyPull(const Position pos,
     glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_y(lArmVAO, 20, 4);
     //------------Left forearm:-----------------------
-    static unsigned int lForeArmVAO;
+    static GLuint lForeArmVAO;
     if (firstTime)
         lForeArmVAO = create_cylinder_z(3.0, 3.0,
                                          0, d / 2.0,
@@ -1130,7 +1245,7 @@ void drawFluffyPull(const Position pos,
                                         40);
     normal = std_normal;
     model = std_model;
-    model = translate(model, glm::vec3(a * 1.15, -b * 0.05, c * 0.75 + (d / 2.0) * length_forearm));
+    model = translate(model, glm::vec3(a * 1.15, -b * 0.05, c * 0.75 + d / 2.0 * length_forearm));
     model = rotate(model, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
     model = rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
     model = rotate(model, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
@@ -1164,7 +1279,7 @@ void drawFluffyPull(const Position pos,
     glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[2], 40);
     //------------Right arm:---------------------------
-    static unsigned int rArmVAO;
+    static GLuint rArmVAO;
     if (firstTime)
         rArmVAO = create_curved_cylinder_y(3.0, 3.0,
                                             0.27 * d / 2.0, 180.0, 270.0,
@@ -1177,7 +1292,7 @@ void drawFluffyPull(const Position pos,
     glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_y(rArmVAO, 20, 4);
     //------------Right forearm:-----------------------
-    static unsigned int rForeArmVAO;
+    static GLuint rForeArmVAO;
     if (firstTime)
         rForeArmVAO = create_cylinder_z(3.0, 3.0,
                                          0, d / 2.0,
@@ -1200,7 +1315,7 @@ void drawFluffyPull(const Position pos,
                                         40);
     normal = std_normal;
     model = std_model;
-    model = translate(model, glm::vec3(-a * 1.15, -b * 0.05, c * 0.75 + (d / 2.0) * length_forearm));
+    model = translate(model, glm::vec3(-a * 1.15, -b * 0.05, c * 0.75 + d / 2.0 * length_forearm));
     model = rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 0.0, 1.0));
     model = rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
     model = rotate(model, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
@@ -1238,28 +1353,28 @@ void drawFluffyPull(const Position pos,
 }
 
 void drawTrack(const Position pos,
-               const unsigned int shaderProgram,
+               const GLuint shaderProgram,
                float deltaTime,
                float playerAngle,
-               const unsigned int texture)
+               const GLuint texture)
 {
     constexpr float d = 60.0;
     static bool firstTime = true;
-    glm::mat4 model = glm::mat4(1.0f);
-    const unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
-    glm::mat4 normal = glm::mat4(1.0f);
-    const unsigned int normalLoc = glGetUniformLocation(shaderProgram, "normal");
-    const unsigned int lightMinLoc = glGetUniformLocation(shaderProgram, "lightMin");
+    auto model = glm::mat4(1.0f);
+    const GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
+    auto normal = glm::mat4(1.0f);
+    const GLint normalLoc = glGetUniformLocation(shaderProgram, "normal");
+    const GLint lightMinLoc = glGetUniformLocation(shaderProgram, "lightMin");
     glUniform3f(lightMinLoc, 1.0, 1.0, 1.0);
 
-    glm::mat4 std_model = glm::mat4(1.0f);
+    auto std_model = glm::mat4(1.0f);
     std_model = translate(std_model, glm::vec3(0.0 * d, pos.y() * d, 0.0 * d));
     // std_model = glm::rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
-    constexpr glm::mat4 std_normal = glm::mat4(1.0f);
+    constexpr auto std_normal= glm::mat4(1.0f);
     // std_normal = glm::rotate(std_normal, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
     //-------------------------------------------------
-    static unsigned int track_VAO;
+    static GLuint track_VAO;
     if (firstTime)
         track_VAO = createSquareY(d * 50.0, d * 50.0,
                                     1.0, 1.0, 1.0);
@@ -1278,25 +1393,25 @@ void drawTrack(const Position pos,
 }
 
 void drawBackground(const Position pos,
-                    const unsigned int shaderProgram,
+                    const GLuint shaderProgram,
                     float deltaTime,
-                    const unsigned int texture)
+                    const GLuint texture)
 {
     constexpr float d = 60.0;
     static bool firstTime = true;
-    glm::mat4 model = glm::mat4(1.0f);
-    const unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
-    glm::mat4 normal = glm::mat4(1.0f);
-    const unsigned int normalLoc = glGetUniformLocation(shaderProgram, "normal");
-    const unsigned int lightMinLoc = glGetUniformLocation(shaderProgram, "lightMin");
+    auto model = glm::mat4(1.0f);
+    const GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
+    auto normal = glm::mat4(1.0f);
+    const GLint normalLoc = glGetUniformLocation(shaderProgram, "normal");
+    const GLint lightMinLoc = glGetUniformLocation(shaderProgram, "lightMin");
     glUniform3f(lightMinLoc, 1.0, 1.0, 1.0);
 
-    glm::mat4 std_model = glm::mat4(1.0f);
+    auto std_model = glm::mat4(1.0f);
     std_model = translate(std_model, glm::vec3(0.0 * d, pos.y() * d, 0.0 * d));
 
-    constexpr glm::mat4 std_normal = glm::mat4(1.0f);
+    constexpr auto std_normal= glm::mat4(1.0f);
     //-------------------------------------------------
-    static unsigned int background_VAO;
+    static GLuint background_VAO;
     if (firstTime)
         background_VAO = create_cylinder_y(d * 40.0,
                                            d * 40.0,
@@ -1318,32 +1433,32 @@ void drawBackground(const Position pos,
 }
 
 void drawKart(Position pos,
-              unsigned int shaderProgram,
+              GLuint shaderProgram,
               float deltaTime,
               bool restart,
               float playerAngle,
               float steeringAngle,
-              unsigned int wheelTexture,
-              unsigned int nullTexture,
-              unsigned int fluffyTexture,
-              unsigned int imeTexture,
-              unsigned int skin)
+              GLuint wheelTexture,
+              GLuint nullTexture,
+              GLuint fluffyTexture,
+              GLuint imeTexture,
+              GLuint skin)
 {
     float d = 60.0;
     static bool firstTime = true;
-    glm::mat4 model = glm::mat4(1.0f);
-    unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
-    glm::mat4 normal = glm::mat4(1.0f);
-    unsigned int normalLoc = glGetUniformLocation(shaderProgram, "normal");
+    auto model = glm::mat4(1.0f);
+    GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
+    auto normal = glm::mat4(1.0f);
+    GLint normalLoc = glGetUniformLocation(shaderProgram, "normal");
 
-    glm::mat4 std_model = glm::mat4(1.0f);
+    auto std_model = glm::mat4(1.0f);
     std_model = translate(std_model, glm::vec3(pos.x() * d, pos.y() * d + 0.20 * d, pos.z() * d + d * 0.60));
     std_model = rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
-    glm::mat4 std_normal = glm::mat4(1.0f);
+    auto std_normal= glm::mat4(1.0f);
     std_normal = rotate(std_normal, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
     //----------------wheel-----------------------
-    static unsigned int wheel_VAO[5];
+    static GLuint wheel_VAO[5];
     if (firstTime)
         wheel_VAO[0] = create_cylinder_z(d / 4.0, d / 4.0,
                                          0, d / 3.0,
@@ -1505,7 +1620,7 @@ void drawKart(Position pos,
     draw_cylinder_z(wheel_VAO[4], 15);
 
     //-----------------exhaust-----------------------------
-    static unsigned int exhaust_VAO[2];
+    static GLuint exhaust_VAO[2];
     if (firstTime)
         exhaust_VAO[0] = create_cylinder_z(d / 8.0, d / 12.0,
                                            0, d / 3.0,
@@ -1547,7 +1662,7 @@ void drawKart(Position pos,
     glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_y(exhaust_VAO[1], 40, 5);
     //-----------steering wheel--------------------
-    static unsigned int steering_VAO[2];
+    static GLuint steering_VAO[2];
     if (firstTime)
         steering_VAO[0] = create_torus_y(d / 25.0,
                                          d / 8.0,
@@ -1576,7 +1691,7 @@ void drawKart(Position pos,
     glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_cylinder_z(steering_VAO[1], 15);
     //----------------front------------------------
-    static unsigned int front_VAO[8];
+    static GLuint front_VAO[8];
     if (firstTime)
         front_VAO[0] = create_ellipsoid_lune_x(d * 0.60, d * 0.20, d * 0.20,
                                                0, 90,
@@ -1699,7 +1814,7 @@ void drawKart(Position pos,
     tex[2] = imeTexture;
     tex[3] = imeTexture;
 
-    static unsigned int side_VAO[1];
+    static GLuint side_VAO[1];
     if (firstTime)
         side_VAO[0] = create_rounded_rectangular_cuboid(d * 0.3, d * 0.3, d * 0.7,
                                                         d * 0.05,
@@ -1725,7 +1840,7 @@ void drawKart(Position pos,
     tex[2] = nullTexture;
     tex[3] = nullTexture;
 
-    static unsigned int back_VAO;
+    static GLuint back_VAO;
     if (firstTime)
         back_VAO = create_rectangular_cuboid(d * 0.6, d * 0.3, d * 0.3,
                                              1.0, 1.0, 1.0);
@@ -1737,7 +1852,7 @@ void drawKart(Position pos,
     glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_rectangular_cuboid(back_VAO, tex);
     //-----------------seat----------------------------
-    static unsigned int seat_VAO[2];
+    static GLuint seat_VAO[2];
     if (firstTime)
         seat_VAO[0] = create_curved_cylinder_y(d * 0.05, d * 0.05,
                                                d * 0.3,
@@ -1769,7 +1884,7 @@ void drawKart(Position pos,
     glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipse_sector_z(seat_VAO[1], 0, 180, 5);
     //------------------bottom-------------------------
-    static unsigned int bottom_VAO[3];
+    static GLuint bottom_VAO[3];
     if (firstTime)
         bottom_VAO[0] = create_rectangular_cuboid(d * 0.6, d * 0.1, d * 2.0,
                                                   1.0, 1.0, 1.0);
@@ -1810,39 +1925,37 @@ void drawKart(Position pos,
 }
 
 void drawFluffySeated(const Position pos,
-                      const unsigned int shaderProgram,
+                      const GLuint shaderProgram,
                       const float deltaTime,
                       bool restart,
                       const float playerAngle,
-                      const unsigned int texture,
-                      const unsigned int skin)
+                      const GLuint texture,
+                      const GLuint skin)
 {
-    float d = 60.0, a, b, c;
+    constexpr float d = 60.0;
     static bool firstTime = true;
-    glm::mat4 model = glm::mat4(1.0f);
-    const unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
-    glm::mat4 normal = glm::mat4(1.0f);
-    const unsigned int normalLoc = glGetUniformLocation(shaderProgram, "normal");
+    auto model = glm::mat4(1.0f);
+    const GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
+    auto normal = glm::mat4(1.0f);
+    const GLint normalLoc = glGetUniformLocation(shaderProgram, "normal");
     static float length_forearm = 0.3;
-    static float step_forearm = 0.0;
     static float foot_angle = -45.0;
-    static float foot_angle_step = 0.0;
 
-    glm::mat4 std_model = glm::mat4(1.0f);
+    auto std_model = glm::mat4(1.0f);
     std_model = translate(std_model, glm::vec3(pos.x() * d, pos.y() * d + 0.20 * d, pos.z() * d + d * 0.60));
     std_model = rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
-    glm::mat4 std_normal = glm::mat4(1.0f);
+    auto std_normal= glm::mat4(1.0f);
     std_normal = rotate(std_normal, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
-    a = 0.8 * d / 2.0;
-    b = d / 2.0;
-    c = 0.8 * d / 2.0;
+    constexpr float a = 0.8 * d / 2.0;
+    constexpr float b = d / 2.0;
+    constexpr float c = 0.8 * d / 2.0;
     //------------Body:------------------------------
     drawFluffyBody(pos, a, b, c, modelLoc, normalLoc, std_model,
                    std_normal, deltaTime, texture, skin);
     //------------Feet:------------------------------
-    static unsigned int feet_VAO[2];
+    static GLuint feet_VAO[2];
     if (firstTime)
     {
         feet_VAO[0] = create_ellipsoid_lune_z(a * 0.30, b * 0.10, c * 0.70,
@@ -1872,11 +1985,11 @@ void drawFluffySeated(const Position pos,
     glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid_lune_z(feet_VAO[1], 0, 180, 40);
 
-    const float R = 0.60 * d / 2.0; // 0.27*d/2.0;
+    constexpr float R = 0.60 * d / 2.0; // 0.27*d/2.0;
     //------------Hands:------------------------------
-    static unsigned int hands_VAO[6];
+    static GLuint hands_VAO[6];
     //------------Left arm:---------------------------
-    static unsigned int lArmVAO;
+    static GLuint lArmVAO;
     if (firstTime)
         lArmVAO = create_curved_cylinder_y(3.0, 3.0,
                                             R, 90.0, 180.0,
@@ -1889,7 +2002,7 @@ void drawFluffySeated(const Position pos,
     glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_y(lArmVAO, 20, 4);
     //------------Left forearm:-----------------------
-    static unsigned int lForeArmVAO;
+    static GLuint lForeArmVAO;
     if (firstTime)
         lForeArmVAO = create_curved_cylinder_y(3.0, 3.0,
                                                 R, 30.0, 90.0,
@@ -1949,7 +2062,7 @@ void drawFluffySeated(const Position pos,
     glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[2], 40);
     //------------Right arm:---------------------------
-    static unsigned int rArmVAO;
+    static GLuint rArmVAO;
     if (firstTime)
         rArmVAO = create_curved_cylinder_y(3.0, 3.0,
                                             R, 180.0, 270.0,
@@ -1962,7 +2075,7 @@ void drawFluffySeated(const Position pos,
     glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_y(rArmVAO, 20, 4);
     //------------Right forearm:-----------------------
-    static unsigned int rForeArmVAO;
+    static GLuint rForeArmVAO;
     if (firstTime)
         rForeArmVAO = create_curved_cylinder_y(3.0, 3.0,
                                                 R, 270.0, 330.0,
@@ -2022,38 +2135,38 @@ void drawFluffySeated(const Position pos,
 }
 
 void drawFluffyHang(const Position pos,
-                    const unsigned int shaderProgram,
+                    const GLuint shaderProgram,
                     const float deltaTime,
                     bool restart,
                     const float playerAngle,
-                    const unsigned int texture,
-                    const unsigned int skin)
+                    const GLuint texture,
+                    const GLuint skin)
 {
-    float d = 60.0, a, b, c;
+    constexpr float d = 60.0;
     static bool firstTime = true;
-    glm::mat4 model = glm::mat4(1.0f);
-    const unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
-    glm::mat4 normal = glm::mat4(1.0f);
-    const unsigned int normalLoc = glGetUniformLocation(shaderProgram, "normal");
+    auto model = glm::mat4(1.0f);
+    const GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
+    auto normal = glm::mat4(1.0f);
+    const GLint normalLoc = glGetUniformLocation(shaderProgram, "normal");
     static float length_forearm = 0.75;
     static float foot_angle = 25.0;
 
-    glm::mat4 std_model = glm::mat4(1.0f);
+    auto std_model = glm::mat4(1.0f);
     std_model = translate(std_model, glm::vec3(pos.x() * d, pos.y() * d, pos.z() * d));
-    std_model = translate(std_model, glm::vec3(0.0, (d / 2.0) * 0.20, 0.0));
+    std_model = translate(std_model, glm::vec3(0.0, d / 2.0 * 0.20, 0.0));
     std_model = rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
-    glm::mat4 std_normal = glm::mat4(1.0f);
+    auto std_normal= glm::mat4(1.0f);
     std_normal = rotate(std_normal, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
-    a = 0.8 * d / 2.0;
-    b = d / 2.0;
-    c = 0.8 * d / 2.0;
+    constexpr float a = 0.8 * d / 2.0;
+    constexpr float b = d / 2.0;
+    constexpr float c = 0.8 * d / 2.0;
     //------------Body:------------------------------
     drawFluffyBody(pos, a, b, c, modelLoc, normalLoc, std_model,
                    std_normal, deltaTime, texture, skin);
     //------------Feet:------------------------------
-    static unsigned int feet_VAO[2];
+    static GLuint feet_VAO[2];
     if (firstTime)
     {
         feet_VAO[0] = create_ellipsoid_lune_z(a * 0.30, b * 0.10, c * 0.70,
@@ -2083,9 +2196,9 @@ void drawFluffyHang(const Position pos,
     glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid_lune_z(feet_VAO[1], 0, 180, 40);
     //------------Hands:------------------------------
-    static unsigned int hands_VAO[6];
+    static GLuint hands_VAO[6];
     //------------Left arm:---------------------------
-    static unsigned int lArmVAO;
+    static GLuint lArmVAO;
     if (firstTime)
         lArmVAO = create_curved_cylinder_y(3.0, 3.0,
                                             0.27 * d / 2.0, 90.0, 180.0,
@@ -2102,7 +2215,7 @@ void drawFluffyHang(const Position pos,
     glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_y(lArmVAO, 20, 5);
     //------------Left forearm:-----------------------
-    static unsigned int lForeArmVAO;
+    static GLuint lForeArmVAO;
     if (firstTime)
         lForeArmVAO = create_cylinder_z(3.0, 3.0,
                                          0, d / 2.0,
@@ -2129,7 +2242,7 @@ void drawFluffyHang(const Position pos,
                                         40);
     normal = std_normal;
     model = std_model;
-    model = translate(model, glm::vec3(a * 0.95, b * 0.7, c * 0.75 + (d / 2.0) * 0.3));
+    model = translate(model, glm::vec3(a * 0.95, b * 0.7, c * 0.75 + d / 2.0 * 0.3));
     model = rotate(model, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
     model = rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
     normal = rotate(normal, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
@@ -2160,7 +2273,7 @@ void drawFluffyHang(const Position pos,
     glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[2], 40);
     //------------Right arm:---------------------------
-    static unsigned int rArmVAO;
+    static GLuint rArmVAO;
     if (firstTime)
         rArmVAO = create_curved_cylinder_y(3.0, 3.0,
                                             0.27 * d / 2.0, 180.0, 270.0,
@@ -2177,7 +2290,7 @@ void drawFluffyHang(const Position pos,
     glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_y(rArmVAO, 20, 5);
     //------------Right forearm:-----------------------
-    static unsigned int rForeArmVAO;
+    static GLuint rForeArmVAO;
     if (firstTime)
         rForeArmVAO = create_cylinder_z(3.0, 3.0,
                                          0, d / 2.0,
@@ -2204,7 +2317,7 @@ void drawFluffyHang(const Position pos,
                                         40);
     normal = std_normal;
     model = std_model;
-    model = translate(model, glm::vec3(-a * 0.95, b * 0.7, c * 0.75 + (d / 2.0) * 0.3));
+    model = translate(model, glm::vec3(-a * 0.95, b * 0.7, c * 0.75 + d / 2.0 * 0.3));
     model = rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 0.0, 1.0));
     model = rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
     normal = rotate(normal, glm::radians(-90.0f), glm::vec3(0.0, 0.0, 1.0));
@@ -2239,19 +2352,19 @@ void drawFluffyHang(const Position pos,
 }
 
 void drawFluffyHangRight(Position pos,
-                         unsigned int shaderProgram,
+                         GLuint shaderProgram,
                          float deltaTime,
                          bool restart,
                          float playerAngle,
-                         unsigned int texture,
-                         unsigned int skin)
+                         GLuint texture,
+                         GLuint skin)
 {
     float d = 60.0, a, b, c;
     static bool firstTime = true;
-    glm::mat4 model = glm::mat4(1.0f);
-    unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
-    glm::mat4 normal = glm::mat4(1.0f);
-    unsigned int normalLoc = glGetUniformLocation(shaderProgram, "normal");
+    auto model = glm::mat4(1.0f);
+    GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
+    auto normal = glm::mat4(1.0f);
+    GLint normalLoc = glGetUniformLocation(shaderProgram, "normal");
     static float length_forearm = 0.75;
     static float foot_angle = 25.0;
     static float arm_angle_left = 0.0; // 20.0;
@@ -2268,13 +2381,13 @@ void drawFluffyHangRight(Position pos,
         turn_arm = 0;
     }
 
-    glm::mat4 tmp_model = glm::mat4(1.0f);
-    glm::mat4 std_model = glm::mat4(1.0f);
+    auto tmp_model = glm::mat4(1.0f);
+    auto std_model = glm::mat4(1.0f);
     std_model = translate(std_model, glm::vec3(pos.x() * d, pos.y() * d, pos.z() * d));
-    std_model = translate(std_model, glm::vec3(0.0, (d / 2.0) * 0.20, 0.0));
+    std_model = translate(std_model, glm::vec3(0.0, d / 2.0 * 0.20, 0.0));
     std_model = rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
-    glm::mat4 std_normal = glm::mat4(1.0f);
+    auto std_normal= glm::mat4(1.0f);
     std_normal = rotate(std_normal, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
     a = 0.8 * d / 2.0;
@@ -2284,7 +2397,7 @@ void drawFluffyHangRight(Position pos,
     drawFluffyBody(pos, a, b, c, modelLoc, normalLoc, std_model,
                    std_normal, deltaTime, texture, skin);
     //------------Feet:------------------------------
-    static unsigned int feet_VAO[2];
+    static GLuint feet_VAO[2];
     if (firstTime)
     {
         feet_VAO[0] = create_ellipsoid_lune_z(a * 0.30, b * 0.10, c * 0.70,
@@ -2314,7 +2427,7 @@ void drawFluffyHangRight(Position pos,
     glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid_lune_z(feet_VAO[1], 0, 180, 40);
     //------------Hands:------------------------------
-    static unsigned int hands_VAO[6];
+    static GLuint hands_VAO[6];
 
     if (turn_arm == 0)
     {
@@ -2358,7 +2471,7 @@ void drawFluffyHangRight(Position pos,
     L_left = sqrtf(SQUARE(length_forearm * cosf(PI * 50.0 / 180.0)) + SQUARE(displacement));
     gamma_left = 180.0 * asinf(displacement / L_left) / PI - 50;
 
-    static unsigned int lArmVAO;
+    static GLuint lArmVAO;
     if (firstTime)
         lArmVAO = create_curved_cylinder_y(3.0, 3.0,
                                             0.27 * d / 2.0, 90.0, 180.0,
@@ -2377,7 +2490,7 @@ void drawFluffyHangRight(Position pos,
     glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_y(lArmVAO, 20, 5);
     //------------Left forearm:-----------------------
-    static unsigned int lForeArmVAO;
+    static GLuint lForeArmVAO;
     if (firstTime)
         lForeArmVAO = create_cylinder_z(3.0, 3.0,
                                          0, d / 2.0,
@@ -2402,7 +2515,7 @@ void drawFluffyHangRight(Position pos,
         hands_VAO[0] = create_ellipsoid(a * 0.15, b * 0.30, c * 0.40,
                                         1.0, 0.0, 0.0,
                                         40);
-    model = translate(model, glm::vec3(0.0, 0.0, (d / 2.0) * L_left));
+    model = translate(model, glm::vec3(0.0, 0.0, d / 2.0 * L_left));
     model = rotate(model, glm::radians(50.0f + gamma_left), glm::vec3(1.0, 0.0, 0.0));
     normal = rotate(normal, glm::radians(50.0f + gamma_left), glm::vec3(1.0, 0.0, 0.0));
     model = translate(model, glm::vec3(0.0, c * 0.26, a * 0.02));
@@ -2440,7 +2553,7 @@ void drawFluffyHangRight(Position pos,
     glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[2], 40);
     //------------Right arm:---------------------------
-    static unsigned int rArmVAO;
+    static GLuint rArmVAO;
     if (firstTime)
         rArmVAO = create_curved_cylinder_y(3.0, 3.0,
                                             0.27 * d / 2.0, 180.0, 270.0,
@@ -2459,7 +2572,7 @@ void drawFluffyHangRight(Position pos,
     glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_y(rArmVAO, 20, 5);
     //------------Right forearm:-----------------------
-    static unsigned int rForeArmVAO;
+    static GLuint rForeArmVAO;
     if (firstTime)
         rForeArmVAO = create_cylinder_z(3.0, 3.0,
                                          0, d / 2.0,
@@ -2484,7 +2597,7 @@ void drawFluffyHangRight(Position pos,
         hands_VAO[3] = create_ellipsoid(a * 0.15, b * 0.30, c * 0.40,
                                         1.0, 0.0, 0.0,
                                         40);
-    model = translate(model, glm::vec3(0.0, 0.0, (d / 2.0) * L_right));
+    model = translate(model, glm::vec3(0.0, 0.0, d / 2.0 * L_right));
     model = rotate(model, glm::radians(50.0f + gamma_right), glm::vec3(1.0, 0.0, 0.0));
     normal = rotate(normal, glm::radians(50.0f + gamma_right), glm::vec3(1.0, 0.0, 0.0));
     model = translate(model, glm::vec3(0.0, c * 0.26, a * 0.02));
@@ -2524,19 +2637,19 @@ void drawFluffyHangRight(Position pos,
 }
 
 void drawFluffyHangLeft(Position pos,
-                        unsigned int shaderProgram,
+                        GLuint shaderProgram,
                         float deltaTime,
                         bool restart,
                         float playerAngle,
-                        unsigned int texture,
-                        unsigned int skin)
+                        GLuint texture,
+                        GLuint skin)
 {
     float d = 60.0, a, b, c;
     static bool firstTime = true;
-    glm::mat4 model = glm::mat4(1.0f);
-    unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
-    glm::mat4 normal = glm::mat4(1.0f);
-    unsigned int normalLoc = glGetUniformLocation(shaderProgram, "normal");
+    auto model = glm::mat4(1.0f);
+    GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
+    auto normal = glm::mat4(1.0f);
+    GLint normalLoc = glGetUniformLocation(shaderProgram, "normal");
     static float length_forearm = 0.75;
     static float foot_angle = 25.0;
     static float arm_angle_left = 0.0; // 20.0;
@@ -2544,7 +2657,7 @@ void drawFluffyHangLeft(Position pos,
     static float step_arm_angle;
     static int turn_arm = 0;
     float displacement, L_proj, L_right, gamma_right, L_left, gamma_left;
-    step_arm_angle = 150.0 * deltaTime;
+    step_arm_angle = deltaTime * 150.0;
 
     if (restart)
     {
@@ -2553,13 +2666,13 @@ void drawFluffyHangLeft(Position pos,
         turn_arm = 0;
     }
 
-    glm::mat4 tmp_model = glm::mat4(1.0f);
-    glm::mat4 std_model = glm::mat4(1.0f);
+    auto tmp_model = glm::mat4(1.0f);
+    auto std_model = glm::mat4(1.0f);
     std_model = translate(std_model, glm::vec3(pos.x() * d, pos.y() * d, pos.z() * d));
-    std_model = translate(std_model, glm::vec3(0.0, (d / 2.0) * 0.20, 0.0));
+    std_model = translate(std_model, glm::vec3(0.0, d / 2.0 * 0.20, 0.0));
     std_model = rotate(std_model, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
-    glm::mat4 std_normal = glm::mat4(1.0f);
+    auto std_normal= glm::mat4(1.0f);
     std_normal = rotate(std_normal, glm::radians(playerAngle), glm::vec3(0.0, 1.0, 0.0));
 
     a = 0.8 * d / 2.0;
@@ -2569,7 +2682,7 @@ void drawFluffyHangLeft(Position pos,
     drawFluffyBody(pos, a, b, c, modelLoc, normalLoc,
                    std_model, std_normal, deltaTime, texture, skin);
     //------------Feet:------------------------------
-    static unsigned int feet_VAO[2];
+    static GLuint feet_VAO[2];
     if (firstTime)
     {
         feet_VAO[0] = create_ellipsoid_lune_z(a * 0.30, b * 0.10, c * 0.70,
@@ -2599,7 +2712,7 @@ void drawFluffyHangLeft(Position pos,
     glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid_lune_z(feet_VAO[1], 0, 180, 40);
     //------------Hands:------------------------------
-    static unsigned int hands_VAO[6];
+    static GLuint hands_VAO[6];
 
     if (turn_arm == 0)
     {
@@ -2647,7 +2760,7 @@ void drawFluffyHangLeft(Position pos,
 
     // printf("left = L: %f, gamma: %f, displacement: %f\n",L_left,gamma_left,displacement);
     //------------Left arm:---------------------------
-    static unsigned int lArmVAO;
+    static GLuint lArmVAO;
     if (firstTime)
         lArmVAO = create_curved_cylinder_y(3.0, 3.0,
                                             0.27 * d / 2.0, 90.0, 180.0,
@@ -2666,7 +2779,7 @@ void drawFluffyHangLeft(Position pos,
     glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_y(lArmVAO, 20, 5);
     //------------Left forearm:-----------------------
-    static unsigned int lForeArmVAO;
+    static GLuint lForeArmVAO;
     if (firstTime)
         lForeArmVAO = create_cylinder_z(3.0, 3.0,
                                          0, d / 2.0,
@@ -2691,7 +2804,7 @@ void drawFluffyHangLeft(Position pos,
         hands_VAO[0] = create_ellipsoid(a * 0.15, b * 0.30, c * 0.40,
                                         1.0, 0.0, 0.0,
                                         40);
-    model = translate(model, glm::vec3(0.0, 0.0, (d / 2.0) * L_left));
+    model = translate(model, glm::vec3(0.0, 0.0, d / 2.0 * L_left));
     model = rotate(model, glm::radians(50.0f + gamma_left), glm::vec3(1.0, 0.0, 0.0));
     normal = rotate(normal, glm::radians(50.0f + gamma_left), glm::vec3(1.0, 0.0, 0.0));
     model = translate(model, glm::vec3(0.0, c * 0.26, a * 0.02));
@@ -2729,7 +2842,7 @@ void drawFluffyHangLeft(Position pos,
     glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_ellipsoid(hands_VAO[2], 40);
     //------------Right arm:---------------------------
-    static unsigned int rArmVAO;
+    static GLuint rArmVAO;
     if (firstTime)
         rArmVAO = create_curved_cylinder_y(3.0, 3.0,
                                             0.27 * d / 2.0, 180.0, 270.0,
@@ -2748,7 +2861,7 @@ void drawFluffyHangLeft(Position pos,
     glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
     draw_curved_cylinder_y(rArmVAO, 20, 5);
     //------------Right forearm:-----------------------
-    static unsigned int rForeArmVAO;
+    static GLuint rForeArmVAO;
     if (firstTime)
         rForeArmVAO = create_cylinder_z(3.0, 3.0,
                                          0, d / 2.0,
@@ -2773,7 +2886,7 @@ void drawFluffyHangLeft(Position pos,
         hands_VAO[3] = create_ellipsoid(a * 0.15, b * 0.30, c * 0.40,
                                         1.0, 0.0, 0.0,
                                         40);
-    model = translate(model, glm::vec3(0.0, 0.0, (d / 2.0) * L_right));
+    model = translate(model, glm::vec3(0.0, 0.0, d / 2.0 * L_right));
     model = rotate(model, glm::radians(50.0f + gamma_right), glm::vec3(1.0, 0.0, 0.0));
     normal = rotate(normal, glm::radians(50.0f + gamma_right), glm::vec3(1.0, 0.0, 0.0));
     model = translate(model, glm::vec3(0.0, c * 0.26, a * 0.02));

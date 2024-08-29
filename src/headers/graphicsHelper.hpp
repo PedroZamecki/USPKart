@@ -65,9 +65,6 @@ private:
      */
     void setupOpenGL() const;
 
-    void drawWindow(const Camera* cam, GLuint shaderProgram, float deltaTime) const;
-    void drawInterface(const Camera* cam, GLuint shaderProgram, GLuint interfaceTexture);
-
     /*
      * Calculate the frames per second.
      */
