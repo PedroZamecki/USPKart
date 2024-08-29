@@ -5,7 +5,7 @@
 
 #include <glad/glad.h>
 
-#include <utils.hpp>
+#include <game/utils.hpp>
 #include <cmath>
 
 float magnitude(const float A[3]);

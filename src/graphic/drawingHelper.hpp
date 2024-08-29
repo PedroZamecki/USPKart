@@ -3,13 +3,13 @@
 #ifndef DRAWING_HELPER_HPP
 #define DRAWING_HELPER_HPP
 
-#include <primitives.hpp>
+#include <graphic/primitives.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <resourceManager.hpp>
-#include <utils.hpp>
+#include <resource/resourceManager.hpp>
+#include <game/utils.hpp>
 #include <cmath>
 
 void drawWindow(int height, int width, const Camera *cam, GLuint shaderProgram, float deltaTime, const ResourceManager *rm);

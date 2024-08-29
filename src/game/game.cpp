@@ -1,5 +1,5 @@
 ﻿#define SDL_MAIN_HANDLED
-#include <game.hpp>
+#include "game.hpp"
 
 Game::Game(): config(new Configuration), window(), data()
 {

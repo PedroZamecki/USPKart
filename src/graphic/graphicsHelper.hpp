@@ -14,10 +14,10 @@
 
 #include <string>
 
-#include <config.hpp>
-#include <utils.hpp>
-#include <drawingHelper.hpp>
-#include <resourceManager.hpp>
+#include <game/config.hpp>
+#include <game/utils.hpp>
+#include <graphic/drawingHelper.hpp>
+#include <resource/resourceManager.hpp>
 
 class GraphicsHelper
 {

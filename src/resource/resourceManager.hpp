@@ -5,7 +5,7 @@
 
 #include <glad/glad.h>
 #include <SDL2/SDL_image.h>
-#include <utils.hpp>
+#include <game/utils.hpp>
 #include <iostream>
 #include <map>
 

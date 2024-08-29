@@ -1,4 +1,4 @@
-#include <graphicsHelper.hpp>
+#include "graphicsHelper.hpp"
 
 std::string readShader(const std::string &filename)
 {

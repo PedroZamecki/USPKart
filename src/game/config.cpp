@@ -1,4 +1,4 @@
-#include <config.hpp>
+#include "config.hpp"
 
 const auto configPath = "../config/config.json";
 

@@ -1,4 +1,4 @@
-#include <drawingHelper.hpp>
+#include "drawingHelper.hpp"
 
 void drawWindow(const int height, const int width, const Camera *cam, const GLuint shaderProgram, const float deltaTime, const ResourceManager *rm)
 {

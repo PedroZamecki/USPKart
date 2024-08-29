@@ -27,15 +27,15 @@ add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/Zc:wchar_t>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/Zc:throwingNew>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/Zc:referenceBinding>")
 
-add_executable (USPKart "resourceManager.cpp"
-                        "graphicsHelper.cpp"
-                        "drawingHelper.cpp"
-                        "primitives.cpp"
-                        "config.cpp"
-                        "utils.cpp"
-                        "game.cpp" )
+add_executable (USPKart "resource/resourceManager.cpp"
+                        "graphic/graphicsHelper.cpp"
+                        "graphic/drawingHelper.cpp"
+                        "graphic/primitives.cpp"
+                        "game/config.cpp"
+                        "game/utils.cpp"
+                        "game/game.cpp" )
                         
-target_include_directories(USPKart PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/headers ${OPENGL_INCLUDE_DIR})
+target_include_directories(USPKart PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${OPENGL_INCLUDE_DIR})
 
 target_link_libraries(USPKart PRIVATE   GLEW::GLEW
                                         $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
