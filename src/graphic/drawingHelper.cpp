@@ -1,5 +1,12 @@
 #include "drawingHelper.hpp"
 
+#include <graphic/primitives.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+#include <cmath>
+
 void drawWindow(const int height, const int width, const Camera *cam, const GLuint shaderProgram, const float deltaTime, const ResourceManager *rm)
 {
     constexpr float d = 60.0;
@@ -17,7 +24,7 @@ void drawWindow(const int height, const int width, const Camera *cam, const GLui
     constexpr auto up = glm::vec3(0.0f, 1.0f, 0.0f);
 
     glm::vec3 direction;
-    direction.x = cos(glm::radians(cam->yaw)) * cos(glm::radians(cam->pitch));
+    direction.x = (cos(glm::radians(cam->yaw))) * cos(glm::radians(cam->pitch));
     direction.y = sin(glm::radians(cam->pitch));
     direction.z = sin(glm::radians(cam->yaw)) * cos(glm::radians(cam->pitch));
     const auto cameraFront = normalize(direction);

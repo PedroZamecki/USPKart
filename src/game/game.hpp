@@ -3,8 +3,6 @@
 #ifndef GAME_HPP
 #define GAME_HPP
 
-#include <iostream>
-
 #include <game/utils.hpp>
 #include <graphic/graphicsHelper.hpp>
 
@@ -18,7 +16,7 @@ class Game {
     private:
         GraphicsHelper *graphicsHelper;
         Configuration *config;
-        SDL_Window *window;
+        GLFWwindow *window;
         Data *data;
 };
 

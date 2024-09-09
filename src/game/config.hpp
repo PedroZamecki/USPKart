@@ -3,11 +3,6 @@
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
 
-#include <fstream>
-#include <sstream>
-#include <iostream>
-#include <nlohmann/json.hpp>
-
 class Configuration {
 	private:
 		int width;

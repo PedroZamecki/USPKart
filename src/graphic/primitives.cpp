@@ -1,5 +1,8 @@
 #include "primitives.hpp"
 
+#include <game/utils.hpp>
+#include <cmath>
+
 float magnitude(const float A[3])
 {
     return sqrtf(A[0] * A[0] + A[1] * A[1] + A[2] * A[2]);
