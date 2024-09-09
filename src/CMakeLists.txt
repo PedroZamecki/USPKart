@@ -7,10 +7,9 @@ find_package(glad REQUIRED)
 find_package(glm REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(nlohmann_json REQUIRED)
-find_package(SDL2 REQUIRED)
-find_package(SDL2_image REQUIRED)
-find_package(SDL2_ttf REQUIRED)
-find_package(SDL2_mixer REQUIRED)
+find_package(glfw3 CONFIG REQUIRED)
+find_package(OpenAL CONFIG REQUIRED)
+find_package(soil2 CONFIG REQUIRED)
 
 if(NOT OpenGL_FOUND)
     message(FATAL_ERROR "OpenGL not found!")
@@ -28,6 +27,7 @@ add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/Zc:throwingNew>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/Zc:referenceBinding>")
 
 add_executable (USPKart "resource/resourceManager.cpp"
+                        "controls/controlsHandler.cpp"
                         "graphic/graphicsHelper.cpp"
                         "graphic/drawingHelper.cpp"
                         "graphic/primitives.cpp"
@@ -38,10 +38,9 @@ add_executable (USPKart "resource/resourceManager.cpp"
 target_include_directories(USPKart PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${OPENGL_INCLUDE_DIR})
 
 target_link_libraries(USPKart PRIVATE   GLEW::GLEW
-                                        $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
-                                        $<IF:$<TARGET_EXISTS:SDL2_image::SDL2_image>,SDL2_image::SDL2_image,SDL2_image::SDL2_image-static>
-                                        $<IF:$<TARGET_EXISTS:SDL2_ttf::SDL2_ttf>,SDL2_ttf::SDL2_ttf,SDL2_ttf::SDL2_ttf-static>
-                                        $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>
+                                        glfw
+                                        OpenAL::OpenAL
+                                        soil2
                                         OpenGL::GL
                                         ${OPENGL_LIBRARIES}
                                         glm::glm

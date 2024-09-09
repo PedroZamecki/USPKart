@@ -5,9 +5,6 @@
 
 #include <glad/glad.h>
 
-#include <game/utils.hpp>
-#include <cmath>
-
 float magnitude(const float A[3]);
 
 unsigned int createSquareY(float sx, float sz,

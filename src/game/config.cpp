@@ -1,5 +1,10 @@
 #include "config.hpp"
 
+#include <fstream>
+#include <sstream>
+#include <iostream>
+#include <nlohmann/json.hpp>
+
 const auto configPath = "../config/config.json";
 
 void Configuration::readConfigurationFile() {

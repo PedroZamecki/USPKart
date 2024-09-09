@@ -5,18 +5,12 @@
 
 #include <glad/glad.h>
 #include <GL/gl.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
-#include <SDL2/SDL_mixer.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
+#include <GLFW/glfw3.h>
 #include <string>
 
-#include <game/config.hpp>
 #include <game/utils.hpp>
-#include <graphic/drawingHelper.hpp>
+#include <game/config.hpp>
+#include <controls/controlsHandler.h>
 #include <resource/resourceManager.hpp>
 
 class GraphicsHelper
@@ -38,7 +32,7 @@ public:
      * @param config The configuration of the window.
      * @return A pointer to the window created.
      */
-    SDL_Window *createWindow(const char* title, Configuration* configuration);
+    GLFWwindow *createWindow(const char* title, Configuration* configuration);
 
     void manageWindow();
 
@@ -46,17 +40,14 @@ private:
     Data *data;
 
     Camera *cam = new Camera();
-    SDL_GLContext glContext{};
     Configuration *config{};
     GLuint shaderProgram{};
-    SDL_Window *window{};
+    GLFWwindow *window{};
     std::string session;
     ResourceManager *rm{};
+    ControlsHandler *ch{};
 
-    TTF_Font *font{};
-    SDL_Color textColor = {255, 255, 255, 255}; // White
-
-    Uint32 startTime = 0, currentTime = 0;
+    uint32_t startTime = 0, currentTime = 0;
     float deltaTime = 0;
     unsigned int frameCount = 0, fps = 0;
 
@@ -69,8 +60,6 @@ private:
      * Calculate the frames per second.
      */
     void calculateFPS();
-
-    SDL_bool manageInputs(const SDL_Event& event) const;
 
     /*
      * Generate a shader program with the specified vertex and fragment shaders.

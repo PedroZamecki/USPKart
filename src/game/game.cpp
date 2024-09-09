@@ -1,5 +1,4 @@
-﻿#define SDL_MAIN_HANDLED
-#include "game.hpp"
+﻿#include "game.hpp"
 
 Game::Game(): config(new Configuration), window(), data()
 {
@@ -21,10 +20,9 @@ void Game::run() const
 	graphicsHelper->manageWindow();
 }
 
-int main(int argc, char** argv)
+int main()
 {
 	const auto game = new Game();
 	game->run();
 	delete game;
-	return 0;
 }
