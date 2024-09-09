@@ -14,6 +14,7 @@ private:
     std::map<std::string, char*> audio;
 
 public:
+    ResourceManager();
     ~ResourceManager();
 
     GLuint loadTexture(const char *filePath, int height, int width, const std::string& name);

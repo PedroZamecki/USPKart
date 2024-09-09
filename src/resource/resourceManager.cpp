@@ -2,6 +2,8 @@
 #include <SOIL2/SOIL2.h>
 #include <iostream>
 
+ResourceManager::ResourceManager() = default;
+
 ResourceManager::~ResourceManager()
 {
     for (auto & [fst, snd] : textures)
@@ -13,7 +15,7 @@ ResourceManager::~ResourceManager()
 
 GLuint ResourceManager::loadTexture(const char *filePath, int height, int width, const std::string& name)
 {
-    GLuint texture;
+    GLuint texture = 0;
 
     glGenTextures(1, &texture);
 

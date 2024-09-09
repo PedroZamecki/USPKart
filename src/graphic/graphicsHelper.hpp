@@ -8,17 +8,15 @@
 #include <GLFW/glfw3.h>
 #include <string>
 
-#include <game/utils.hpp>
 #include <game/config.hpp>
-#include <controls/controlsHandler.h>
-#include <resource/resourceManager.hpp>
 
 class GraphicsHelper
 {
 public:
-    explicit GraphicsHelper(Data *data);
+    GraphicsHelper();
     ~GraphicsHelper();
 
+    static GLuint loadShaders();
     /*
      * Configure the environment for the game.
      */
@@ -34,42 +32,25 @@ public:
      */
     GLFWwindow *createWindow(const char* title, Configuration* configuration);
 
-    void manageWindow();
-
-private:
-    Data *data;
-
-    Camera *cam = new Camera();
-    Configuration *config{};
-    GLuint shaderProgram{};
-    GLFWwindow *window{};
-    std::string session;
-    ResourceManager *rm{};
-    ControlsHandler *ch{};
-
-    uint32_t startTime = 0, currentTime = 0;
-    float deltaTime = 0;
-    unsigned int frameCount = 0, fps = 0;
-
-    /*
-     * Set up the OpenGL context.
-     */
-    void setupOpenGL() const;
-
-    /*
-     * Calculate the frames per second.
-     */
-    void calculateFPS();
-
     /*
      * Generate a shader program with the specified vertex and fragment shaders.
      * @param programID The ID of the shader program.
      * @param vertexShader The vertex shader.
      * @param fragmentShader The fragment shader.
      */
-    static void generateShaders(GLuint &programID, const char *vertexShader, const char *fragmentShader);
-
+    void generateShaders(GLuint &programID, const char *vertexShader, const char *fragmentShader);
     void stop() const;
+
+private:
+    Configuration *config{};
+    GLuint shaderProgram{};
+    GLFWwindow *window{};
+    std::string session;
+
+    /*
+     * Set up the OpenGL context.
+     */
+    void setupOpenGL() const;
 };
 
 #endif
