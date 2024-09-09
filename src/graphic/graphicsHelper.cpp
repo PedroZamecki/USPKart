@@ -3,6 +3,7 @@
 #include <graphic/drawingHelper.hpp>
 #include <iostream>
 #include <sstream>
+#include <vector>
 
 #include <AL/alc.h>
 #include <glm/glm.hpp>
@@ -67,7 +68,7 @@ GLuint createShaderProgram(const std::vector<GLuint> &shaders)
     return program;
 }
 
-GLuint loadShaders()
+GLuint GraphicsHelper::loadShaders()
 {
     const std::string vertexShaderSource = readShader("shaders/shader.vs");
     const std::string fragmentShaderSource = readShader("shaders/shader.fs");
@@ -119,16 +120,17 @@ void GraphicsHelper::configureEnvironment()
 #endif
 }
 
-GraphicsHelper::GraphicsHelper(Data *data): config(new Configuration)
-{
-    this->data = data;
-}
+GraphicsHelper::GraphicsHelper(): config(new Configuration) { }
 
 GraphicsHelper::~GraphicsHelper()
 {
-    delete data;
-    delete cam;
-    delete rm;
+    // Cleanup
+    glDeleteProgram(shaderProgram);
+    glfwTerminate();
+
+    // Close OpenAL
+    alcMakeContextCurrent(nullptr);
+    alcCloseDevice(alcGetContextsDevice(alcGetCurrentContext()));
 }
 
 GLFWwindow *GraphicsHelper::createWindow(const char *title, Configuration *configuration)
@@ -214,16 +216,6 @@ GLFWwindow *GraphicsHelper::createWindow(const char *title, Configuration *confi
 
     // Load audio file
 
-    // Load textures
-    rm = new ResourceManager();
-    rm->loadTexture("assets/textures/null.png", 1, 1, "null");
-    rm->loadTexture("assets/textures/kart/SNES_Donut_Plains_1.png", 1024, 1024, "track");
-    rm->loadTexture("assets/textures/kart/background.png", 256, 1024, "background");
-    rm->loadTexture("assets/textures/IME/ime_usp.png", 209, 668, "ime_usp");
-    rm->loadTexture("assets/textures/IME/fluffy_4.png", 378, 378,"fluffy");
-    rm->loadTexture("assets/textures/wheel_cap.png", 512, 512, "wheel_cap");
-
-    ch = new ControlsHandler(window);
     return window;
 }
 
@@ -253,45 +245,6 @@ void GraphicsHelper::setupOpenGL() const
 
     /* Setup our viewport. */
     glViewport(0, 0, static_cast<int>(config->getWidth()), static_cast<int>(config->getHeight()));
-}
-
-void GraphicsHelper::calculateFPS()
-{
-    frameCount++;
-    currentTime = time(nullptr);
-    deltaTime = static_cast<float>(currentTime - startTime) / 1000.0f;
-    if (deltaTime >= 1.0f)
-    {
-        fps = frameCount;
-        frameCount = 0;
-        startTime = currentTime;
-    }
-}
-
-void GraphicsHelper::manageWindow()
-{
-    startTime = time(nullptr);
-
-    // Set up the shaders
-    shaderProgram = loadShaders();
-
-    while (!glfwWindowShouldClose(window))
-    {
-        calculateFPS();
-
-        glfwPollEvents();
-
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        glUseProgram(shaderProgram);
-
-        drawWindow(config->getHeight(), config->getWidth(), cam, shaderProgram, deltaTime, rm);
-
-        drawInterface(config->getHeight(), config->getWidth(), cam, shaderProgram, rm->getTexture("track"));
-
-        glfwSwapBuffers(window);
-    }
-    stop();
 }
 
 void GraphicsHelper::generateShaders(GLuint &programID, const char *vertexShader, const char *fragmentShader)
@@ -348,15 +301,4 @@ void GraphicsHelper::generateShaders(GLuint &programID, const char *vertexShader
 
     glDeleteShader(vertexShaderID);
     glDeleteShader(fragmentShaderID);
-}
-
-void GraphicsHelper::stop() const
-{
-    // Cleanup
-    glDeleteProgram(shaderProgram);
-    glfwTerminate();
-
-    // Close OpenAL
-    alcMakeContextCurrent(nullptr);
-    alcCloseDevice(alcGetContextsDevice(alcGetCurrentContext()));
 }
