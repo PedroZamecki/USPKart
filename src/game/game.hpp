@@ -16,8 +16,8 @@ class Game {
         void run();
 
     private:
-        GraphicsHelper *graphicsHelper;
         Configuration *config;
+        GraphicsHelper *graphicsHelper;
         GLFWwindow *window;
         Data *data;
         Camera *cam;
