@@ -13,7 +13,6 @@
 class GraphicsHelper
 {
 public:
-    GraphicsHelper();
     ~GraphicsHelper();
 
     static GLuint loadShaders();
@@ -30,7 +29,8 @@ public:
      * @param config The configuration of the window.
      * @return A pointer to the window created.
      */
-    GLFWwindow *createWindow(const char* title, Configuration* configuration);
+    GLFWwindow *createWindow(const char* title,
+                             const Configuration * configuration);
 
     /*
      * Generate a shader program with the specified vertex and fragment shaders.
@@ -42,10 +42,8 @@ public:
     void stop() const;
 
 private:
-    Configuration *config{};
     GLuint shaderProgram{};
     GLFWwindow *window{};
-    std::string session;
 
     /*
      * Set up the OpenGL context.

@@ -2,10 +2,13 @@
 
 #include <graphic/drawingHelper.hpp>
 
-Game::Game(): config(new Configuration), window(), data(), cam(new Camera), rm(new ResourceManager)
-{
-	graphicsHelper = new GraphicsHelper();
-}
+Game::Game():
+	config(new Configuration),
+	graphicsHelper(new GraphicsHelper),
+	window(graphicsHelper->createWindow("USPKart v0.0.2", config)),
+	data(),
+	cam(new Camera),
+	rm(new ResourceManager) {}
 
 Game::~Game()
 {
@@ -19,7 +22,6 @@ Game::~Game()
 void Game::run() {
 	graphicsHelper->configureEnvironment();
 
-	const auto window = graphicsHelper->createWindow("USPKart v0.0.2", config);
 	ch = new ControlsHandler(window);
 
 	rm = new ResourceManager();

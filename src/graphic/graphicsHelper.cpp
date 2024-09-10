@@ -93,20 +93,19 @@ void GraphicsHelper::configureEnvironment()
 #elif __linux__
     if (const std::string sessionType = std::getenv("XDG_SESSION_TYPE"); !sessionType.empty())
     {
-        session = sessionType;
-        if (std::string(session) == "wayland")
+        if (std::string(sessionType) == "wayland")
         {
             std::cout << "Running on Linux (Wayland)" << std::endl;
             putenv(const_cast<char *>("GDK_BACKEND=wayland"));
         }
-        else if (session == "x11")
+        else if (sessionType == "x11")
         {
             std::cout << "Running on Linux (X11)" << std::endl;
             putenv(const_cast<char *>("GDK_BACKEND=x11"));
         }
         else
         {
-            std::cout << "Unknown session type: " << session << std::endl;
+            std::cout << "Unknown session type: " << sessionType << std::endl;
         }
     }
     else
@@ -120,8 +119,6 @@ void GraphicsHelper::configureEnvironment()
 #endif
 }
 
-GraphicsHelper::GraphicsHelper(): config(new Configuration) { }
-
 GraphicsHelper::~GraphicsHelper()
 {
     // Cleanup
@@ -133,14 +130,14 @@ GraphicsHelper::~GraphicsHelper()
     alcCloseDevice(alcGetContextsDevice(alcGetCurrentContext()));
 }
 
-GLFWwindow *GraphicsHelper::createWindow(const char *title, Configuration *configuration)
+GLFWwindow *GraphicsHelper::createWindow(const char *title,
+                                         const Configuration *configuration)
 {
-    config = configuration;
-    const unsigned int width = config->getWidth();
-    const unsigned int height = config->getHeight();
-    const bool resizable = config->isResizable();
-    const bool fullScreen = config->isFullScreen();
-    const bool borderless = config->isBorderless();
+    const unsigned int width = configuration->getWidth();
+    const unsigned int height = configuration->getHeight();
+    const bool resizable = configuration->isResizable();
+    const bool fullScreen = configuration->isFullScreen();
+    const bool borderless = configuration->isBorderless();
 
     if (!glfwInit())
     {
@@ -172,13 +169,15 @@ GLFWwindow *GraphicsHelper::createWindow(const char *title, Configuration *confi
         window = glfwCreateWindow(width, height, title, nullptr, nullptr);
     }
 
-    if (!window)
-    {
-        std::cerr << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
-        throw std::runtime_error("Failed to create GLFW window");
+    if (!window) {
+      std::cerr << "Failed to create GLFW window" << std::endl;
+      glfwTerminate();
+      throw std::runtime_error("Failed to create GLFW window");
     }
 
+    glfwSetWindowSizeCallback(window, [](GLFWwindow *window, int width, int height) {
+        glViewport(0, 0, width, height);
+    });
 
     glfwMakeContextCurrent(window);
     gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress));
