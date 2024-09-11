@@ -19,7 +19,7 @@ public:
     /*
      * Configure the environment for the game.
      */
-    void configureEnvironment();
+    static void configureEnvironment();
 
     /*
      * Create a window with the specified title, width, and height.
@@ -30,7 +30,7 @@ public:
      * @return A pointer to the window created.
      */
     GLFWwindow *createWindow(const char* title,
-                             const Configuration * configuration);
+                             const Configuration * c);
 
     /*
      * Generate a shader program with the specified vertex and fragment shaders.
@@ -38,17 +38,16 @@ public:
      * @param vertexShader The vertex shader.
      * @param fragmentShader The fragment shader.
      */
-    void generateShaders(GLuint &programID, const char *vertexShader, const char *fragmentShader);
-    void stop() const;
+     static void generateShaders(GLuint &programID, const char *vertexShader, const char *fragmentShader);
+
+     /*
+      * Set up the OpenGL context.
+      */
+     static void setupOpenGL(int width, int height);
 
 private:
     GLuint shaderProgram{};
     GLFWwindow *window{};
-
-    /*
-     * Set up the OpenGL context.
-     */
-    void setupOpenGL() const;
 };
 
 #endif

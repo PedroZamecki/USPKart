@@ -6,7 +6,7 @@
 #include <graphic/graphicsHelper.hpp>
 #include <game/utils.hpp>
 #include <resource/resourceManager.hpp>
-#include <controls/controlsHandler.h>
+#include <controls/controlsHandler.hpp>
 
 class Game {
     public:

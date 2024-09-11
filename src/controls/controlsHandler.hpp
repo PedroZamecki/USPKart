@@ -1,5 +1,5 @@
-#ifndef CONTROLS_HANDLER_H
-#define CONTROLS_HANDLER_H
+#ifndef CONTROLS_HANDLER_HPP
+#define CONTROLS_HANDLER_HPP
 
 #include <GLFW/glfw3.h>
 #include <functional>
@@ -10,9 +10,8 @@ public:
 	explicit ControlsHandler(GLFWwindow *window);
 	~ControlsHandler();
 
-	static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
-	void executeKeyCallback(int key, int scancode, int action, int mods) const;
-
+	void executeKeyCallback(int key, int action, int mods) const;
+	void insertKeyCallback(int key, int action, int mods, std::function<void()> callback);
 private:
 	std::map<unsigned int, std::function<void()>> keyCallbacks;
 };

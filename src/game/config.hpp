@@ -4,34 +4,38 @@
 #define CONFIG_HPP
 
 class Configuration {
-	private:
+	public:
 		int width;
 		int height;
 		bool resizable;
 		bool fullScreen;
 		bool borderless;
+		bool vsync;
+		int posX;
+		int posY;
 
-	public:
+
 		explicit Configuration(	const int width = 800,
-								const int height = 600,
-			                    const bool resizable = false,
-			                    const bool fullScreen = false,
-								const bool borderless = false) : width(width), height(height), resizable(resizable), fullScreen(fullScreen), borderless(borderless) {
+					const int height = 600,
+			                const bool resizable = false,
+			                const bool fullScreen = false,
+					const bool borderless = false,
+					const bool vsync = false,
+					const int posX = 0,
+					const int posY = 0) :
+						width(width),
+						height(height),
+						resizable(resizable),
+						fullScreen(fullScreen),
+						borderless(borderless),
+						vsync(vsync),
+						posX(posX),
+						posY(posY) {
 			readConfigurationFile();
 		}
 		~Configuration() {
 			writeConfigurationFile();
 		}
-		int getWidth() const { return width; }
-		int getHeight() const { return height; }
-		bool isResizable() const { return resizable; }
-		bool isFullScreen() const { return fullScreen; }
-		bool isBorderless() const { return borderless; }
-		void setWidth(const int width) { this->width = width; }
-		void setHeight(const int height) { this->height = height; }
-		void setResizable(const bool resizable) { this->resizable = resizable; }
-		void setFullScreen(const bool fullScreen) { this->fullScreen = fullScreen; }
-		void setBorderless(const bool borderless) { this->borderless = borderless; }
 
 		void readConfigurationFile();
 		void writeConfigurationFile();

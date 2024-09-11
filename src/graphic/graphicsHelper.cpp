@@ -88,7 +88,6 @@ GLuint GraphicsHelper::loadShaders()
 void GraphicsHelper::configureEnvironment()
 {
 #ifdef _WIN32
-    session = "windows";
     std::cout << "Running on Windows" << std::endl;
 #elif __linux__
     if (const std::string sessionType = std::getenv("XDG_SESSION_TYPE"); !sessionType.empty())
@@ -113,7 +112,6 @@ void GraphicsHelper::configureEnvironment()
         std::cout << "Variable XDG_SESSION_TYPE not defined." << std::endl;
     }
 #else
-    session = "unknown";
     std::cout << "Not running on known environment, please ask for new implementation if required" << std::endl;
     throw std::runtime_error("Unknown environment");
 #endif
@@ -126,19 +124,15 @@ GraphicsHelper::~GraphicsHelper()
     glfwTerminate();
 
     // Close OpenAL
+    ALCcontext *context = alcGetCurrentContext();
+    ALCdevice *device = alcGetContextsDevice(context);
     alcMakeContextCurrent(nullptr);
-    alcCloseDevice(alcGetContextsDevice(alcGetCurrentContext()));
+    alcDestroyContext(context);
+    alcCloseDevice(device);
 }
 
-GLFWwindow *GraphicsHelper::createWindow(const char *title,
-                                         const Configuration *configuration)
+GLFWwindow *GraphicsHelper::createWindow(const char *title, const Configuration *c)
 {
-    const unsigned int width = configuration->getWidth();
-    const unsigned int height = configuration->getHeight();
-    const bool resizable = configuration->isResizable();
-    const bool fullScreen = configuration->isFullScreen();
-    const bool borderless = configuration->isBorderless();
-
     if (!glfwInit())
     {
         std::cerr << "Failed to initialize GLFW" << std::endl;
@@ -149,24 +143,19 @@ GLFWwindow *GraphicsHelper::createWindow(const char *title,
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+    glfwWindowHint(GLFW_RESIZABLE, c->resizable);
+    glfwWindowHint(GLFW_DECORATED, !c->borderless);
 
-    if (resizable)
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-    else
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-
-    if (borderless)
-        glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
-
-    if (fullScreen)
+    if (c->fullScreen)
     {
         GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
         const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
         window = glfwCreateWindow(mode->width, mode->height, title, primaryMonitor, nullptr);
     }
+
     else
     {
-        window = glfwCreateWindow(width, height, title, nullptr, nullptr);
+        window = glfwCreateWindow(c->width, c->height, title, nullptr, nullptr);
     }
 
     if (!window) {
@@ -175,10 +164,7 @@ GLFWwindow *GraphicsHelper::createWindow(const char *title,
       throw std::runtime_error("Failed to create GLFW window");
     }
 
-    glfwSetWindowSizeCallback(window, [](GLFWwindow *window, int width, int height) {
-        glViewport(0, 0, width, height);
-    });
-
+    glfwSetWindowPos(window, c->posX, c->posY);
     glfwMakeContextCurrent(window);
     gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress));
 
@@ -188,7 +174,9 @@ GLFWwindow *GraphicsHelper::createWindow(const char *title,
               << "OpenGL vendor: " << glGetString(GL_VENDOR) << std::endl;
 
     // Set up OpenGL
-    setupOpenGL();
+    setupOpenGL(c->width, c->height);
+    // Turn on VSync if requested
+    glfwSwapInterval(c->vsync);
 
     // Initialize OpenAL
     ALCdevice *device = alcOpenDevice(nullptr);
@@ -213,21 +201,10 @@ GLFWwindow *GraphicsHelper::createWindow(const char *title,
         throw std::runtime_error("Failed to make OpenAL context current");
     }
 
-    // Load audio file
-
     return window;
 }
 
-void GraphicsHelper::setupOpenGL() const
-{
-    glfwSetWindowSizeCallback(
-        window,
-        [](GLFWwindow *window, int const width, int const height)
-        {
-            glViewport(0, 0, width, height);
-            std::cout << "Window resized to " << width << "x" << height << std::endl;
-        }
-    );
+void GraphicsHelper::setupOpenGL(const int width, const int height) {
     /*
     float ratio = static_cast<float>(config->getWidth()) / static_cast<float>(config->getHeight());
     static GLfloat lightPosition[] = {0.0f, 0.0f, 0.0f, 1.0f};
@@ -243,7 +220,7 @@ void GraphicsHelper::setupOpenGL() const
     glClearColor(1, 0.6, 0.8, 0);
 
     /* Setup our viewport. */
-    glViewport(0, 0, static_cast<int>(config->getWidth()), static_cast<int>(config->getHeight()));
+    glViewport(0, 0, width, height);
 }
 
 void GraphicsHelper::generateShaders(GLuint &programID, const char *vertexShader, const char *fragmentShader)
