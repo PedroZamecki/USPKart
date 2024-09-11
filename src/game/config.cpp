@@ -40,11 +40,14 @@ void Configuration::readConfigurationFile() {
 	nlohmann::json json = nlohmann::json::parse(buffer.str());
 	
 	// Set the configuration.
-	width = json["width"];
-	height = json["height"];
-	resizable = json["resizable"];
-	fullScreen = json["fullScreen"];
-	borderless = json["borderless"];
+	width = json.contains("width") ? static_cast<int>(json["width"]) : 800;
+	height = json.contains("height") ? static_cast<int>(json["height"]) : 600;
+	resizable = json.contains("resizable") ? static_cast<bool>(json["resizable"]) : false;
+	fullScreen = json.contains("fullScreen") ? static_cast<bool>(json["fullScreen"]) : false;
+	borderless = json.contains("borderless") ? static_cast<bool>(json["borderless"]) : false;
+	vsync = json.contains("vsync") ? static_cast<bool>(json["vsync"]) : false;
+	posX = json.contains("posX") ? static_cast<int>(json["posX"]) : 0;
+	posY = json.contains("posY") ? static_cast<int>(json["posY"]) : 0;
 
 	if (width <= 0 || height <= 0 || width > 1920*16 || height > 1080*16) {
 		std::cerr << "Invalid width or height in the configuration file" << std::endl;
@@ -62,6 +65,9 @@ void Configuration::writeConfigurationFile() {
 	json["resizable"] = resizable;
 	json["fullScreen"] = fullScreen;
 	json["borderless"] = borderless;
+	json["vsync"] = vsync;
+	json["posX"] = posX;
+	json["posY"] = posY;
 
 	std::fstream file;
 	file.open(configPath, std::ios::out);

@@ -19,11 +19,10 @@ unsigned int createSquareY(const float sx, const float sz,
         0.5f, 0.0f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
         -0.5f, 0.0f, 0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
         -0.5f, 0.0f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f};
-    int i;
-    unsigned int VAO;
+  unsigned int VAO;
     unsigned int VBO;
 
-    for (i = 0; i < 6; i++)
+    for (int i = 0; i < 6; i++)
     {
         vertices[i * 11 + 0] *= sx;
         vertices[i * 11 + 2] *= sz;
@@ -74,22 +73,19 @@ unsigned int createEllipseSectorZ(const float a, const float b,
                                   const int angle1, const int angle2,
                                   const int dangle)
 {
-    float angle, cos_angle, sin_angle;
-    float x, y, z = 0.0;
-    float *vertices;
-    int j, k, n;
-    unsigned int VAO;
+  unsigned int VAO;
     unsigned int VBO;
-    n = ((angle2 - angle1) / dangle + 2) * 11;
-    k = 0;
-    vertices = static_cast<float*>(calloc(n, sizeof(float)));
-    for (j = angle1; j <= angle2; j += dangle)
+  const int n = ((angle2 - angle1) / dangle + 2) * 11;
+    int k = 0;
+    auto *vertices = static_cast<float *>(calloc(n, sizeof(float)));
+    for (int j = angle1; j <= angle2; j += dangle)
     {
-        angle = static_cast<float>(j) * (PI / 180.0f);
-        cos_angle = cosf(angle);
-        sin_angle = sinf(angle);
-        x = a * cos_angle;
-        y = b * sin_angle;
+      constexpr float z = 0.0;
+      const float angle = PI / 180.0f * static_cast<float>(j);
+    const float cos_angle = cosf(angle);
+    const float sin_angle = sinf(angle);
+    const float x = a * cos_angle;
+    const float y = b * sin_angle;
 
         // glVertex3f( x, y, z );
         vertices[k] = x;
@@ -151,8 +147,8 @@ unsigned int createEllipseSectorZ(const float a, const float b,
     return VAO;
 }
 
-unsigned int createSquareZ(float sx, float sy,
-                 float R, float G, float B){
+unsigned int createSquareZ(const float sx, const float sy, const float R,
+                           const float G, const float B){
     float vertices[] = {
         // positions         // colors          // texture coords  //normals
         -0.5f,  -0.5f, 0.0f, 1.0f, 1.0f, 1.0f,  0.0f, 1.0f,        0.0f,  0.0f,  1.0f,
@@ -162,11 +158,10 @@ unsigned int createSquareZ(float sx, float sy,
         -0.5f,   0.5f, 0.0f, 1.0f, 1.0f, 1.0f,  0.0f, 0.0f,        0.0f,  0.0f,  1.0f,
         -0.5f,  -0.5f, 0.0f, 1.0f, 1.0f, 1.0f,  0.0f, 1.0f,        0.0f,  0.0f,  1.0f
       };
-    int i;
-    unsigned int VAO;
+  unsigned int VAO;
     unsigned int VBO;
 
-    for(i = 0; i < 6; i++){
+    for(int i = 0; i < 6; i++){
         vertices[i*11 + 0] *= sx;
         vertices[i*11 + 1] *= sy;
 
@@ -205,8 +200,7 @@ unsigned int createSquareZ(float sx, float sy,
 
 
 
-void drawSquareZ(unsigned int VAO,
-           GLuint tex){
+void drawSquareZ(const unsigned int VAO, const GLuint tex){
     glBindVertexArray(VAO);
     glBindTexture(GL_TEXTURE_2D, tex);
     glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -224,22 +218,19 @@ unsigned int create_ellipse_z(const float a, const float b,
                               const float R, const float G, const float B,
                               const int dangle)
 {
-    float angle, cos_angle, sin_angle;
-    float x, y, z = 0.0;
-    float *vertices;
-    int j, k, n;
-    unsigned int VAO;
+  constexpr float z = 0.0;
+  unsigned int VAO;
     unsigned int VBO;
-    n = (360 / dangle + 2) * 11;
-    k = 0;
-    vertices = static_cast<float*>(calloc(n, sizeof(float)));
-    for (j = 0; j <= 360; j += dangle)
+  const int n = (360 / dangle + 2) * 11;
+    int k = 0;
+    float *vertices = static_cast<float *>(calloc(n, sizeof(float)));
+    for (int j = 0; j <= 360; j += dangle)
     {
-        angle = static_cast<float>(j) * (PI / 180.0f);
-        cos_angle = cosf(angle);
-        sin_angle = sinf(angle);
-        x = a * cos_angle;
-        y = b * sin_angle;
+    const float angle = static_cast<float>(j) * (PI / 180.0f);
+    const float cos_angle = cosf(angle);
+    const float sin_angle = sinf(angle);
+    const float x = a * cos_angle;
+    const float y = b * sin_angle;
 
         // glVertex3f( x, y, z );
         vertices[k] = x;
@@ -354,11 +345,10 @@ unsigned int create_rectangular_cuboid(const float sx, const float sy, const flo
         0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
         -0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
         -0.5f, 0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f};
-    int i;
-    unsigned int VAO;
+  unsigned int VAO;
     unsigned int VBO;
 
-    for (i = 0; i < 36; i++)
+    for (int i = 0; i < 36; i++)
     {
         vertices[i * 11 + 0] *= sx;
         vertices[i * 11 + 1] *= sy;
@@ -400,9 +390,8 @@ unsigned int create_rectangular_cuboid(const float sx, const float sy, const flo
 void draw_rectangular_cuboid(const unsigned int VAO,
                              GLuint tex[6])
 {
-    int i;
-    glBindVertexArray(VAO);
-    for (i = 0; i < 6; i++)
+  glBindVertexArray(VAO);
+    for (int i = 0; i < 6; i++)
     {
         glBindTexture(GL_TEXTURE_2D, tex[i]);
         glDrawArrays(GL_TRIANGLES, i * 6, 6);
@@ -829,9 +818,8 @@ unsigned int create_rounded_rectangular_cuboid(float sx, float sy, float sz,
 void draw_rounded_rectangular_cuboid(const unsigned int VAO,
                                      GLuint tex[7])
 {
-    int i;
-    glBindVertexArray(VAO);
-    for (i = 0; i < 6; i++)
+  glBindVertexArray(VAO);
+    for (int i = 0; i < 6; i++)
     {
         glBindTexture(GL_TEXTURE_2D, tex[i]);
         glDrawArrays(GL_TRIANGLES, i * 6, 6);
@@ -849,46 +837,43 @@ unsigned int create_ellipsoid(const float a, const float b, const float c,
 {
     unsigned int VAO;
     unsigned int VBO;
-    float *vertices;
-    float w0, w1, angle, x0, y0, z0, x1, y1, z1, xb, yb, zb;
-    float cos_angle, sin_angle;
-    float mag, a0, a1, b0, b1;
+    float xb, yb, zb;
     float C[3];
     int t = 0;
-    int i, j, k, n, dangle = 1; // 2;
+    constexpr int dangle = 1; // 2;
 
-    n = slices * (360 / dangle + 1) * 2 * 11;
-    k = 0;
-    vertices = static_cast<float*>(calloc(n, sizeof(float)));
-    for (i = 0; i < slices; i++)
+    const int n = slices * (360 / dangle + 1) * 2 * 11;
+    int k = 0;
+    float *vertices = static_cast<float *>(calloc(n, sizeof(float)));
+    for (int i = 0; i < slices; i++)
     {
-        w0 = static_cast<float>(i) / static_cast<float>(slices);
-        w1 = static_cast<float>(i + 1) / static_cast<float>(slices);
+      const float w0 = static_cast<float>(i) / static_cast<float>(slices);
+      const float w1 = static_cast<float>(i + 1) / static_cast<float>(slices);
 
-        z0 = (-c) * (1.0 - w0) + c * w0;
-        z1 = (-c) * (1.0 - w1) + c * w1;
+      const float z0 = (-c) * (1.0 - w0) + c * w0;
+      const float z1 = (-c) * (1.0 - w1) + c * w1;
 
-        b0 = sqrtf(b * b * (1.0 - (z0 * z0) / (c * c)));
-        b1 = sqrtf(b * b * (1.0 - (z1 * z1) / (c * c)));
+      const float b0 = sqrtf(b * b * (1.0 - (z0 * z0) / (c * c)));
+      const float b1 = sqrtf(b * b * (1.0 - (z1 * z1) / (c * c)));
 
-        a0 = sqrtf(a * a * (1.0 - (z0 * z0) / (c * c)));
-        a1 = sqrtf(a * a * (1.0 - (z1 * z1) / (c * c)));
+      const float a0 = sqrtf(a * a * (1.0 - (z0 * z0) / (c * c)));
+      const float a1 = sqrtf(a * a * (1.0 - (z1 * z1) / (c * c)));
 
         // glBegin(GL_TRIANGLE_STRIP);
-        for (j = 0; j <= 360; j += dangle)
+        for (int j = 0; j <= 360; j += dangle)
         {
-            angle = static_cast<float>(j) * (PI / 180.0f);
-            cos_angle = cosf(angle);
-            sin_angle = sinf(angle);
-            x0 = a0 * cos_angle;
-            y0 = b0 * sin_angle;
-            x1 = a1 * cos_angle;
-            y1 = b1 * sin_angle;
+        const float angle = static_cast<float>(j) * (PI / 180.0f);
+        const float cos_angle = cosf(angle);
+        const float sin_angle = sinf(angle);
+        const float x0 = a0 * cos_angle;
+        const float y0 = b0 * sin_angle;
+        const float x1 = a1 * cos_angle;
+        const float y1 = b1 * sin_angle;
 
             C[0] = (2.0 * x0) / (a * a); // b0*cos_angle;
             C[1] = (2.0 * y0) / (b * b); // y0;
             C[2] = (2.0 * z0) / (c * c); // b0*cos_angle;
-            mag = magnitude(C);
+            float mag = magnitude(C);
             C[0] /= mag;
             C[1] /= mag;
             C[2] /= mag;
@@ -1001,11 +986,11 @@ unsigned int create_ellipsoid(const float a, const float b, const float c,
 void draw_ellipsoid(const unsigned int VAO,
                     const int slices)
 {
-    int i, k, dangle = 1; // 2;
+  constexpr int dangle = 1; // 2;
 
     glBindVertexArray(VAO);
-    k = 0;
-    for (i = 0; i < slices; i++)
+    int k = 0;
+    for (int i = 0; i < slices; i++)
     {
         glDrawArrays(GL_TRIANGLE_STRIP, k, (360 / dangle + 1) * 2);
         k += (360 / dangle + 1) * 2;
@@ -1023,46 +1008,42 @@ unsigned int create_ellipsoid_lune_cap_z(const float a, const float b, const flo
 {
     unsigned int VAO;
     unsigned int VBO;
-    float *vertices;
-    float w0, w1, angle, x0, y0, z0, x1, y1, z1, xb, yb, zb;
-    float cos_angle, sin_angle;
-    float mag, a0, a1, b0, b1;
+    float xb, yb, zb;
     float C[3];
     int t = 0;
-    int i, j, k, n;
 
-    n = slices * (angle2 - angle1 + 1) * 2 * 11;
-    k = 0;
-    vertices = static_cast<float*>(calloc(n, sizeof(float)));
-    for (i = 0; i < slices; i++)
+    const int n = slices * (angle2 - angle1 + 1) * 2 * 11;
+    int k = 0;
+    float *vertices = static_cast<float *>(calloc(n, sizeof(float)));
+    for (int i = 0; i < slices; i++)
     {
-        w0 = static_cast<float>(i) / static_cast<float>(slices);
-        w1 = static_cast<float>(i + 1) / static_cast<float>(slices);
+      const float w0 = static_cast<float>(i) / static_cast<float>(slices);
+      const float w1 = static_cast<float>(i + 1) / static_cast<float>(slices);
 
-        z0 = z_0 * (1.0 - w0) + z_1 * w0;
-        z1 = z_0 * (1.0 - w1) + z_1 * w1;
+      const float z0 = z_0 * (1.0 - w0) + z_1 * w0;
+      const float z1 = z_0 * (1.0 - w1) + z_1 * w1;
 
-        b0 = sqrtf(b * b * (1.0 - (z0 * z0) / (c * c)));
-        b1 = sqrtf(b * b * (1.0 - (z1 * z1) / (c * c)));
+      const float b0 = sqrtf(b * b * (1.0 - (z0 * z0) / (c * c)));
+      const float b1 = sqrtf(b * b * (1.0 - (z1 * z1) / (c * c)));
 
-        a0 = sqrtf(a * a * (1.0 - (z0 * z0) / (c * c)));
-        a1 = sqrtf(a * a * (1.0 - (z1 * z1) / (c * c)));
+      const float a0 = sqrtf(a * a * (1.0 - (z0 * z0) / (c * c)));
+      const float a1 = sqrtf(a * a * (1.0 - (z1 * z1) / (c * c)));
 
         // glBegin(GL_QUAD_STRIP);
-        for (j = angle1; j <= angle2; j++)
+        for (int j = angle1; j <= angle2; j++)
         {
-            angle = static_cast<float>(j) * (PI / 180.0f);
-            cos_angle = cosf(angle);
-            sin_angle = sinf(angle);
-            x0 = a0 * cos_angle;
-            y0 = b0 * sin_angle;
-            x1 = a1 * cos_angle;
-            y1 = b1 * sin_angle;
+        const float angle = static_cast<float>(j) * (PI / 180.0f);
+        const float cos_angle = cosf(angle);
+        const float sin_angle = sinf(angle);
+        const float x0 = a0 * cos_angle;
+        const float y0 = b0 * sin_angle;
+        const float x1 = a1 * cos_angle;
+        const float y1 = b1 * sin_angle;
 
             C[0] = (2.0 * x0) / (a * a); // b0*cos_angle;
             C[1] = (2.0 * y0) / (b * b); // y0;
             C[2] = (2.0 * z0) / (c * c); // b0*cos_angle;
-            mag = magnitude(C);
+            float mag = magnitude(C);
             C[0] /= mag;
             C[1] /= mag;
             C[2] /= mag;
@@ -1176,11 +1157,10 @@ void draw_ellipsoid_lune_cap_z(const unsigned int VAO,
                                const int angle1, const int angle2,
                                const int slices)
 {
-    int i, k;
 
-    glBindVertexArray(VAO);
-    k = 0;
-    for (i = 0; i < slices; i++)
+  glBindVertexArray(VAO);
+    int k = 0;
+    for (int i = 0; i < slices; i++)
     {
         glDrawArrays(GL_TRIANGLE_STRIP, k, (angle2 - angle1 + 1) * 2);
         k += (angle2 - angle1 + 1) * 2;
@@ -1197,46 +1177,42 @@ unsigned int create_ellipsoid_lune_z(const float a, const float b, const float c
 {
     unsigned int VAO;
     unsigned int VBO;
-    float *vertices;
-    float w0, w1, angle, x0, y0, z0, x1, y1, z1, xb, yb, zb;
-    float cos_angle, sin_angle;
-    float mag, a0, a1, b0, b1;
+    float xb, yb, zb;
     float C[3];
     int t = 0;
-    int i, j, k, n;
 
-    n = slices * (angle2 - angle1 + 1) * 2 * 11;
-    k = 0;
-    vertices = static_cast<float*>(calloc(n, sizeof(float)));
-    for (i = 0; i < slices; i++)
+    const int n = slices * (angle2 - angle1 + 1) * 2 * 11;
+    int k = 0;
+    float *vertices = static_cast<float *>(calloc(n, sizeof(float)));
+    for (int i = 0; i < slices; i++)
     {
-        w0 = static_cast<float>(i) / static_cast<float>(slices);
-        w1 = static_cast<float>(i + 1) / static_cast<float>(slices);
+      const float w0 = static_cast<float>(i) / static_cast<float>(slices);
+      const float w1 = static_cast<float>(i + 1) / static_cast<float>(slices);
 
-        z0 = (-c) * (1.0 - w0) + c * w0;
-        z1 = (-c) * (1.0 - w1) + c * w1;
+      const float z0 = (-c) * (1.0 - w0) + c * w0;
+      const float z1 = (-c) * (1.0 - w1) + c * w1;
 
-        b0 = sqrtf(b * b * (1.0 - (z0 * z0) / (c * c)));
-        b1 = sqrtf(b * b * (1.0 - (z1 * z1) / (c * c)));
+      const float b0 = sqrtf(b * b * (1.0 - (z0 * z0) / (c * c)));
+      const float b1 = sqrtf(b * b * (1.0 - (z1 * z1) / (c * c)));
 
-        a0 = sqrtf(a * a * (1.0 - (z0 * z0) / (c * c)));
-        a1 = sqrtf(a * a * (1.0 - (z1 * z1) / (c * c)));
+      const float a0 = sqrtf(a * a * (1.0 - (z0 * z0) / (c * c)));
+      const float a1 = sqrtf(a * a * (1.0 - (z1 * z1) / (c * c)));
 
         // glBegin(GL_QUAD_STRIP);
-        for (j = angle1; j <= angle2; j++)
+        for (int j = angle1; j <= angle2; j++)
         {
-            angle = static_cast<float>(j) * (PI / 180.0f);
-            cos_angle = cosf(angle);
-            sin_angle = sinf(angle);
-            x0 = a0 * cos_angle;
-            y0 = b0 * sin_angle;
-            x1 = a1 * cos_angle;
-            y1 = b1 * sin_angle;
+        const float angle = static_cast<float>(j) * (PI / 180.0f);
+        const float cos_angle = cosf(angle);
+        const float sin_angle = sinf(angle);
+        const float x0 = a0 * cos_angle;
+        const float y0 = b0 * sin_angle;
+        const float x1 = a1 * cos_angle;
+        const float y1 = b1 * sin_angle;
 
             C[0] = (2.0 * x0) / (a * a); // b0*cos_angle;
             C[1] = (2.0 * y0) / (b * b); // y0;
             C[2] = (2.0 * z0) / (c * c); // b0*cos_angle;
-            mag = magnitude(C);
+            float mag = magnitude(C);
             C[0] /= mag;
             C[1] /= mag;
             C[2] /= mag;
@@ -1350,11 +1326,10 @@ void draw_ellipsoid_lune_z(const unsigned int VAO,
                            const int angle1, const int angle2,
                            const int slices)
 {
-    int i, k;
 
-    glBindVertexArray(VAO);
-    k = 0;
-    for (i = 0; i < slices; i++)
+  glBindVertexArray(VAO);
+    int k = 0;
+    for (int i = 0; i < slices; i++)
     {
         glDrawArrays(GL_TRIANGLE_STRIP, k, (angle2 - angle1 + 1) * 2);
         k += (angle2 - angle1 + 1) * 2;
@@ -1370,46 +1345,42 @@ unsigned int create_ellipsoid_lune_x(const float a, const float b, const float c
 {
     unsigned int VAO;
     unsigned int VBO;
-    float *vertices;
-    float w0, w1, angle, x0, y0, z0, x1, y1, z1, xb, yb, zb;
-    float cos_angle, sin_angle;
-    float mag, c0, c1, b0, b1;
+    float xb, yb, zb;
     float C[3];
     int t = 0;
-    int i, j, k, n;
 
-    n = slices * (angle2 - angle1 + 1) * 2 * 11;
-    k = 0;
-    vertices = static_cast<float*>(calloc(n, sizeof(float)));
-    for (i = 0; i < slices; i++)
+    const int n = slices * (angle2 - angle1 + 1) * 2 * 11;
+    int k = 0;
+    float *vertices = static_cast<float *>(calloc(n, sizeof(float)));
+    for (int i = 0; i < slices; i++)
     {
-        w0 = static_cast<float>(i) / static_cast<float>(slices);
-        w1 = static_cast<float>(i + 1) / static_cast<float>(slices);
+      const float w0 = static_cast<float>(i) / static_cast<float>(slices);
+      const float w1 = static_cast<float>(i + 1) / static_cast<float>(slices);
 
-        x0 = (-a) * (1.0 - w0) + a * w0;
-        x1 = (-a) * (1.0 - w1) + a * w1;
+      const float x0 = (-a) * (1.0 - w0) + a * w0;
+      const float x1 = (-a) * (1.0 - w1) + a * w1;
 
-        b0 = sqrtf(b * b * (1.0 - (x0 * x0) / (a * a)));
-        b1 = sqrtf(b * b * (1.0 - (x1 * x1) / (a * a)));
+      const float b0 = sqrtf(b * b * (1.0 - (x0 * x0) / (a * a)));
+      const float b1 = sqrtf(b * b * (1.0 - (x1 * x1) / (a * a)));
 
-        c0 = sqrtf(c * c * (1.0 - (x0 * x0) / (a * a)));
-        c1 = sqrtf(c * c * (1.0 - (x1 * x1) / (a * a)));
+      const float c0 = sqrtf(c * c * (1.0 - (x0 * x0) / (a * a)));
+      const float c1 = sqrtf(c * c * (1.0 - (x1 * x1) / (a * a)));
 
         // glBegin(GL_QUAD_STRIP);
-        for (j = angle1; j <= angle2; j++)
+        for (int j = angle1; j <= angle2; j++)
         {
-            angle = static_cast<float>(j) * (PI / 180.0f);
-            cos_angle = cosf(angle);
-            sin_angle = sinf(angle);
-            z0 = c0 * cos_angle;
-            y0 = b0 * sin_angle;
-            z1 = c1 * cos_angle;
-            y1 = b1 * sin_angle;
+        const float angle = static_cast<float>(j) * (PI / 180.0f);
+        const float cos_angle = cosf(angle);
+        const float sin_angle = sinf(angle);
+        const float z0 = c0 * cos_angle;
+        const float y0 = b0 * sin_angle;
+        const float z1 = c1 * cos_angle;
+        const float y1 = b1 * sin_angle;
 
             C[0] = (2.0 * x0) / (a * a); // b0*cos_angle;
             C[1] = (2.0 * y0) / (b * b); // y0;
             C[2] = (2.0 * z0) / (c * c); // b0*cos_angle;
-            mag = magnitude(C);
+            float mag = magnitude(C);
             C[0] /= mag;
             C[1] /= mag;
             C[2] /= mag;
@@ -1523,11 +1494,10 @@ void draw_ellipsoid_lune_x(const unsigned int VAO,
                            const int angle1, const int angle2,
                            const int slices)
 {
-    int i, k;
 
-    glBindVertexArray(VAO);
-    k = 0;
-    for (i = 0; i < slices; i++)
+  glBindVertexArray(VAO);
+    int k = 0;
+    for (int i = 0; i < slices; i++)
     {
         glDrawArrays(GL_TRIANGLE_STRIP, k, (angle2 - angle1 + 1) * 2);
         k += (angle2 - angle1 + 1) * 2;
@@ -1544,46 +1514,42 @@ unsigned int create_ellipsoid_lune_cap_x(const float a, const float b, const flo
 {
     unsigned int VAO;
     unsigned int VBO;
-    float *vertices;
-    float w0, w1, angle, x0, y0, z0, x1, y1, z1, xb, yb, zb;
-    float cos_angle, sin_angle;
-    float mag, c0, c1, b0, b1;
+    float xb, yb, zb;
     float C[3];
     int t = 0;
-    int i, j, k, n;
 
-    n = slices * (angle2 - angle1 + 1) * 2 * 11;
-    k = 0;
-    vertices = static_cast<float*>(calloc(n, sizeof(float)));
-    for (i = 0; i < slices; i++)
+    const int n = slices * (angle2 - angle1 + 1) * 2 * 11;
+    int k = 0;
+    float *vertices = static_cast<float *>(calloc(n, sizeof(float)));
+    for (int i = 0; i < slices; i++)
     {
-        w0 = static_cast<float>(i) / static_cast<float>(slices);
-        w1 = static_cast<float>(i + 1) / static_cast<float>(slices);
+      const float w0 = static_cast<float>(i) / static_cast<float>(slices);
+      const float w1 = static_cast<float>(i + 1) / static_cast<float>(slices);
 
-        x0 = x_0 * (1.0 - w0) + x_1 * w0;
-        x1 = x_0 * (1.0 - w1) + x_1 * w1;
+      const float x0 = x_0 * (1.0 - w0) + x_1 * w0;
+      const float x1 = x_0 * (1.0 - w1) + x_1 * w1;
 
-        b0 = sqrtf(b * b * (1.0 - (x0 * x0) / (a * a)));
-        b1 = sqrtf(b * b * (1.0 - (x1 * x1) / (a * a)));
+      const float b0 = sqrtf(b * b * (1.0 - (x0 * x0) / (a * a)));
+      const float b1 = sqrtf(b * b * (1.0 - (x1 * x1) / (a * a)));
 
-        c0 = sqrtf(c * c * (1.0 - (x0 * x0) / (a * a)));
-        c1 = sqrtf(c * c * (1.0 - (x1 * x1) / (a * a)));
+      const float c0 = sqrtf(c * c * (1.0 - (x0 * x0) / (a * a)));
+      const float c1 = sqrtf(c * c * (1.0 - (x1 * x1) / (a * a)));
 
         // glBegin(GL_QUAD_STRIP);
-        for (j = angle1; j <= angle2; j++)
+        for (int j = angle1; j <= angle2; j++)
         {
-            angle = static_cast<float>(j) * (PI / 180.0f);
-            cos_angle = cosf(angle);
-            sin_angle = sinf(angle);
-            z0 = c0 * cos_angle;
-            y0 = b0 * sin_angle;
-            z1 = c1 * cos_angle;
-            y1 = b1 * sin_angle;
+        const float angle = static_cast<float>(j) * (PI / 180.0f);
+        const float cos_angle = cosf(angle);
+        const float sin_angle = sinf(angle);
+        const float z0 = c0 * cos_angle;
+        const float y0 = b0 * sin_angle;
+        const float z1 = c1 * cos_angle;
+        const float y1 = b1 * sin_angle;
 
             C[0] = (2.0 * x0) / (a * a); // b0*cos_angle;
             C[1] = (2.0 * y0) / (b * b); // y0;
             C[2] = (2.0 * z0) / (c * c); // b0*cos_angle;
-            mag = magnitude(C);
+            float mag = magnitude(C);
             C[0] /= mag;
             C[1] /= mag;
             C[2] /= mag;
@@ -1697,11 +1663,10 @@ void draw_ellipsoid_lune_cap_x(const unsigned int VAO,
                                const int angle1, const int angle2,
                                const int slices)
 {
-    int i, k;
 
-    glBindVertexArray(VAO);
-    k = 0;
-    for (i = 0; i < slices; i++)
+  glBindVertexArray(VAO);
+    int k = 0;
+    for (int i = 0; i < slices; i++)
     {
         glDrawArrays(GL_TRIANGLE_STRIP, k, (angle2 - angle1 + 1) * 2);
         k += (angle2 - angle1 + 1) * 2;
@@ -1883,10 +1848,9 @@ void draw_curved_cylinder_x(const unsigned int VAO,
                             const int slices,
                             const int delta)
 {
-    int i, k;
-    glBindVertexArray(VAO);
-    k = 0;
-    for (i = 0; i < slices; i++)
+  glBindVertexArray(VAO);
+    int k = 0;
+    for (int i = 0; i < slices; i++)
     {
         glDrawArrays(GL_TRIANGLE_STRIP, k, (360 / delta + 1) * 2);
         k += (360 / delta + 1) * 2;
@@ -2093,10 +2057,9 @@ void draw_curved_cylinder_y(const unsigned int VAO,
                             const int slices,
                             const int delta)
 {
-    int i, k;
-    glBindVertexArray(VAO);
-    k = 0;
-    for (i = 0; i < slices; i++)
+  glBindVertexArray(VAO);
+    int k = 0;
+    for (int i = 0; i < slices; i++)
     {
         glDrawArrays(GL_TRIANGLE_STRIP, k, (360 / delta + 1) * 2);
         k += (360 / delta + 1) * 2;
@@ -2139,39 +2102,34 @@ unsigned int create_cylinder_z(const float radius0,
 {
     unsigned int VAO;
     unsigned int VBO;
-    float *vertices;
-    float angle, x0, y0, x1, y1, xb, yb, zb;
-    float cos_angle, sin_angle;
-    float mag;
     float C[3];
-    int j, n, k;
 
-    n = (360 / delta + 1) * 2 * 11;
-    k = 0;
-    vertices = static_cast<float*>(calloc(n, sizeof(float)));
+    const int n = (360 / delta + 1) * 2 * 11;
+    int k = 0;
+    float *vertices = static_cast<float *>(calloc(n, sizeof(float)));
 
     // glBegin(GL_QUAD_STRIP);
-    for (j = 0; j <= 360; j += delta)
+    for (int j = 0; j <= 360; j += delta)
     {
-        angle = static_cast<float>(j) * (PI / 180.0f);
-        cos_angle = cosf(angle);
-        sin_angle = sinf(angle);
-        y0 = radius0 * cos_angle;
-        x0 = radius0 * sin_angle;
-        y1 = radius1 * cos_angle;
-        x1 = radius1 * sin_angle;
+      const float angle = static_cast<float>(j) * (PI / 180.0f);
+      const float cos_angle = cosf(angle);
+      const float sin_angle = sinf(angle);
+      const float y0 = radius0 * cos_angle;
+      const float x0 = radius0 * sin_angle;
+      const float y1 = radius1 * cos_angle;
+      const float x1 = radius1 * sin_angle;
 
         C[0] = x0;
         C[1] = y0;
         C[2] = 0;
-        mag = magnitude(C);
+        float mag = magnitude(C);
         C[0] /= mag;
         C[1] /= mag;
         C[2] /= mag;
         // glNormal3f(C[0], C[1], C[2]);
-        yb = y0;
-        xb = x0;
-        zb = z0;
+        float yb = y0;
+        float xb = x0;
+        float zb = z0;
         // glVertex3f( xb, yb, zb );
         vertices[k] = xb;
         k++;
@@ -2292,39 +2250,34 @@ unsigned int create_cylinder_y(const float radius0,
 {
     unsigned int VAO;
     unsigned int VBO;
-    float *vertices;
-    float angle, x0, z0, x1, z1, xb, yb, zb;
-    float cos_angle, sin_angle;
-    float mag;
     float C[3];
-    int j, n, k;
 
-    n = (360 / delta + 1) * 2 * 11;
-    k = 0;
-    vertices = static_cast<float*>(calloc(n, sizeof(float)));
+    const int n = (360 / delta + 1) * 2 * 11;
+    int k = 0;
+    float *vertices = static_cast<float *>(calloc(n, sizeof(float)));
 
     // glBegin(GL_QUAD_STRIP);
-    for (j = 0; j <= 360; j += delta)
+    for (int j = 0; j <= 360; j += delta)
     {
-        angle = static_cast<float>(j) * (PI / 180.0f);
-        cos_angle = cosf(angle);
-        sin_angle = sinf(angle);
-        z0 = radius0 * cos_angle;
-        x0 = radius0 * sin_angle;
-        z1 = radius1 * cos_angle;
-        x1 = radius1 * sin_angle;
+      const float angle = static_cast<float>(j) * (PI / 180.0f);
+      const float cos_angle = cosf(angle);
+      const float sin_angle = sinf(angle);
+      const float z0 = radius0 * cos_angle;
+      const float x0 = radius0 * sin_angle;
+      const float z1 = radius1 * cos_angle;
+      const float x1 = radius1 * sin_angle;
 
         C[0] = x0;
         C[1] = 0;
         C[2] = z0;
-        mag = magnitude(C);
+        float mag = magnitude(C);
         C[0] /= mag;
         C[1] /= mag;
         C[2] /= mag;
         // glNormal3f(C[0], C[1], C[2]);
-        yb = y0;
-        xb = x0;
-        zb = z0;
+        float yb = y0;
+        float xb = x0;
+        float zb = z0;
         // glVertex3f( xb, yb, zb );
         vertices[k] = xb;
         k++;
@@ -2454,40 +2407,35 @@ unsigned int create_elliptic_cylinder_z(const float a0, const float b0,
 {
     unsigned int VAO;
     unsigned int VBO;
-    float *vertices;
-    float angle, x0, y0, x1, y1, xb, yb, zb;
-    float cos_angle, sin_angle;
-    float mag;
     float C[3];
     int t = 0;
-    int j, n, k;
 
-    n = (360 / delta + 1) * 2 * 11;
-    k = 0;
-    vertices = static_cast<float*>(calloc(n, sizeof(float)));
+    const int n = (360 / delta + 1) * 2 * 11;
+    int k = 0;
+    float *vertices = static_cast<float *>(calloc(n, sizeof(float)));
 
     // glBegin(GL_QUAD_STRIP);
-    for (j = 0; j <= 360; j += delta)
+    for (int j = 0; j <= 360; j += delta)
     {
-        angle = static_cast<float>(j) * (PI / 180.0f);
-        cos_angle = cosf(angle);
-        sin_angle = sinf(angle);
-        y0 = b0 * cos_angle;
-        x0 = a0 * sin_angle;
-        y1 = b1 * cos_angle;
-        x1 = a1 * sin_angle;
+      const float angle = static_cast<float>(j) * (PI / 180.0f);
+      const float cos_angle = cosf(angle);
+      const float sin_angle = sinf(angle);
+      const float y0 = b0 * cos_angle;
+      const float x0 = a0 * sin_angle;
+      const float y1 = b1 * cos_angle;
+      const float x1 = a1 * sin_angle;
 
         C[0] = x0 / (a0 * a0);
         C[1] = y0 / (b0 * b0);
         C[2] = 0;
-        mag = magnitude(C);
+        float mag = magnitude(C);
         C[0] /= mag;
         C[1] /= mag;
         C[2] /= mag;
         // glNormal3f(C[0], C[1], C[2]);
-        yb = y0;
-        xb = x0;
-        zb = z0;
+        float yb = y0;
+        float xb = x0;
+        float zb = z0;
         // glVertex3f( xb, yb, zb );
         vertices[k] = xb;
         k++;

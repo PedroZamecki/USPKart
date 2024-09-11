@@ -1,14 +1,60 @@
 ﻿#include "game.hpp"
 
+#include <chrono>
 #include <graphic/drawingHelper.hpp>
+
+#define getPointer static_cast<Game *>(glfwGetWindowUserPointer(window))
+#define Clock std::chrono::system_clock
 
 Game::Game():
 	config(new Configuration),
 	graphicsHelper(new GraphicsHelper),
 	window(graphicsHelper->createWindow("USPKart v0.0.2", config)),
-	data(),
+	data(new Data),
 	cam(new Camera),
-	rm(new ResourceManager) {}
+	rm(new ResourceManager),
+	ch(new ControlsHandler(window)) {
+		glfwSetWindowUserPointer(window, this);
+		glfwSetKeyCallback(window, []
+			(GLFWwindow *window, const int key, int, const int action, const int mods) {
+			const auto game = getPointer;
+			game->ch->executeKeyCallback(key, action, mods);
+		});
+		glfwSetWindowSizeCallback(window, [](GLFWwindow *window, const int width, const int height) {
+			if (const auto game = getPointer; !game->config->fullScreen) {
+				game->config->width = width;
+				game->config->height = height;
+			}
+			GraphicsHelper::setupOpenGL(width, height);
+		});
+		glfwSetWindowPosCallback(window, [](GLFWwindow *window, const int x, const int y) {
+			 if (const auto game = getPointer; !game->config->fullScreen) {
+				game->config->posX = x;
+				game->config->posY = y;
+			}
+		});
+
+		ch->insertKeyCallback(GLFW_KEY_ESCAPE, GLFW_PRESS, 0, [this]() -> void {
+			glfwSetWindowShouldClose(window, GLFW_TRUE);
+		});
+
+		ch->insertKeyCallback(GLFW_KEY_F, GLFW_PRESS, 0, [this]() -> void {
+			// Set fullscreen
+			if (config->fullScreen) {
+				glfwSetWindowMonitor(window, nullptr, config->posX, config->posY, config->width, config->height, GLFW_DONT_CARE);
+				glfwSetWindowPos(window, config->posX, config->posY);
+				glfwSetWindowSize(window, config->width, config->height);
+				glfwSetWindowAttrib(window, GLFW_DECORATED, !config->borderless);
+				glfwSetWindowAttrib(window, GLFW_RESIZABLE, config->resizable);
+				config->fullScreen = false;
+			} else {
+				const auto monitor = glfwGetPrimaryMonitor();
+				const auto mode = glfwGetVideoMode(monitor);
+				glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+				config->fullScreen = true;
+			}
+		});
+}
 
 Game::~Game()
 {
@@ -20,33 +66,38 @@ Game::~Game()
 }
 
 void Game::run() {
-	graphicsHelper->configureEnvironment();
-
-	ch = new ControlsHandler(window);
+	GraphicsHelper::configureEnvironment();
 
 	rm = new ResourceManager();
 	loadTextures();
 
 	// Set up the shaders
 	const auto shaderProgram = GraphicsHelper::loadShaders();
-	auto now = time(nullptr);
-	float deltaTime = 0.0f;
+        std::chrono::duration<double> delta{};
+	double fps = 0.0;
+
 	while (!glfwWindowShouldClose(window)) {
+	    std::chrono::time_point<Clock> start = Clock::now();
 	    glfwPollEvents();
 
 	    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	    glUseProgram(shaderProgram);
 
-	    drawWindow(config->getHeight(), config->getWidth(), cam, shaderProgram,
-	               deltaTime, rm);
+	    drawWindow(config->height, config->height, cam, shaderProgram, static_cast<float>(delta.count()), rm);
 
-	    drawInterface(config->getHeight(), config->getWidth(), cam, shaderProgram,
-	                  rm->getTexture("track"));
+	    drawInterface(config->height, config->height, cam, shaderProgram,
+	    rm->getTexture("track"));
 
 	    glfwSwapBuffers(window);
-	    deltaTime = static_cast<float>(time(nullptr) - now);
-	    now = time(nullptr);
+
+	    std::chrono::time_point<Clock> end = Clock::now();
+	    delta = end - start;
+	    if (delta.count() > 0) {
+	        fps = 1.0 / delta.count();
+	    }
+
+	    glfwSetWindowTitle(window, ("USPKart v0.0.2 (FPS: " + std::to_string(fps) + ")").c_str());
 	}
 }
 void Game::loadTextures() const {
