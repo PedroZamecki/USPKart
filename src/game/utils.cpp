@@ -63,46 +63,32 @@ Position Position::cross(Position const pos) const
 
 Camera::Camera()
 {
-    this->pos = Position();
-    this->target = Position();
-    this->targetDist = 250;
-    this->pitch = -20;
+    this->pos = Position(-250, 250 ,-250);
+    this->target = Position(0, 0, 0);
+    this->pitch = 0;
     this->yaw = 0;
     this->roll = 0;
-    this->fov = 20;
-    this->aspectRatio = 1;
-    this->near = 0;
+    this->fov = 80;
+    this->aspectRatio = 0;
+    this->near = 16;
     this->far = 4096;
 }
 
-Camera::Camera( Position const pos,
-                Position const target,
-                float const targetDist,
-                float const pitch,
-                float const yaw,
-                float const roll,
-                float const fov,
-                float const aspectRatio,
-                float const near,
-                float const far)
-{
-    this->pos = pos;
-    this->target = target;
-    this->targetDist = targetDist;
-    this->pitch = pitch;
-    this->yaw = yaw;
-    this->roll = roll;
-    this->fov = fov;
-    this->aspectRatio = aspectRatio;
-    this->near = near;
-    this->far = far;
-}
+Camera::Camera(Position const pos,
+               Position const target,
+               float const pitch,
+               float const yaw,
+               float const roll,
+               float const fov,
+               float const aspectRatio,
+               float const near,
+               float const far)
+    : pos(pos), target(target), pitch(pitch), yaw(yaw), roll(roll),
+      fov(fov), aspectRatio(aspectRatio), near(near), far(far) {}
 
 glm::mat4 Camera::getViewMatrix() const
 {
-    return lookAt(glm::vec3(pos.x(), pos.y(), pos.z()),
-                                 glm::vec3(target.x(), target.y(), target.z()),
-                                 glm::vec3(0, 1, 0));
+    return lookAt(pos.toVec3(), target.toVec3(), up());
 }
 
 glm::mat4 Camera::getProjectionMatrix() const
