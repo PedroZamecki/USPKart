@@ -10,26 +10,25 @@
 void drawWindow(const int height, const int width, const Camera *cam, const GLuint shaderProgram, const float deltaTime, const ResourceManager *rm)
 {
     constexpr float d = 60.0;
-    glm::mat4 projection = glm::perspective(glm::radians(60.0f),
-                                            static_cast<float>(width) / static_cast<float>(height),
-                                            1.0f, 4024.0f);
+    glm::mat4 projection = cam->getProjectionMatrix();
 
-    const float dist = cam->targetDist * cos(glm::radians(cam->pitch));
+    const float dist = cam->targetDist() * cos(glm::radians(cam->pitch));
 
     const float camZ = d * cam->target.z()  - sin(glm::radians(cam->yaw)) * dist;
-    const float cam_x = d * cam->target.x()  - cos(glm::radians(cam->yaw)) * dist;
-    const float cam_y = d * cam->target.y()  - sin(glm::radians(cam->pitch)) * cam->targetDist;
+    const float camX = d * cam->target.x()  - cos(glm::radians(cam->yaw)) * dist;
+    const float camY = d * cam->target.y()  - sin(glm::radians(cam->pitch)) * cam->targetDist();
 
-    const auto cameraPos = glm::vec3(cam_x, cam_y, camZ);
+    const auto cameraPos = glm::vec3(camX, camY, camZ);
     constexpr auto up = glm::vec3(0.0f, 1.0f, 0.0f);
 
-    glm::vec3 direction;
-    direction.x = (cos(glm::radians(cam->yaw))) * cos(glm::radians(cam->pitch));
-    direction.y = sin(glm::radians(cam->pitch));
-    direction.z = sin(glm::radians(cam->yaw)) * cos(glm::radians(cam->pitch));
+    glm::vec3 direction = {
+        (cos(glm::radians(cam->yaw))) * cos(glm::radians(cam->pitch)),
+        sin(glm::radians(cam->pitch)),
+        sin(glm::radians(cam->yaw)) * cos(glm::radians(cam->pitch))
+    };
     const auto cameraFront = normalize(direction);
 
-    glm::mat4 view = lookAt(cameraPos, cameraPos + cameraFront, up);
+    glm::mat4 view = cam->getViewMatrix();
 
     const GLint viewLoc = glGetUniformLocation(shaderProgram, "view");
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, value_ptr(view));

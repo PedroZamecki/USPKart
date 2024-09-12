@@ -3,6 +3,7 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
+#include <cmath>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -18,7 +19,6 @@
 
 #define EPS 0.00001
 
-enum animationType {normal, pushing, walking, pulling, hanging, hangingLeft, hangingRight, seated};
 enum skinType {none, professor, last};
 enum camViewType {back, front, left, right};
 
@@ -34,6 +34,16 @@ class Position
         Position operator-(Position pos) const;
         Position operator*(float scalar) const;
         Position operator/(float scalar) const;
+
+        auto toVec3() const -> glm::vec3 { return {x_, y_, z_}; };
+        auto norm() const { return std::sqrt(SQUARE(x_) + SQUARE(y_) + SQUARE(z_)); }
+        const auto dist(const Position pos) -> float {
+            return (std::sqrt(SQUARE(x_ - pos.x()) + SQUARE(y_ - pos.y()) + SQUARE(z_ - pos.z())));
+        }
+
+        static const auto dist(const Position pos1, const Position pos2) ->  float {
+            return (std::sqrt(SQUARE(pos1.x() - pos2.x()) + SQUARE(pos1.y() - pos2.y()) + SQUARE(pos1.z() - pos2.z())));
+        }
 
         float dot(Position pos) const;
         Position cross(Position pos) const;
@@ -51,7 +61,6 @@ class Camera
         Camera();
         Camera( Position pos,
                 Position target,
-                float targetDist,
                 float pitch,
                 float yaw,
                 float roll,
@@ -59,15 +68,40 @@ class Camera
                 float aspectRatio,
                 float near,
                 float far);
-        Position pos = {0.0f, 0.0f, 0.0f};
-        Position target = {1.0f, 1.0f, 1.0f};
-        float targetDist = 250;
-        float pitch = -20, yaw = 0, roll = 0;
-        float fov = 20;
-        float aspectRatio = 1;
-        float near = 0, far = 0;
+        Position pos, target;
+        float pitch, yaw, roll, fov, aspectRatio, near, far;
+
+        void setAspectRatio(const int width, const int height) { aspectRatio = static_cast<float>(width) / static_cast<float>(height); };
+
+        auto targetDist() const -> auto {
+            return (target - pos).norm();
+        }
+
+        auto forward() const -> glm::vec<3, float> {
+            return {
+                std::cos(yaw) * std::cos(pitch),
+                std::sin(pitch),
+                std::sin(yaw) * std::cos(pitch)
+            };
+        }
+        auto right() const -> glm::vec<3, float> {
+            return cross( forward(), glm::vec<3, float>({0, 1, 0}));
+        }
+        auto up() const -> glm::vec<3, float> {
+            // Calculate the cross product between the forward vector and {0, 1, 0}
+            return cross(right(), forward());
+        }
+        auto direction() const -> glm::vec<3, float> {
+            return {
+                (cos(glm::radians(yaw))) * cos(glm::radians(pitch)),
+                sin(glm::radians(pitch)),
+                sin(glm::radians(yaw)) * cos(glm::radians(pitch))
+            };
+        }
+        auto cameraFront() const -> auto { return normalize(direction()); };
 
         glm::mat4 getViewMatrix() const;
+
         glm::mat4 getProjectionMatrix() const;
 };
 
@@ -111,7 +145,6 @@ class Player: Character {
         Position pos;
         float width, height, depth;
         CollisionBox box;
-        animationType animation;
         skinType skin;
         camViewType camView;
 };
