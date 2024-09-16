@@ -1,4 +1,7 @@
-﻿cmake_minimum_required (VERSION 3.8)
+﻿cmake_minimum_required(VERSION 3.8)
+
+# Set the #define USP_KART_VERSION to the project version
+add_definitions(-DUSP_KART_VERSION="${PROJECT_VERSION}")
 
 set(OpenGL_GL_PREFERENCE "GLVND")
 
@@ -11,9 +14,9 @@ find_package(glfw3 CONFIG REQUIRED)
 find_package(OpenAL CONFIG REQUIRED)
 find_package(soil2 CONFIG REQUIRED)
 
-if(NOT OpenGL_FOUND)
+if (NOT OpenGL_FOUND)
     message(FATAL_ERROR "OpenGL not found!")
-endif()
+endif ()
 
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/std:c++latest>")
@@ -26,42 +29,42 @@ add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/Zc:wchar_t>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/Zc:throwingNew>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/Zc:referenceBinding>")
 
-add_executable (USPKart "resource/resourceManager.cpp"
-                        "controls/controlsHandler.cpp"
-                        "graphic/graphicsHelper.cpp"
-                        "graphic/drawingHelper.cpp"
-                        "graphic/primitives.cpp"
-                        "game/config.cpp"
-                        "game/utils.cpp"
-                        "game/game.cpp" )
-                        
+add_executable(USPKart "resource/resourceManager.cpp"
+        "controls/controlsHandler.cpp"
+        "graphic/graphicsHelper.cpp"
+        "graphic/drawingHelper.cpp"
+        "graphic/primitives.cpp"
+        "game/config.cpp"
+        "game/utils.cpp"
+        "game/game.cpp")
+
 target_include_directories(USPKart PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${OPENGL_INCLUDE_DIR})
 
-target_link_libraries(USPKart PRIVATE   GLEW::GLEW
-                                        glfw
-                                        OpenAL::OpenAL
-                                        soil2
-                                        OpenGL::GL
-                                        ${OPENGL_LIBRARIES}
-                                        glm::glm
-                                        glad::glad 
-                                        nlohmann_json::nlohmann_json)
+target_link_libraries(USPKart PRIVATE GLEW::GLEW
+        glfw
+        OpenAL::OpenAL
+        soil2
+        OpenGL::GL
+        ${OPENGL_LIBRARIES}
+        glm::glm
+        glad::glad
+        nlohmann_json::nlohmann_json)
 
 function(copy_directory SRC_DIR DST_DIR)
     file(MAKE_DIRECTORY ${DST_DIR})
 
     file(GLOB_RECURSE ITEMS RELATIVE ${SRC_DIR} ${SRC_DIR}/*)
 
-    foreach(ITEM ${ITEMS})
+    foreach (ITEM ${ITEMS})
         set(SRC "${SRC_DIR}/${ITEM}")
         set(DST "${DST_DIR}/${ITEM}")
 
-        if(IS_DIRECTORY ${SRC})
+        if (IS_DIRECTORY ${SRC})
             file(MAKE_DIRECTORY ${DST})
-        else()
+        else ()
             configure_file(${SRC} ${DST} COPYONLY)
-        endif()
-    endforeach()
+        endif ()
+    endforeach ()
 endfunction()
 
 set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/assets")

@@ -2,59 +2,71 @@
 
 #include <graphic/drawingHelper.hpp>
 
+#define WINDOW_TITLE std::string("USPKart v") + USP_KART_VERSION
 #define getPointer static_cast<Game *>(glfwGetWindowUserPointer(window))
 
-Game::Game():	config(new Configuration),
-		graphicsHelper(new GraphicsHelper),
-		window(graphicsHelper->createWindow("USPKart v0.0.2", config)),
-		data(new Data),
-		cam(new Camera),
-		rm(new ResourceManager),
-		ch(new ControlsHandler(window)) {
+Game::Game() :
+	config(new Configuration), graphicsHelper(new GraphicsHelper),
+	window(static_cast<GLFWwindow*>(graphicsHelper->createWindow((WINDOW_TITLE).c_str(), config))),
+	data(new Data), cam(new Camera),
+	rm(new ResourceManager), ch(new ControlsHandler(window))
+{
 	glfwSetWindowUserPointer(window, this);
-	glfwSetKeyCallback(window, []
-		(GLFWwindow *window, const int key, int, const int action, const int mods) {
-		const auto game = getPointer;
-		game->ch->executeKeyCallback(key, action, mods);
-	});
-	glfwSetWindowSizeCallback(window, [](GLFWwindow *window, const int width, const int height) {
-		if (const auto game = getPointer; !game->config->fullScreen) {
-			game->config->width = width;
-			game->config->height = height;
-			game->cam->setAspectRatio(width, height);
-		}
-		GraphicsHelper::setupOpenGL(width, height);
-	});
-	glfwSetWindowPosCallback(window, [](GLFWwindow *window, const int x, const int y) {
-		 if (const auto game = getPointer; !game->config->fullScreen) {
-			game->config->posX = x;
-			game->config->posY = y;
-		}
-	});
+	glfwSetKeyCallback(window,
+					   [](GLFWwindow *window, const int key, int, const int action, const int mods)
+					   {
+						   const auto game = getPointer;
+						   game->ch->executeKeyCallback(key, action, mods);
+					   });
+	glfwSetWindowSizeCallback(window,
+							  [](GLFWwindow *window, const int width, const int height)
+							  {
+								  if (const auto game = getPointer; !game->config->fullScreen)
+								  {
+									  game->config->width = width;
+									  game->config->height = height;
+									  game->cam->setAspectRatio(width, height);
+								  }
+								  GraphicsHelper::setupOpenGL(width, height);
+							  });
+	glfwSetWindowPosCallback(window,
+							 [](GLFWwindow *window, const int x, const int y)
+							 {
+								 if (const auto game = getPointer; !game->config->fullScreen)
+								 {
+									 game->config->posX = x;
+									 game->config->posY = y;
+								 }
+							 });
 
-	ch->insertKeyCallback(GLFW_KEY_ESCAPE, GLFW_PRESS, 0, [this]() -> void {
-		glfwSetWindowShouldClose(window, GLFW_TRUE);
-	});
+	ch->insertKeyCallback(GLFW_KEY_ESCAPE, GLFW_PRESS, 0,
+						  [this]() -> void { glfwSetWindowShouldClose(window, GLFW_TRUE); });
 
-	ch->insertKeyCallback(GLFW_KEY_F, GLFW_PRESS, 0, [this]() -> void {
-		// Set fullscreen
-		if (config->fullScreen) {
-			glfwSetWindowMonitor(window, nullptr, config->posX, config->posY, config->width, config->height, GLFW_DONT_CARE);
-			glfwSetWindowPos(window, config->posX, config->posY);
-			glfwSetWindowSize(window, config->width, config->height);
-			glfwSetWindowAttrib(window, GLFW_DECORATED, !config->borderless);
-			glfwSetWindowAttrib(window, GLFW_RESIZABLE, config->resizable);
-			cam->setAspectRatio(config->width, config->height);
-			config->fullScreen = false;
-		} else {
-			const auto monitor = glfwGetPrimaryMonitor();
-			const auto mode = glfwGetVideoMode(monitor);
-			cam->setAspectRatio(mode->width, mode->height);
-			glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
-			config->fullScreen = true;
-		}
-	});
-
+	ch->insertKeyCallback(GLFW_KEY_F, GLFW_PRESS, 0,
+						  [this]() -> void
+						  {
+							  // Set fullscreen
+							  if (config->fullScreen)
+							  {
+								  glfwSetWindowMonitor(window, nullptr, config->posX, config->posY, config->width,
+													   config->height, GLFW_DONT_CARE);
+								  glfwSetWindowPos(window, config->posX, config->posY);
+								  glfwSetWindowSize(window, config->width, config->height);
+								  glfwSetWindowAttrib(window, GLFW_DECORATED, !config->borderless);
+								  glfwSetWindowAttrib(window, GLFW_RESIZABLE, config->resizable);
+								  cam->setAspectRatio(config->width, config->height);
+								  config->fullScreen = false;
+							  }
+							  else
+							  {
+								  const auto monitor = glfwGetPrimaryMonitor();
+								  const auto mode = glfwGetVideoMode(monitor);
+								  cam->setAspectRatio(mode->width, mode->height);
+								  glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height,
+													   mode->refreshRate);
+								  config->fullScreen = true;
+							  }
+						  });
 }
 
 Game::~Game()
@@ -66,7 +78,8 @@ Game::~Game()
 	delete cam;
 }
 
-void Game::run() {
+void Game::run()
+{
 	GraphicsHelper::configureEnvironment();
 
 	rm = new ResourceManager();
@@ -75,37 +88,34 @@ void Game::run() {
 
 	// Set up the shaders
 	const auto shaderProgram = GraphicsHelper::loadShaders();
-    double delta = 0.0;
+	double delta = 0.0;
 	double fps = 0.0;
 
-	while (!glfwWindowShouldClose(window)) {
+	while (!glfwWindowShouldClose(window))
+	{
 		const auto start = glfwGetTime();
-	    glfwPollEvents();
+		glfwPollEvents();
 
-	    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		drawWindow(cam, shaderProgram, static_cast<float>(delta), rm);
 
-	    glUseProgram(shaderProgram);
+		drawInterface(config->height, config->height, cam, shaderProgram, rm->getTexture("track"));
 
-	    drawWindow(config->height, config->height, cam, shaderProgram, static_cast<float>(delta), rm);
-
-	    drawInterface(config->height, config->height, cam, shaderProgram,
-	    rm->getTexture("track"));
-
-	    glfwSwapBuffers(window);
+		glfwSwapBuffers(window);
 
 		const auto end = glfwGetTime();
-	    delta = end - start;
+		delta = end - start;
 		fps = 1.0 / delta;
 
-	    glfwSetWindowTitle(window, ("USPKart v0.0.2 (FPS: " + std::to_string(fps) + ")").c_str());
+		glfwSetWindowTitle(window, (WINDOW_TITLE + " (FPS: " + std::to_string(fps) + ")").c_str());
 	}
 }
-void Game::loadTextures() const {
+void Game::loadTextures() const
+{
 	rm->loadTexture("assets/textures/null.png", 1, 1, "null");
 	rm->loadTexture("assets/textures/kart/SNES_Donut_Plains_1.png", 1024, 1024, "track");
 	rm->loadTexture("assets/textures/kart/background.png", 256, 1024, "background");
 	rm->loadTexture("assets/textures/IME/ime_usp.png", 209, 668, "ime_usp");
-	rm->loadTexture("assets/textures/IME/fluffy_4.png", 378, 378,"fluffy");
+	rm->loadTexture("assets/textures/IME/fluffy_4.png", 378, 378, "fluffy");
 	rm->loadTexture("assets/textures/wheel_cap.png", 512, 512, "wheel_cap");
 }
 
