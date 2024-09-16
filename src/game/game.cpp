@@ -1,11 +1,8 @@
 ﻿#include "game.hpp"
 
-#include <chrono>
 #include <graphic/drawingHelper.hpp>
-#include <iostream>
 
 #define getPointer static_cast<Game *>(glfwGetWindowUserPointer(window))
-#define Clock std::chrono::system_clock
 
 Game::Game():	config(new Configuration),
 		graphicsHelper(new GraphicsHelper),
@@ -78,29 +75,27 @@ void Game::run() {
 
 	// Set up the shaders
 	const auto shaderProgram = GraphicsHelper::loadShaders();
-        std::chrono::duration<double> delta{};
+    double delta = 0.0;
 	double fps = 0.0;
 
 	while (!glfwWindowShouldClose(window)) {
-	    std::chrono::time_point<Clock> start = Clock::now();
+		const auto start = glfwGetTime();
 	    glfwPollEvents();
 
 	    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	    glUseProgram(shaderProgram);
 
-	    drawWindow(config->height, config->height, cam, shaderProgram, static_cast<float>(delta.count()), rm);
+	    drawWindow(config->height, config->height, cam, shaderProgram, static_cast<float>(delta), rm);
 
 	    drawInterface(config->height, config->height, cam, shaderProgram,
 	    rm->getTexture("track"));
 
 	    glfwSwapBuffers(window);
 
-	    std::chrono::time_point<Clock> end = Clock::now();
+		const auto end = glfwGetTime();
 	    delta = end - start;
-	    if (delta.count() > 0) {
-	        fps = 1.0 / delta.count();
-	    }
+		fps = 1.0 / delta;
 
 	    glfwSetWindowTitle(window, ("USPKart v0.0.2 (FPS: " + std::to_string(fps) + ")").c_str());
 	}
