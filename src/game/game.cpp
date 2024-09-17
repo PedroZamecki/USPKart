@@ -10,7 +10,7 @@ Game::Game() :
 	config(new Configuration), graphicsHelper(new GraphicsHelper), data(new Data), cam(new Camera),
 	rm(new ResourceManager), ch(new ControlsHandler())
 {
-	const auto icon = static_cast<GLFWimage*>(rm->loadIcon("assets/icon.png"));
+	const auto icon = static_cast<GLFWimage *>(ResourceManager::loadIcon("assets/icon.png"));
 	window = static_cast<GLFWwindow *>(GraphicsHelper::createWindow((WINDOW_TITLE).c_str(), config, icon));
 	glfwSetWindowUserPointer(window, this);
 	glfwSetKeyCallback(window,
@@ -103,7 +103,8 @@ void Game::run()
 
 		drawWindow(cam, shaderProgram, static_cast<float>(delta), rm);
 
-		drawInterface(config->height, config->height, cam, shaderProgram, rm->getTexture("track"));
+		// TO-DO: fix the drawing of the interface
+		// drawInterface(config->height, config->height, cam, shaderProgram, rm->getTexture("track"));
 
 		glfwSwapBuffers(window);
 

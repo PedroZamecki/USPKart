@@ -11,13 +11,13 @@ ControlsHandler::~ControlsHandler() { keyCallbacks.clear(); }
 
 void ControlsHandler::executeKeyCallback(const int key, const int action, const int mods) {
     keyStates[key % GLFW_KEY_LAST] = action;
-    if (const unsigned int hashKey = hash(key, action, mods); keyCallbacks.contains(hashKey))
+    if (const unsigned int hashKey = hash(key, action, mods); keyCallbacks.count(hashKey))
         keyCallbacks.at(hashKey)();
 }
 
 void ControlsHandler::insertKeyCallback(const int key, const int action, const int mods,
                                         const std::function<void()> &callback) {
-    if (keyCallbacks.contains(hash(key, action, mods))) {
+    if (keyCallbacks.count(hash(key, action, mods))) {
         std::cerr << "Key callback already exists" << std::endl;
         return;
     }
