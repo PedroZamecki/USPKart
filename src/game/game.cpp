@@ -7,9 +7,8 @@
 
 Game::Game() :
 	config(new Configuration), graphicsHelper(new GraphicsHelper),
-	window(static_cast<GLFWwindow*>(graphicsHelper->createWindow((WINDOW_TITLE).c_str(), config))),
-	data(new Data), cam(new Camera),
-	rm(new ResourceManager), ch(new ControlsHandler(window))
+	window(static_cast<GLFWwindow *>(GraphicsHelper::createWindow((WINDOW_TITLE).c_str(), config))), data(new Data),
+	cam(new Camera), rm(new ResourceManager), ch(new ControlsHandler())
 {
 	glfwSetWindowUserPointer(window, this);
 	glfwSetKeyCallback(window,

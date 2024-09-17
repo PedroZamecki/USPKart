@@ -1,7 +1,7 @@
 #include "primitives.hpp"
 
 #include <cmath>
-#include <game/utils.hpp>
+#include <glm/ext/scalar_constants.hpp>
 
 float magnitude(const float A[3]) { return sqrtf(A[0] * A[0] + A[1] * A[1] + A[2] * A[2]); }
 
@@ -68,7 +68,7 @@ unsigned int createEllipseSectorZ(const float a, const float b, const float R, c
 	for (int j = angle1; j <= angle2; j += dangle)
 	{
 		constexpr float z = 0.0;
-		const float angle = PI / 180.0f * static_cast<float>(j);
+		const float angle = glm::pi<float>() / 180.0f * static_cast<float>(j);
 		const float cos_angle = cosf(angle);
 		const float sin_angle = sinf(angle);
 		const float x = a * cos_angle;
@@ -200,7 +200,7 @@ unsigned int create_ellipse_z(const float a, const float b, const float R, const
 	float *vertices = static_cast<float *>(calloc(n, sizeof(float)));
 	for (int j = 0; j <= 360; j += dangle)
 	{
-		const float angle = static_cast<float>(j) * (PI / 180.0f);
+		const float angle = static_cast<float>(j) * (glm::pi<float>() / 180.0f);
 		const float cos_angle = cosf(angle);
 		const float sin_angle = sinf(angle);
 		const float x = a * cos_angle;
@@ -756,19 +756,19 @@ unsigned int create_ellipsoid(const float a, const float b, const float c, const
 		const float w0 = static_cast<float>(i) / static_cast<float>(slices);
 		const float w1 = static_cast<float>(i + 1) / static_cast<float>(slices);
 
-		const float z0 = (-c) * (1.0 - w0) + c * w0;
-		const float z1 = (-c) * (1.0 - w1) + c * w1;
+		const float z0 = -c * (1.0 - w0) + c * w0;
+		const float z1 = -c * (1.0 - w1) + c * w1;
 
-		const float b0 = sqrtf(b * b * (1.0 - (z0 * z0) / (c * c)));
-		const float b1 = sqrtf(b * b * (1.0 - (z1 * z1) / (c * c)));
+		const float b0 = sqrtf(b * b * (1.0 - z0 * z0 / (c * c)));
+		const float b1 = sqrtf(b * b * (1.0 - z1 * z1 / (c * c)));
 
-		const float a0 = sqrtf(a * a * (1.0 - (z0 * z0) / (c * c)));
-		const float a1 = sqrtf(a * a * (1.0 - (z1 * z1) / (c * c)));
+		const float a0 = sqrtf(a * a * (1.0 - z0 * z0 / (c * c)));
+		const float a1 = sqrtf(a * a * (1.0 - z1 * z1 / (c * c)));
 
 		// glBegin(GL_TRIANGLE_STRIP);
 		for (int j = 0; j <= 360; j += dangle)
 		{
-			const float angle = static_cast<float>(j) * (PI / 180.0f);
+			const float angle = static_cast<float>(j) * (glm::pi<float>() / 180.0f);
 			const float cos_angle = cosf(angle);
 			const float sin_angle = sinf(angle);
 			const float x0 = a0 * cos_angle;
@@ -776,9 +776,9 @@ unsigned int create_ellipsoid(const float a, const float b, const float c, const
 			const float x1 = a1 * cos_angle;
 			const float y1 = b1 * sin_angle;
 
-			C[0] = (2.0 * x0) / (a * a); // b0*cos_angle;
-			C[1] = (2.0 * y0) / (b * b); // y0;
-			C[2] = (2.0 * z0) / (c * c); // b0*cos_angle;
+			C[0] = 2.0 * x0 / (a * a); // b0*cos_angle;
+			C[1] = 2.0 * y0 / (b * b); // y0;
+			C[2] = 2.0 * z0 / (c * c); // b0*cos_angle;
 			float mag = magnitude(C);
 			C[0] /= mag;
 			C[1] /= mag;
@@ -815,9 +815,9 @@ unsigned int create_ellipsoid(const float a, const float b, const float c, const
 			vertices[k] = C[2];
 			k++;
 
-			C[0] = (2.0 * x1) / (a * a); // b1*cos_angle;
-			C[1] = (2.0 * y1) / (b * b); // y1;
-			C[2] = (2.0 * z1) / (c * c); // b1*cos_angle;
+			C[0] = 2.0 * x1 / (a * a); // b1*cos_angle;
+			C[1] = 2.0 * y1 / (b * b); // y1;
+			C[2] = 2.0 * z1 / (c * c); // b1*cos_angle;
 			mag = magnitude(C);
 			C[0] /= mag;
 			C[1] /= mag;
@@ -922,16 +922,16 @@ unsigned int create_ellipsoid_lune_cap_z(const float a, const float b, const flo
 		const float z0 = z_0 * (1.0 - w0) + z_1 * w0;
 		const float z1 = z_0 * (1.0 - w1) + z_1 * w1;
 
-		const float b0 = sqrtf(b * b * (1.0 - (z0 * z0) / (c * c)));
-		const float b1 = sqrtf(b * b * (1.0 - (z1 * z1) / (c * c)));
+		const float b0 = sqrtf(b * b * (1.0 - z0 * z0 / (c * c)));
+		const float b1 = sqrtf(b * b * (1.0 - z1 * z1 / (c * c)));
 
-		const float a0 = sqrtf(a * a * (1.0 - (z0 * z0) / (c * c)));
-		const float a1 = sqrtf(a * a * (1.0 - (z1 * z1) / (c * c)));
+		const float a0 = sqrtf(a * a * (1.0 - z0 * z0 / (c * c)));
+		const float a1 = sqrtf(a * a * (1.0 - z1 * z1 / (c * c)));
 
 		// glBegin(GL_QUAD_STRIP);
 		for (int j = angle1; j <= angle2; j++)
 		{
-			const float angle = static_cast<float>(j) * (PI / 180.0f);
+			const float angle = static_cast<float>(j) * (glm::pi<float>() / 180.0f);
 			const float cos_angle = cosf(angle);
 			const float sin_angle = sinf(angle);
 			const float x0 = a0 * cos_angle;
@@ -939,9 +939,9 @@ unsigned int create_ellipsoid_lune_cap_z(const float a, const float b, const flo
 			const float x1 = a1 * cos_angle;
 			const float y1 = b1 * sin_angle;
 
-			C[0] = (2.0 * x0) / (a * a); // b0*cos_angle;
-			C[1] = (2.0 * y0) / (b * b); // y0;
-			C[2] = (2.0 * z0) / (c * c); // b0*cos_angle;
+			C[0] = 2.0 * x0 / (a * a); // b0*cos_angle;
+			C[1] = 2.0 * y0 / (b * b); // y0;
+			C[2] = 2.0 * z0 / (c * c); // b0*cos_angle;
 			float mag = magnitude(C);
 			C[0] /= mag;
 			C[1] /= mag;
@@ -978,9 +978,9 @@ unsigned int create_ellipsoid_lune_cap_z(const float a, const float b, const flo
 			vertices[k] = C[2];
 			k++;
 
-			C[0] = (2.0 * x1) / (a * a); // b1*cos_angle;
-			C[1] = (2.0 * y1) / (b * b); // y1;
-			C[2] = (2.0 * z1) / (c * c); // b1*cos_angle;
+			C[0] = 2.0 * x1 / (a * a); // b1*cos_angle;
+			C[1] = 2.0 * y1 / (b * b); // y1;
+			C[2] = 2.0 * z1 / (c * c); // b1*cos_angle;
 			mag = magnitude(C);
 			C[0] /= mag;
 			C[1] /= mag;
@@ -1080,19 +1080,19 @@ unsigned int create_ellipsoid_lune_z(const float a, const float b, const float c
 		const float w0 = static_cast<float>(i) / static_cast<float>(slices);
 		const float w1 = static_cast<float>(i + 1) / static_cast<float>(slices);
 
-		const float z0 = (-c) * (1.0 - w0) + c * w0;
-		const float z1 = (-c) * (1.0 - w1) + c * w1;
+		const float z0 = -c * (1.0 - w0) + c * w0;
+		const float z1 = -c * (1.0 - w1) + c * w1;
 
-		const float b0 = sqrtf(b * b * (1.0 - (z0 * z0) / (c * c)));
-		const float b1 = sqrtf(b * b * (1.0 - (z1 * z1) / (c * c)));
+		const float b0 = sqrtf(b * b * (1.0 - z0 * z0 / (c * c)));
+		const float b1 = sqrtf(b * b * (1.0 - z1 * z1 / (c * c)));
 
-		const float a0 = sqrtf(a * a * (1.0 - (z0 * z0) / (c * c)));
-		const float a1 = sqrtf(a * a * (1.0 - (z1 * z1) / (c * c)));
+		const float a0 = sqrtf(a * a * (1.0 - z0 * z0 / (c * c)));
+		const float a1 = sqrtf(a * a * (1.0 - z1 * z1 / (c * c)));
 
 		// glBegin(GL_QUAD_STRIP);
 		for (int j = angle1; j <= angle2; j++)
 		{
-			const float angle = static_cast<float>(j) * (PI / 180.0f);
+			const float angle = static_cast<float>(j) * (glm::pi<float>() / 180.0f);
 			const float cos_angle = cosf(angle);
 			const float sin_angle = sinf(angle);
 			const float x0 = a0 * cos_angle;
@@ -1100,9 +1100,9 @@ unsigned int create_ellipsoid_lune_z(const float a, const float b, const float c
 			const float x1 = a1 * cos_angle;
 			const float y1 = b1 * sin_angle;
 
-			C[0] = (2.0 * x0) / (a * a); // b0*cos_angle;
-			C[1] = (2.0 * y0) / (b * b); // y0;
-			C[2] = (2.0 * z0) / (c * c); // b0*cos_angle;
+			C[0] = 2.0 * x0 / (a * a); // b0*cos_angle;
+			C[1] = 2.0 * y0 / (b * b); // y0;
+			C[2] = 2.0 * z0 / (c * c); // b0*cos_angle;
 			float mag = magnitude(C);
 			C[0] /= mag;
 			C[1] /= mag;
@@ -1139,9 +1139,9 @@ unsigned int create_ellipsoid_lune_z(const float a, const float b, const float c
 			vertices[k] = C[2];
 			k++;
 
-			C[0] = (2.0 * x1) / (a * a); // b1*cos_angle;
-			C[1] = (2.0 * y1) / (b * b); // y1;
-			C[2] = (2.0 * z1) / (c * c); // b1*cos_angle;
+			C[0] = 2.0 * x1 / (a * a); // b1*cos_angle;
+			C[1] = 2.0 * y1 / (b * b); // y1;
+			C[2] = 2.0 * z1 / (c * c); // b1*cos_angle;
 			mag = magnitude(C);
 			C[0] /= mag;
 			C[1] /= mag;
@@ -1240,19 +1240,19 @@ unsigned int create_ellipsoid_lune_x(const float a, const float b, const float c
 		const float w0 = static_cast<float>(i) / static_cast<float>(slices);
 		const float w1 = static_cast<float>(i + 1) / static_cast<float>(slices);
 
-		const float x0 = (-a) * (1.0 - w0) + a * w0;
-		const float x1 = (-a) * (1.0 - w1) + a * w1;
+		const float x0 = -a * (1.0 - w0) + a * w0;
+		const float x1 = -a * (1.0 - w1) + a * w1;
 
-		const float b0 = sqrtf(b * b * (1.0 - (x0 * x0) / (a * a)));
-		const float b1 = sqrtf(b * b * (1.0 - (x1 * x1) / (a * a)));
+		const float b0 = sqrtf(b * b * (1.0 - x0 * x0 / (a * a)));
+		const float b1 = sqrtf(b * b * (1.0 - x1 * x1 / (a * a)));
 
-		const float c0 = sqrtf(c * c * (1.0 - (x0 * x0) / (a * a)));
-		const float c1 = sqrtf(c * c * (1.0 - (x1 * x1) / (a * a)));
+		const float c0 = sqrtf(c * c * (1.0 - x0 * x0 / (a * a)));
+		const float c1 = sqrtf(c * c * (1.0 - x1 * x1 / (a * a)));
 
 		// glBegin(GL_QUAD_STRIP);
 		for (int j = angle1; j <= angle2; j++)
 		{
-			const float angle = static_cast<float>(j) * (PI / 180.0f);
+			const float angle = static_cast<float>(j) * (glm::pi<float>() / 180.0f);
 			const float cos_angle = cosf(angle);
 			const float sin_angle = sinf(angle);
 			const float z0 = c0 * cos_angle;
@@ -1260,9 +1260,9 @@ unsigned int create_ellipsoid_lune_x(const float a, const float b, const float c
 			const float z1 = c1 * cos_angle;
 			const float y1 = b1 * sin_angle;
 
-			C[0] = (2.0 * x0) / (a * a); // b0*cos_angle;
-			C[1] = (2.0 * y0) / (b * b); // y0;
-			C[2] = (2.0 * z0) / (c * c); // b0*cos_angle;
+			C[0] = 2.0 * x0 / (a * a); // b0*cos_angle;
+			C[1] = 2.0 * y0 / (b * b); // y0;
+			C[2] = 2.0 * z0 / (c * c); // b0*cos_angle;
 			float mag = magnitude(C);
 			C[0] /= mag;
 			C[1] /= mag;
@@ -1299,9 +1299,9 @@ unsigned int create_ellipsoid_lune_x(const float a, const float b, const float c
 			vertices[k] = C[2];
 			k++;
 
-			C[0] = (2.0 * x1) / (a * a); // b1*cos_angle;
-			C[1] = (2.0 * y1) / (b * b); // y1;
-			C[2] = (2.0 * z1) / (c * c); // b1*cos_angle;
+			C[0] = 2.0 * x1 / (a * a); // b1*cos_angle;
+			C[1] = 2.0 * y1 / (b * b); // y1;
+			C[2] = 2.0 * z1 / (c * c); // b1*cos_angle;
 			mag = magnitude(C);
 			C[0] /= mag;
 			C[1] /= mag;
@@ -1404,16 +1404,16 @@ unsigned int create_ellipsoid_lune_cap_x(const float a, const float b, const flo
 		const float x0 = x_0 * (1.0 - w0) + x_1 * w0;
 		const float x1 = x_0 * (1.0 - w1) + x_1 * w1;
 
-		const float b0 = sqrtf(b * b * (1.0 - (x0 * x0) / (a * a)));
-		const float b1 = sqrtf(b * b * (1.0 - (x1 * x1) / (a * a)));
+		const float b0 = sqrtf(b * b * (1.0 - x0 * x0 / (a * a)));
+		const float b1 = sqrtf(b * b * (1.0 - x1 * x1 / (a * a)));
 
-		const float c0 = sqrtf(c * c * (1.0 - (x0 * x0) / (a * a)));
-		const float c1 = sqrtf(c * c * (1.0 - (x1 * x1) / (a * a)));
+		const float c0 = sqrtf(c * c * (1.0 - x0 * x0 / (a * a)));
+		const float c1 = sqrtf(c * c * (1.0 - x1 * x1 / (a * a)));
 
 		// glBegin(GL_QUAD_STRIP);
 		for (int j = angle1; j <= angle2; j++)
 		{
-			const float angle = static_cast<float>(j) * (PI / 180.0f);
+			const float angle = static_cast<float>(j) * (glm::pi<float>() / 180.0f);
 			const float cos_angle = cosf(angle);
 			const float sin_angle = sinf(angle);
 			const float z0 = c0 * cos_angle;
@@ -1421,9 +1421,9 @@ unsigned int create_ellipsoid_lune_cap_x(const float a, const float b, const flo
 			const float z1 = c1 * cos_angle;
 			const float y1 = b1 * sin_angle;
 
-			C[0] = (2.0 * x0) / (a * a); // b0*cos_angle;
-			C[1] = (2.0 * y0) / (b * b); // y0;
-			C[2] = (2.0 * z0) / (c * c); // b0*cos_angle;
+			C[0] = 2.0 * x0 / (a * a); // b0*cos_angle;
+			C[1] = 2.0 * y0 / (b * b); // y0;
+			C[2] = 2.0 * z0 / (c * c); // b0*cos_angle;
 			float mag = magnitude(C);
 			C[0] /= mag;
 			C[1] /= mag;
@@ -1460,9 +1460,9 @@ unsigned int create_ellipsoid_lune_cap_x(const float a, const float b, const flo
 			vertices[k] = C[2];
 			k++;
 
-			C[0] = (2.0 * x1) / (a * a); // b1*cos_angle;
-			C[1] = (2.0 * y1) / (b * b); // y1;
-			C[2] = (2.0 * z1) / (c * c); // b1*cos_angle;
+			C[0] = 2.0 * x1 / (a * a); // b1*cos_angle;
+			C[1] = 2.0 * y1 / (b * b); // y1;
+			C[2] = 2.0 * z1 / (c * c); // b1*cos_angle;
 			mag = magnitude(C);
 			C[0] /= mag;
 			C[1] /= mag;
@@ -1562,8 +1562,8 @@ unsigned int create_curved_cylinder_x(float radius0, float radius1, float bend_r
 	k = 0;
 	vertices = static_cast<float *>(calloc(n, sizeof(float)));
 
-	bend_ang0 *= (PI / 180.0f);
-	bend_ang1 *= (PI / 180.0f);
+	bend_ang0 *= glm::pi<float>() / 180.0f;
+	bend_ang1 *= glm::pi<float>() / 180.0f;
 	for (i = 0; i < slices; i++)
 	{
 		w0 = static_cast<float>(i) / static_cast<float>(slices);
@@ -1582,7 +1582,7 @@ unsigned int create_curved_cylinder_x(float radius0, float radius1, float bend_r
 		// glBegin(GL_QUAD_STRIP);
 		for (j = 0; j <= 360; j += delta)
 		{
-			angle = static_cast<float>(j) * (PI / 180.0f);
+			angle = static_cast<float>(j) * (glm::pi<float>() / 180.0f);
 			cos_angle = cosf(angle);
 			sin_angle = sinf(angle);
 			y0 = rad0 * cos_angle + bend_radius;
@@ -1748,8 +1748,8 @@ unsigned int create_curved_cylinder_y(float radius0, float radius1, float bend_r
 	k = 0;
 	vertices = static_cast<float *>(calloc(n, sizeof(float)));
 
-	bend_ang0 *= (PI / 180.0f);
-	bend_ang1 *= (PI / 180.0f);
+	bend_ang0 *= glm::pi<float>() / 180.0f;
+	bend_ang1 *= glm::pi<float>() / 180.0f;
 	for (i = 0; i < slices; i++)
 	{
 		w0 = static_cast<float>(i) / static_cast<float>(slices);
@@ -1768,7 +1768,7 @@ unsigned int create_curved_cylinder_y(float radius0, float radius1, float bend_r
 		// glBegin(GL_QUAD_STRIP);
 		for (j = 0; j <= 360; j += delta)
 		{
-			angle = static_cast<float>(j) * (PI / 180.0f);
+			angle = static_cast<float>(j) * (glm::pi<float>() / 180.0f);
 			cos_angle = cosf(angle);
 			sin_angle = sinf(angle);
 			x0 = rad0 * cos_angle + bend_radius;
@@ -1930,7 +1930,7 @@ unsigned int create_cylinder_z(const float radius0, const float radius1, const f
 	// glBegin(GL_QUAD_STRIP);
 	for (int j = 0; j <= 360; j += delta)
 	{
-		const float angle = static_cast<float>(j) * (PI / 180.0f);
+		const float angle = static_cast<float>(j) * (glm::pi<float>() / 180.0f);
 		const float cos_angle = cosf(angle);
 		const float sin_angle = sinf(angle);
 		const float y0 = radius0 * cos_angle;
@@ -2069,7 +2069,7 @@ unsigned int create_cylinder_y(const float radius0, const float radius1, const f
 	// glBegin(GL_QUAD_STRIP);
 	for (int j = 0; j <= 360; j += delta)
 	{
-		const float angle = static_cast<float>(j) * (PI / 180.0f);
+		const float angle = static_cast<float>(j) * (glm::pi<float>() / 180.0f);
 		const float cos_angle = cosf(angle);
 		const float sin_angle = sinf(angle);
 		const float z0 = radius0 * cos_angle;
@@ -2216,7 +2216,7 @@ unsigned int create_elliptic_cylinder_z(const float a0, const float b0, const fl
 	// glBegin(GL_QUAD_STRIP);
 	for (int j = 0; j <= 360; j += delta)
 	{
-		const float angle = static_cast<float>(j) * (PI / 180.0f);
+		const float angle = static_cast<float>(j) * (glm::pi<float>() / 180.0f);
 		const float cos_angle = cosf(angle);
 		const float sin_angle = sinf(angle);
 		const float y0 = b0 * cos_angle;

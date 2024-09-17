@@ -29,14 +29,12 @@ add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/Zc:wchar_t>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/Zc:throwingNew>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/Zc:referenceBinding>")
 
-add_executable(USPKart "resource/resourceManager.cpp"
-        "controls/controlsHandler.cpp"
-        "graphic/graphicsHelper.cpp"
-        "graphic/drawingHelper.cpp"
-        "graphic/primitives.cpp"
-        "game/config.cpp"
-        "game/utils.cpp"
-        "game/game.cpp")
+file(GLOB_RECURSE SOURCE_FILES
+        "${CMAKE_CURRENT_SOURCE_DIR}/*/*.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/*/*.hpp"
+)
+
+add_executable(USPKart ${SOURCE_FILES})
 
 target_include_directories(USPKart PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${OPENGL_INCLUDE_DIR})
 

@@ -4,9 +4,10 @@
 #define GAME_HPP
 
 #include <controls/controlsHandler.hpp>
-#include <game/utils.hpp>
 #include <graphic/graphicsHelper.hpp>
 #include <resource/resourceManager.hpp>
+#include <utils/camera.hpp>
+#include <utils/data.hpp>
 
 class Game
 {
