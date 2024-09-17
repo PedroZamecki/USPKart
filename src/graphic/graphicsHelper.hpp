@@ -24,7 +24,7 @@ public:
 	 * @param config The configuration of the window.
 	 * @return A pointer to the window created.
 	 */
-	static void *createWindow(const char *title, const Configuration *c);
+	static void *createWindow(const char *title, const Configuration *c, const void *icon);
 
 	/*
 	 * Generate a shader program with the specified vertex and fragment shaders.

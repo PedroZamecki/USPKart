@@ -1,15 +1,17 @@
 ﻿#include "game.hpp"
 
 #include <graphic/drawingHelper.hpp>
+#include <string>
 
 #define WINDOW_TITLE std::string("USPKart v") + USP_KART_VERSION
 #define getPointer static_cast<Game *>(glfwGetWindowUserPointer(window))
 
 Game::Game() :
-	config(new Configuration), graphicsHelper(new GraphicsHelper),
-	window(static_cast<GLFWwindow *>(GraphicsHelper::createWindow((WINDOW_TITLE).c_str(), config))), data(new Data),
-	cam(new Camera), rm(new ResourceManager), ch(new ControlsHandler())
+	config(new Configuration), graphicsHelper(new GraphicsHelper), data(new Data), cam(new Camera),
+	rm(new ResourceManager), ch(new ControlsHandler())
 {
+	const auto icon = static_cast<GLFWimage*>(rm->loadIcon("assets/icon.png"));
+	window = static_cast<GLFWwindow *>(GraphicsHelper::createWindow((WINDOW_TITLE).c_str(), config, icon));
 	glfwSetWindowUserPointer(window, this);
 	glfwSetKeyCallback(window,
 					   [](GLFWwindow *window, const int key, int, const int action, const int mods)
@@ -20,6 +22,8 @@ Game::Game() :
 	glfwSetWindowSizeCallback(window,
 							  [](GLFWwindow *window, const int width, const int height)
 							  {
+								  if (width == 0 || height == 0)
+									  return;
 								  if (const auto game = getPointer; !game->config->fullScreen)
 								  {
 									  game->config->width = width;
@@ -31,6 +35,8 @@ Game::Game() :
 	glfwSetWindowPosCallback(window,
 							 [](GLFWwindow *window, const int x, const int y)
 							 {
+								 if (x == 0 || y == 0 || x == -32000 || y == -32000)
+									 return;
 								 if (const auto game = getPointer; !game->config->fullScreen)
 								 {
 									 game->config->posX = x;

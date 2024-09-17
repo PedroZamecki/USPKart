@@ -19,12 +19,12 @@ public:
 
 	[[nodiscard]] auto toVec3() const -> glm::vec3 { return {x_, y_, z_}; };
 	[[nodiscard]] auto norm() const { return sqrt(pow(x_, 2) + pow(y_, 2) + pow(z_, 2)); }
-	[[nodiscard]] const auto dist(const Position pos) const -> double
+	[[nodiscard]] auto dist(const Position pos) const -> double
 	{
 		return sqrt(pow(x_ - pos.x(), 2) + pow(y_ - pos.y(), 2) + pow(z_ - pos.z(), 2));
 	}
 
-	static const auto dist(const Position pos1, const Position pos2) -> double
+	static auto dist(const Position pos1, const Position pos2) -> double
 	{
 		return sqrt(pow(pos1.x() - pos2.x(), 2) + pow(pos1.y() - pos2.y(), 2) + pow(pos1.z() - pos2.z(), 2));
 	}

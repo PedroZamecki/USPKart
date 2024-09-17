@@ -2,12 +2,14 @@
 #include <SOIL2/SOIL2.h>
 #include <glad/glad.h>
 #include <iostream>
+#include <ranges>
+#include <GLFW/glfw3.h>
 
 ResourceManager::ResourceManager() = default;
 
 ResourceManager::~ResourceManager()
 {
-	for (auto &[fst, snd] : textures)
+	for (auto &snd : textures | std::views::values)
 	{
 		glDeleteTextures(1, &snd);
 	}
@@ -41,7 +43,7 @@ GLuint ResourceManager::loadTexture(const char *filePath, int height, int width,
 
 GLuint ResourceManager::getTexture(const std::string &name) const
 {
-	if (textures.find(name) == textures.end())
+	if (!textures.contains(name))
 	{
 		std::cerr << "Error: Texture \"" << name << "\" not found." << std::endl;
 		return 0;
@@ -52,3 +54,14 @@ GLuint ResourceManager::getTexture(const std::string &name) const
 char *ResourceManager::loadAudio(const char *filePath) { return const_cast<char *>(filePath); }
 
 char *ResourceManager::getAudio(char *name) { return name; }
+
+void *ResourceManager::loadIcon(const char *filePath)
+{
+	const auto icon = new GLFWimage;
+	int width, height;
+	width = height = 512;
+	icon->pixels = SOIL_load_image(filePath, &width, &height, nullptr, SOIL_LOAD_RGB);
+	icon->width = width;
+	icon->height = height;
+	return icon;
+}
