@@ -12,7 +12,7 @@ public:
 	~ControlsHandler();
 
 	void executeKeyCallback(int key, int action, int mods);
-	void insertKeyCallback(int key, int action, int mods, std::function<void()> callback);
+	void insertKeyCallback(int key, int action, int mods, const std::function<void()> &callback);
 	[[nodiscard]] int getKeyState(const int key) const { return keyStates[key]; }
 
 private:

@@ -20,6 +20,7 @@ public:
 	unsigned int getTexture(const std::string &name) const;
 	static char *loadAudio(const char *filePath);
 	static char *getAudio(char *name);
+	static void *loadIcon(const char *filePath);
 };
 
 #endif

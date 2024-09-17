@@ -9,11 +9,10 @@
 #include <vector>
 
 #include <AL/alc.h>
-#include <glm/glm.hpp>
 
 std::string readShader(const std::string &filename)
 {
-	std::ifstream file(filename);
+	const std::ifstream file(filename);
 	if (!file.is_open())
 	{
 		std::cerr << "Error reading shader: " << filename << std::endl;
@@ -132,7 +131,7 @@ GraphicsHelper::~GraphicsHelper()
 	alcCloseDevice(device);
 }
 
-void *GraphicsHelper::createWindow(const char *title, const Configuration *c)
+void *GraphicsHelper::createWindow(const char *title, const Configuration *c, const void *icon)
 {
 	GLFWwindow *window;
 
@@ -167,6 +166,8 @@ void *GraphicsHelper::createWindow(const char *title, const Configuration *c)
 		glfwTerminate();
 		throw std::runtime_error("Failed to create GLFW window");
 	}
+
+	glfwSetWindowIcon(window, 1, (GLFWimage*)icon);
 
 	glfwSetWindowPos(window, c->posX, c->posY);
 	glfwMakeContextCurrent(window);

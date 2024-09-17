@@ -5,6 +5,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <graphic/primitives.hpp>
 
+#include <GLFW/glfw3.h>
 #include <cmath>
 
 #define SIGN(x) ((x) > 0 ? 1 : ((x) < 0 ? -1 : 0))
