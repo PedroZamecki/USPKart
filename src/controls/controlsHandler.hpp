@@ -8,14 +8,16 @@
 class ControlsHandler
 {
 public:
-	explicit ControlsHandler(GLFWwindow *window);
+	explicit ControlsHandler();
 	~ControlsHandler();
 
-	void executeKeyCallback(int key, int action, int mods) const;
+	void executeKeyCallback(int key, int action, int mods);
 	void insertKeyCallback(int key, int action, int mods, std::function<void()> callback);
+	[[nodiscard]] int getKeyState(const int key) const { return keyStates[key]; }
 
 private:
 	std::map<unsigned int, std::function<void()>> keyCallbacks;
+	int keyStates[GLFW_KEY_LAST]{};
 };
 
 #endif
