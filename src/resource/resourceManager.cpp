@@ -2,17 +2,14 @@
 #include <SOIL2/SOIL2.h>
 #include <glad/glad.h>
 #include <iostream>
-#include <ranges>
 #include <GLFW/glfw3.h>
 
 ResourceManager::ResourceManager() = default;
 
 ResourceManager::~ResourceManager()
 {
-	for (auto &snd : textures | std::views::values)
-	{
-		glDeleteTextures(1, &snd);
-	}
+	for (const auto &[key, texture] : textures)
+		glDeleteTextures(1, &texture);
 	textures.clear();
 }
 
@@ -43,7 +40,7 @@ GLuint ResourceManager::loadTexture(const char *filePath, int height, int width,
 
 GLuint ResourceManager::getTexture(const std::string &name) const
 {
-	if (!textures.contains(name))
+	if (!textures.count(name))
 	{
 		std::cerr << "Error: Texture \"" << name << "\" not found." << std::endl;
 		return 0;
