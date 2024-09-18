@@ -1,8 +1,9 @@
 #include "resourceManager.hpp"
-#include <SOIL2/SOIL2.h>
 #include <glad/glad.h>
-#include <iostream>
+
 #include <GLFW/glfw3.h>
+#include <iostream>
+#include <stb_image.h>
 
 ResourceManager::ResourceManager() = default;
 
@@ -23,16 +24,16 @@ GLuint ResourceManager::loadTexture(const char *filePath, int height, int width,
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-	const unsigned char *image = SOIL_load_image(filePath, &width, &height, nullptr, SOIL_LOAD_RGB);
-	if (image == nullptr)
+	const unsigned char *image = stbi_load(filePath, &width, &height, nullptr, 4);
+	if (image)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+	}
+	else
 	{
 		std::cerr << "Error: Texture \"" << name << "\" not found." << std::endl;
-		return 0;
 	}
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-	SOIL_free_image_data(const_cast<unsigned char *>(image));
-	glBindTexture(GL_TEXTURE_2D, 0);
+	stbi_image_free(const_cast<unsigned char *>(image));
 
 	textures[name] = texture;
 	return texture;
@@ -57,7 +58,7 @@ void *ResourceManager::loadIcon(const char *filePath)
 	const auto icon = new GLFWimage;
 	int width, height;
 	width = height = 512;
-	icon->pixels = SOIL_load_image(filePath, &width, &height, nullptr, SOIL_LOAD_RGB);
+	icon->pixels = stbi_load(filePath, &width, &height, nullptr, 4);
 	icon->width = width;
 	icon->height = height;
 	return icon;

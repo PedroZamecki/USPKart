@@ -8,7 +8,6 @@
 
 class ResourceManager
 {
-private:
 	std::map<std::string, unsigned int> textures;
 	std::map<std::string, char *> audio;
 

@@ -10,7 +10,8 @@
 
 #define SIGN(x) ((x) > 0 ? 1 : ((x) < 0 ? -1 : 0))
 
-void drawWindow(const Camera *cam, const GLuint shaderProgram, const float deltaTime, const ResourceManager *rm)
+void drawWindow(const Camera *cam, const GLuint shaderProgram, const float deltaTime, const ResourceManager *rm,
+				Data *data)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -58,9 +59,13 @@ void drawWindow(const Camera *cam, const GLuint shaderProgram, const float delta
 	drawTrack({0.0f, 0.0f, 0.0f}, shaderProgram, rm->getTexture("track"));
 	drawBackground({0, 0, 0}, shaderProgram, rm->getTexture("background"));
 
-	drawFluffy({0, 0, 0}, 45.0, shaderProgram, deltaTime, rm->getTexture("null"));
-	drawKart({0, 0, 0}, shaderProgram, 45.0, 0.0, rm->getTexture("wheel_cap"),
-			 rm->getTexture("null"), rm->getTexture("fluffy"), rm->getTexture("ime_usp"));
+	for (const auto &object : data->objects)
+	{
+		object->draw(shaderProgram, deltaTime, rm->getTexture("null"));
+	}
+	// drawFluffy({0, 0, 0}, 45.0, shaderProgram, deltaTime, rm->getTexture("null"));
+	drawKart({0, 0, 0}, shaderProgram, 45.0, 0.0, rm->getTexture("wheel_cap"), rm->getTexture("null"),
+			 rm->getTexture("fluffy"), rm->getTexture("ime_usp"));
 
 	glEnable(GL_TEXTURE_2D);
 }
