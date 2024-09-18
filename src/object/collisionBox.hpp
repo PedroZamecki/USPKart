@@ -7,12 +7,12 @@ class CollisionBox
 {
 public:
 	CollisionBox();
-	CollisionBox(Position pos, float width, float height, float depth);
-	~CollisionBox();
-	bool isInside(CollisionBox box);
+	CollisionBox(Position *pos, float width, float height, float depth);
+	~CollisionBox() { delete pos; }
+	bool isInside(const CollisionBox *box) const;
 
 private:
-	Position pos;
+	Position *pos;
 	float width, height, depth;
 };
 

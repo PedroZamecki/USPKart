@@ -12,7 +12,6 @@ find_package(OpenGL REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(OpenAL CONFIG REQUIRED)
-find_package(soil2 CONFIG REQUIRED)
 
 if (NOT OpenGL_FOUND)
     message(FATAL_ERROR "OpenGL not found!")
@@ -34,14 +33,15 @@ file(GLOB_RECURSE SOURCE_FILES
         "${CMAKE_CURRENT_SOURCE_DIR}/*/*.hpp"
 )
 
+find_path(TINYGLTF_INCLUDE_DIRS "tiny_gltf.h")
+
 add_executable(USPKart ${SOURCE_FILES})
 
-target_include_directories(USPKart PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${OPENGL_INCLUDE_DIR})
+target_include_directories(USPKart PRIVATE ${TINYGLTF_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR} ${OPENGL_INCLUDE_DIR})
 
 target_link_libraries(USPKart PRIVATE GLEW::GLEW
         glfw
         OpenAL::OpenAL
-        soil2
         OpenGL::GL
         ${OPENGL_LIBRARIES}
         glm::glm

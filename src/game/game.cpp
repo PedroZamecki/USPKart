@@ -3,6 +3,8 @@
 #include <graphic/drawingHelper.hpp>
 #include <string>
 
+#include "object/model.hpp"
+
 #define WINDOW_TITLE std::string("USPKart v") + USP_KART_VERSION
 #define getPointer static_cast<Game *>(glfwGetWindowUserPointer(window))
 
@@ -72,6 +74,7 @@ Game::Game() :
 								  config->fullScreen = true;
 							  }
 						  });
+	data->objects.push_front(new Object(Position{0, 2, 0}, 1, 1, 1, new CollisionBox(), drawFluffy));
 }
 
 Game::~Game()
@@ -90,6 +93,7 @@ void Game::run()
 	rm = new ResourceManager();
 	loadTextures();
 	cam->setAspectRatio(config->width, config->height);
+	auto model = new Model(std::string("assets/models/TestModel.gltf").c_str(), rm->getTexture("null"));
 
 	// Set up the shaders
 	const auto shaderProgram = GraphicsHelper::loadShaders();
@@ -101,11 +105,11 @@ void Game::run()
 		const auto start = glfwGetTime();
 		glfwPollEvents();
 
-		drawWindow(cam, shaderProgram, static_cast<float>(delta), rm);
+		drawWindow(cam, shaderProgram, static_cast<float>(delta), rm, data);
 
-		// TO-DO: fix the drawing of the interface
+		// TODO: fix the drawing of the interface
 		// drawInterface(config->height, config->height, cam, shaderProgram, rm->getTexture("track"));
-
+		model->draw(new Position(1,4,1), static_cast<int>(glfwGetTime())%90, shaderProgram);
 		glfwSwapBuffers(window);
 
 		const auto end = glfwGetTime();
