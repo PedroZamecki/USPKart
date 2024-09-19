@@ -1,5 +1,6 @@
 #include "primitives.hpp"
 
+#include <GL/glew.h>
 #include <cmath>
 #include <glm/ext/scalar_constants.hpp>
 

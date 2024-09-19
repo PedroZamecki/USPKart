@@ -1,6 +1,6 @@
 #include "graphicsHelper.hpp"
 
-#include <glad/glad.h>
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
 #include <graphic/drawingHelper.hpp>
@@ -171,7 +171,7 @@ void *GraphicsHelper::createWindow(const char *title, const Configuration *c, co
 
 	glfwSetWindowPos(window, c->posX, c->posY);
 	glfwMakeContextCurrent(window);
-	gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress));
+	glewInit();
 
 	std::cout << "Video information:" << std::endl
 			  << "OpenGL version: " << glGetString(GL_VERSION) << std::endl

@@ -3,15 +3,13 @@
 #ifndef PRIMITIVES_HPP
 #define PRIMITIVES_HPP
 
-#include <glad/glad.h>
-
 float magnitude(const float A[3]);
 
 unsigned int createSquareY(float sx, float sz, float R, float G, float B);
 unsigned int createSquareZ(float sy, float sz, float R, float G, float B);
 
-void drawSquareY(unsigned int VAO, GLuint tex);
-void drawSquareZ(unsigned int VAO, GLuint tex);
+void drawSquareY(unsigned int VAO, unsigned int tex);
+void drawSquareZ(unsigned int VAO, unsigned int tex);
 
 unsigned int createEllipseSectorZ(float a, float b, float R, float G, float B, int angle1, int angle2, int dangle);
 
@@ -23,14 +21,14 @@ void draw_ellipse_z(unsigned int VAO, int dangle);
 
 unsigned int create_rectangular_cuboid(float sx, float sy, float sz, float R, float G, float B);
 
-void draw_rectangular_cuboid(unsigned int VAO, GLuint tex[6]);
+void draw_rectangular_cuboid(unsigned int VAO, unsigned int tex[6]);
 
 //--------------------------------------
 
 unsigned int create_rounded_rectangular_cuboid(float sx, float sy, float sz, float radius, float Rt, float Gt, float Bt,
 											   float Rm, float Gm, float Bm, float Rb, float Gb, float Bb);
 
-void draw_rounded_rectangular_cuboid(unsigned int VAO, GLuint tex[7]);
+void draw_rounded_rectangular_cuboid(unsigned int VAO, unsigned int tex[7]);
 
 //--------------------------------------
 
@@ -109,7 +107,7 @@ unsigned int create_cylinder_y(float radius0, float radius1, float y0, float y1,
 
 void draw_cylinder_y(unsigned int VAO, int delta);
 
-void draw_cylinder_y(unsigned int VAO, int delta, GLuint tex);
+void draw_cylinder_y(unsigned int VAO, int delta, unsigned int tex);
 
 //--------------------------------------------
 
