@@ -93,23 +93,26 @@ void Game::run()
 	rm = new ResourceManager();
 	loadTextures();
 	cam->setAspectRatio(config->width, config->height);
-	auto model = new Model(std::string("assets/models/TestModel.gltf").c_str(), rm->getTexture("null"));
+	auto model = new Model(std::string("assets/models/").c_str(), rm);
 
 	// Set up the shaders
 	const auto shaderProgram = GraphicsHelper::loadShaders();
 	double delta = 0.0;
 	double fps = 0.0;
 
+	int i = 0;
 	while (!glfwWindowShouldClose(window))
 	{
 		const auto start = glfwGetTime();
 		glfwPollEvents();
 
-		drawWindow(cam, shaderProgram, static_cast<float>(delta), rm, data);
+		// drawWindow(cam, shaderProgram, static_cast<float>(delta), rm, data);
 
 		// TODO: fix the drawing of the interface
 		// drawInterface(config->height, config->height, cam, shaderProgram, rm->getTexture("track"));
-		model->draw(new Position(1,4,1), static_cast<int>(glfwGetTime())%90, shaderProgram);
+		model->draw(new Position(i % 20, i % 20, i % 20), static_cast<int>(glfwGetTime()) % 90, shaderProgram);
+		i = (i + 1) % 40;
+
 		glfwSwapBuffers(window);
 
 		const auto end = glfwGetTime();
