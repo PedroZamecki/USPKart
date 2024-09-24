@@ -8,12 +8,15 @@ float magnitude(const float A[3]) { return sqrtf(A[0] * A[0] + A[1] * A[1] + A[2
 
 unsigned int createSquareY(const float sx, const float sz, const float R, const float G, const float B)
 {
-	float vertices[] = {// positions         // colors          // texture coords  //normals
-						-0.5f, 0.0f,  -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.5f, 0.0f, -0.5f,
-						1.0f,  1.0f,  1.0f,	 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.5f, 0.0f, 0.5f, 1.0f, 1.0f, 1.0f,
-						1.0f,  1.0f,  0.0f,	 1.0f, 0.0f, 0.5f, 0.0f, 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-						1.0f,  0.0f,  -0.5f, 0.0f, 0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, -0.5f,
-						0.0f,  -0.5f, 1.0f,	 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f};
+	float vertices[] = {
+	// pos						   // color						  // text				 // norm
+	/* pos: */-0.5f,  0.0f, -0.5f, /* color: */ 1.0f, 1.0f, 1.0f, /* text: */0.0f, 0.0f, /* norm: */ 0.0f, 1.0f, 0.0f,
+	/* pos: */ 0.5f,  0.0f, -0.5f, /* color: */ 1.0f, 1.0f, 1.0f, /* text: */1.0f, 0.0f, /* norm: */ 0.0f, 1.0f, 0.0f,
+	/* pos: */ 0.5f,  0.0f,  0.5f, /* color: */ 1.0f, 1.0f, 1.0f, /* text: */1.0f, 1.0f, /* norm: */ 0.0f, 1.0f, 0.0f,
+	/* pos: */ 0.5f,  0.0f,  0.5f, /* color: */ 1.0f, 1.0f, 1.0f, /* text: */1.0f, 1.0f, /* norm: */ 0.0f, 1.0f, 0.0f,
+	/* pos: */-0.5f,  0.0f,  0.5f, /* color: */ 1.0f, 1.0f, 1.0f, /* text: */0.0f, 1.0f, /* norm: */ 0.0f, 1.0f, 0.0f,
+	/* pos: */-0.5f,  0.0f, -0.5f, /* color: */ 1.0f, 1.0f, 1.0f, /* text: */0.0f, 0.0f, /* norm: */ 0.0f, 1.0f, 0.0f
+	};
 	unsigned int VAO;
 	unsigned int VBO;
 
@@ -161,7 +164,7 @@ unsigned int createSquareZ(const float sx, const float sy, const float R, const 
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
 	// position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void *)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), static_cast<void *>(0));
 	glEnableVertexAttribArray(0);
 	// color attribute
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void *)(3 * sizeof(float)));

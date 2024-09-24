@@ -15,6 +15,7 @@ find_package(nlohmann_json REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(OpenAL CONFIG REQUIRED)
 find_package(soil2 CONFIG REQUIRED)
+find_package(assimp CONFIG REQUIRED)
 
 if (NOT OpenGL_FOUND)
     message(FATAL_ERROR "OpenGL not found!")
@@ -40,14 +41,15 @@ add_executable(USPKart ${SOURCE_FILES})
 
 target_include_directories(USPKart PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS})
 
-target_link_libraries(USPKart PRIVATE GLEW::GLEW
+target_link_libraries(USPKart GLEW::GLEW
         glfw
         OpenAL::OpenAL
         OpenGL::GL
         ${OPENGL_LIBRARIES}
         glm::glm
         soil2
-        nlohmann_json::nlohmann_json)
+        nlohmann_json::nlohmann_json
+        assimp::assimp)
 
 function(copy_directory SRC_DIR DST_DIR)
     file(MAKE_DIRECTORY ${DST_DIR})

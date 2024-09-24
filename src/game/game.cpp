@@ -3,7 +3,7 @@
 #include <graphic/drawingHelper.hpp>
 #include <string>
 
-#include "object/model.hpp"
+#include "graphic/utils/model.hpp"
 
 #define WINDOW_TITLE std::string("USPKart v") + USP_KART_VERSION
 #define getPointer static_cast<Game *>(glfwGetWindowUserPointer(window))
@@ -93,10 +93,10 @@ void Game::run()
 	rm = new ResourceManager();
 	loadTextures();
 	cam->setAspectRatio(config->width, config->height);
-	auto model = new Model(std::string("assets/models/").c_str(), rm);
+	const auto model = new Model(std::string("assets/models/model.obj"));
 
 	// Set up the shaders
-	const auto shaderProgram = GraphicsHelper::loadShaders();
+	const auto shader = new Shader("shaders/shader.vs", "shaders/shader.fs");
 	double delta = 0.0;
 	double fps = 0.0;
 
@@ -106,11 +106,13 @@ void Game::run()
 		const auto start = glfwGetTime();
 		glfwPollEvents();
 
-		// drawWindow(cam, shaderProgram, static_cast<float>(delta), rm, data);
+		// drawWindow(cam, shader->ID, static_cast<float>(delta), rm, data);
 
 		// TODO: fix the drawing of the interface
 		// drawInterface(config->height, config->height, cam, shaderProgram, rm->getTexture("track"));
-		model->draw(new Position(i % 20, i % 20, i % 20), static_cast<int>(glfwGetTime()) % 90, shaderProgram);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		shader->use();
+		model->Draw(*shader);
 		i = (i + 1) % 40;
 
 		glfwSwapBuffers(window);
