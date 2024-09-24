@@ -8,7 +8,7 @@
 #include <utils/data.hpp>
 
 void drawWindow(const Camera *cam, unsigned int shaderProgram, float deltaTime, const ResourceManager *rm,
-				Data *data);
+				const Data *data);
 
 void drawInterface(int height, int width, const Camera *cam, unsigned int shaderProgram, unsigned int interfaceTexture);
 
