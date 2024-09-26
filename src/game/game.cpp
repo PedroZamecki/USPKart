@@ -74,7 +74,8 @@ Game::Game() :
 								  config->fullScreen = true;
 							  }
 						  });
-	data->objects.push_front(new Object(Position{0, 2, 0}, 1, 1, 1, new CollisionBox(), drawFluffy));
+	data->objects.push_front(new Object(Position{0, 0, 0}, "assets/models/model.fbx" ,.01, .01, .01, new CollisionBox()));
+	data->objects.push_front(new Object(Position{0, 2, 0}, "assets/models/model.fbx" ,.01, .01, .01, new CollisionBox()));
 }
 
 Game::~Game()
@@ -93,7 +94,6 @@ void Game::run()
 	rm = new ResourceManager();
 	loadTextures();
 	cam->setAspectRatio(config->width, config->height);
-	const auto model = new Model(std::string("assets/models/model.obj"));
 
 	// Set up the shaders
 	const auto shader = new Shader("shaders/shader.vs", "shaders/shader.fs");
@@ -106,16 +106,13 @@ void Game::run()
 		const auto start = glfwGetTime();
 		glfwPollEvents();
 
-		// drawWindow(cam, shader->ID, static_cast<float>(delta), rm, data);
+		drawWindow(cam, *shader, static_cast<float>(delta), data);
+
+		glfwSwapBuffers(window);
 
 		// TODO: fix the drawing of the interface
 		// drawInterface(config->height, config->height, cam, shaderProgram, rm->getTexture("track"));
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		shader->use();
-		model->Draw(*shader);
-		i = (i + 1) % 40;
 
-		glfwSwapBuffers(window);
 
 		const auto end = glfwGetTime();
 		delta = end - start;

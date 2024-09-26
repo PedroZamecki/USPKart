@@ -3,12 +3,10 @@
 #ifndef DRAWING_HELPER_HPP
 #define DRAWING_HELPER_HPP
 
-#include <resource/resourceManager.hpp>
 #include <utils/camera.hpp>
 #include <utils/data.hpp>
 
-void drawWindow(const Camera *cam, unsigned int shaderProgram, float deltaTime, const ResourceManager *rm,
-				const Data *data);
+void drawWindow(const Camera *cam, const Shader &shader, float delta, const Data *data);
 
 void drawInterface(int height, int width, const Camera *cam, unsigned int shaderProgram, unsigned int interfaceTexture);
 

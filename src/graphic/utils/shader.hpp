@@ -1,6 +1,7 @@
 #ifndef SHADER_HPP
 #define SHADER_HPP
 
+#include <glm/fwd.hpp>
 #include <string>
 
 class Shader
@@ -21,6 +22,7 @@ public:
 	// ------------------------------------------------------------------------
 	void setFloat(const std::string &name, float value) const;
 
+	void setMat4(const std::string &name, const glm::mat4 &value) const;
 private:
 	// utility function for checking shader compilation/linking errors.
 	// ------------------------------------------------------------------------

@@ -1,15 +1,15 @@
-# Made in Blockbench 4.10.3
+# Made in Blockbench 4.11.0
 mtllib model.mtl
 
 o cube
-v 1 1 1
-v 1 1 -1
-v 1 -1 1
-v 1 -1 -1
-v -1 1 -1
-v -1 1 1
-v -1 -1 -1
-v -1 -1 1
+v 1 0.5 1
+v 1 0.5 -1
+v 1 -1.5 1
+v 1 -1.5 -1
+v -1 0.5 -1
+v -1 0.5 1
+v -1 -1.5 -1
+v -1 -1.5 1
 vt 0 1
 vt 1 1
 vt 1 0
