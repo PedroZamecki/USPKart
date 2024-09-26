@@ -5,14 +5,14 @@
 
 Camera::Camera()
 {
-	this->pos = Position(-250, 250, -250);
+	this->pos = Position(-5, 2, -5	);
 	this->target = Position(0, 0, 0);
 	this->pitch = 0;
 	this->yaw = 0;
 	this->roll = 0;
 	this->fov = 80;
 	this->aspectRatio = 0;
-	this->near = 16;
+	this->near = 0.1;
 	this->far = 4096;
 }
 

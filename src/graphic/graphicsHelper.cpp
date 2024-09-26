@@ -2,6 +2,7 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <fstream>
 
 #include <graphic/drawingHelper.hpp>
 #include <iostream>
@@ -219,6 +220,8 @@ void GraphicsHelper::setupOpenGL(const int width, const int height)
 	static GLfloat lightSpecular[] = {1.0f, 1.0f, 1.0f, 1.0f};
 	static GLfloat lightAttenuation[] = {0.00002f};
 	*/
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDepthFunc(GL_LESS);
 	glEnable(GL_DEPTH_TEST);
 

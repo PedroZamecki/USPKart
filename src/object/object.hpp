@@ -1,26 +1,22 @@
 #ifndef OBJECT_HPP
 #define OBJECT_HPP
 
-#include <functional>
-
 #include "collisionBox.hpp"
-
-typedef std::function<void(Position, float, unsigned int, float, unsigned int)> DrawingFunction;
+#include "graphic/utils/model.hpp"
 
 class Object
 {
 public:
-	Object();
-	Object(Position pos, float width, float height, float depth, CollisionBox *box,
-		   const DrawingFunction &drawFunction);
+	explicit Object(const std::string& modelPath);
+	Object(Position pos, const std::string &modelPath, float width, float height, float depth, CollisionBox *box);
 	~Object();
-	void draw(unsigned int shaderProgram, float deltaTime, unsigned int nullTexture) const;
+	void draw(const Shader &shader, float deltaTime) const;
 
 private:
 	Position pos;
+	Model *model;
 	float width{}, height{}, depth{}, angle{};
 	CollisionBox *box{};
-	DrawingFunction drawFunction;
 };
 
 #endif // OBJECT_HPP

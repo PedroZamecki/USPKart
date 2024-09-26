@@ -10,64 +10,22 @@
 
 #define SIGN(x) ((x) > 0 ? 1 : ((x) < 0 ? -1 : 0))
 
-void drawWindow(const Camera *cam, const GLuint shaderProgram, const float deltaTime, const ResourceManager *rm,
-				const Data *data)
+void drawWindow(const Camera *cam, const Shader &shader, const float delta, const Data *data)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	shader.use();
 
-	glUseProgram(shaderProgram);
+	// pass projection matrix to shader (note that in this case it could change every frame)
+	shader.setMat4("projection", cam->getProjectionMatrix());
 
-	constexpr float d = 60.0;
-	glm::mat4 projection = cam->getProjectionMatrix();
+	// camera/view transformation
+	shader.setMat4("view", cam->getViewMatrix());
 
-	const float dist = cam->targetDist() * cos(glm::radians(cam->pitch));
-
-	const float camZ = d * cam->target.z() - sin(glm::radians(cam->yaw)) * dist;
-	const float camX = d * cam->target.x() - cos(glm::radians(cam->yaw)) * dist;
-	const float camY = d * cam->target.y() - sin(glm::radians(cam->pitch)) * cam->targetDist();
-
-	const auto cameraPos = glm::vec3(camX, camY, camZ);
-
-	glm::mat4 view = cam->getViewMatrix();
-
-	const GLint viewLoc = glGetUniformLocation(shaderProgram, "view");
-	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, value_ptr(view));
-
-	const GLint projectionLoc = glGetUniformLocation(shaderProgram, "projection");
-	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, value_ptr(projection));
-
-	glGetUniformLocation(shaderProgram, "model");
-	//--------------------------------------------------
-	auto normal = glm::mat4(1.0f);
-	const GLint normalLoc = glGetUniformLocation(shaderProgram, "normal");
-	glUniformMatrix4fv(normalLoc, 1, GL_FALSE, value_ptr(normal));
-	//--------------------------------------------------
-	glm::vec3 lightPos = cameraPos;
-	const GLint lightPosLocation = glGetUniformLocation(shaderProgram, "lightPos");
-	glUniform3f(lightPosLocation, lightPos[0], lightPos[1], lightPos[2]);
-
-	const GLint viewPosLocation = glGetUniformLocation(shaderProgram, "viewPos");
-	glUniform3f(viewPosLocation, cameraPos[0], cameraPos[1], cameraPos[2]);
-
-	const GLint lightColorLocation = glGetUniformLocation(shaderProgram, "lightColor");
-	glUniform3f(lightColorLocation, 1.0f, 1.0f, 1.0f);
-
-	const GLint lightMinLoc = glGetUniformLocation(shaderProgram, "lightMin");
-	glUniform3f(lightMinLoc, 0.0, 0.0, 0.0);
-	//--------------------------------------------------
-
-	drawTrack({0.0f, 0.0f, 0.0f}, shaderProgram, rm->getTexture("track"));
-	drawBackground({0, 0, 0}, shaderProgram, rm->getTexture("background"));
-
+	// render the loaded model
 	for (const auto &object : data->objects)
 	{
-		// object->draw(shaderProgram, deltaTime, rm->getTexture("null"));
+		object->draw(shader, delta);
 	}
-	// drawFluffy({0, 0, 0}, 45.0, shaderProgram, deltaTime, rm->getTexture("null"));
-	// drawKart({0, 0, 0}, shaderProgram, 45.0, 0.0, rm->getTexture("wheel_cap"), rm->getTexture("null"),
-	//		 rm->getTexture("fluffy"), rm->getTexture("ime_usp"));
-
-	glEnable(GL_TEXTURE_2D);
 }
 
 void drawInterface(const int height, const int width, const Camera *cam, const GLuint shaderProgram,
