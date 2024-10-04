@@ -7,6 +7,8 @@
 
 class GraphicsHelper
 {
+	unsigned int shaderProgram{};
+
 public:
 	~GraphicsHelper();
 
@@ -29,9 +31,6 @@ public:
 	 * Set up the OpenGL context.
 	 */
 	static void setupOpenGL(int width, int height);
-
-private:
-	unsigned int shaderProgram{};
 };
 
 #endif

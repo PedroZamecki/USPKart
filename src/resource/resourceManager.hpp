@@ -11,6 +11,10 @@
 
 class Texture
 {
+	unsigned int id{};
+	std::string type;
+	std::string path;
+
 public:
 	Texture(const unsigned int id, std::string type, std::string path) :
 		id(id), type(std::move(type)), path(std::move(path))
@@ -19,11 +23,6 @@ public:
 	[[nodiscard]] unsigned int getId() const { return id; }
 	[[nodiscard]] const std::string &getType() const { return type; }
 	[[nodiscard]] const std::string &getPath() const { return path; }
-
-private:
-	unsigned int id{};
-	std::string type;
-	std::string path;
 };
 
 class ResourceManager
@@ -38,14 +37,17 @@ class ResourceManager
 	~ResourceManager();
 
 	static ResourceManager *instance;
-    static std::mutex mtx;
+	static std::mutex mtx;
 
 public:
-	ResourceManager(const ResourceManager& obj) = delete;
-	static ResourceManager *getInstance() {
-		if (instance == nullptr) {
+	ResourceManager(const ResourceManager &obj) = delete;
+	static ResourceManager *getInstance()
+	{
+		if (instance == nullptr)
+		{
 			std::lock_guard lock(mtx);
-			if (instance == nullptr) {
+			if (instance == nullptr)
+			{
 				instance = new ResourceManager();
 			}
 		}

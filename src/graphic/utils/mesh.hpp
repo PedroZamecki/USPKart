@@ -26,6 +26,12 @@ struct Vertex
 
 class Mesh
 {
+	// render data
+	unsigned int VBO{}, EBO{};
+
+	// initializes all the buffer objects/arrays
+	void setupMesh();
+
 public:
 	// mesh Data
 	vector<Vertex> vertices;
@@ -38,13 +44,6 @@ public:
 
 	// render the mesh
 	void Draw(const Shader &shader) const;
-
-private:
-	// render data
-	unsigned int VBO{}, EBO{};
-
-	// initializes all the buffer objects/arrays
-	void setupMesh();
 };
 
 
