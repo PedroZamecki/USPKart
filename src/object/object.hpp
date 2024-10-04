@@ -3,11 +3,12 @@
 
 #include "collisionBox.hpp"
 #include "graphic/utils/model.hpp"
+#include "resource/resourceManager.hpp"
 
 class Object
 {
 public:
-	explicit Object(const std::string& modelPath);
+	explicit Object(const std::string &modelPath);
 	Object(Position pos, const std::string &modelPath, float width, float height, float depth, CollisionBox *box);
 	~Object();
 	void draw(const Shader &shader, float deltaTime) const;

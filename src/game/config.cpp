@@ -7,6 +7,9 @@
 
 const auto configPath = "../config/config.json";
 
+Configuration *Configuration::instance = nullptr;
+std::mutex Configuration::mtx;
+
 void Configuration::readConfigurationFile()
 {
 	// Create the directory if it doesn't exist.

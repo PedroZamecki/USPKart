@@ -6,13 +6,14 @@
 #include <vector>
 
 #include "mesh.hpp"
+#include "resource/resourceManager.hpp"
 
 class Model
 {
 public:
 	// model data
-	std::vector<Texture> texturesLoaded; // stores all the textures loaded so far, optimization to make sure textures
-										 // aren't loaded more than once.
+	std::vector<const Texture *> texturesLoaded; // stores all the textures loaded so far, optimization to make sure
+												 // textures aren't loaded more than once.
 	std::vector<Mesh> meshes;
 	string directory;
 	bool gammaCorrection;
@@ -36,7 +37,7 @@ private:
 
 	// checks all material textures of a given type and loads the textures if they're not loaded yet.
 	// the required info is returned as a Texture struct.
-	std::vector<Texture> loadMaterialTextures(const aiMaterial *mat, aiTextureType type, string typeName);
+	std::vector<Texture> loadMaterialTextures(const aiMaterial *mat, aiTextureType type, const string& typeName);
 };
 
 #endif // MODEL_HPP

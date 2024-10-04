@@ -3,14 +3,13 @@
 #ifndef GRAPHICS_HELPER_HPP
 #define GRAPHICS_HELPER_HPP
 
-#include <game/config.hpp>
+#include <GLFW/glfw3.h>
 
 class GraphicsHelper
 {
 public:
 	~GraphicsHelper();
 
-	static unsigned int loadShaders();
 	/*
 	 * Configure the environment for the game.
 	 */
@@ -24,15 +23,7 @@ public:
 	 * @param config The configuration of the window.
 	 * @return A pointer to the window created.
 	 */
-	static void *createWindow(const char *title, const Configuration *c, const void *icon);
-
-	/*
-	 * Generate a shader program with the specified vertex and fragment shaders.
-	 * @param programID The ID of the shader program.
-	 * @param vertexShader The vertex shader.
-	 * @param fragmentShader The fragment shader.
-	 */
-	static void generateShaders(unsigned int &programID, const char *vertexShader, const char *fragmentShader);
+	static void *createWindow(const char *title, const GLFWimage *icon);
 
 	/*
 	 * Set up the OpenGL context.
