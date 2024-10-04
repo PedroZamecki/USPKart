@@ -3,16 +3,16 @@
 #ifndef GAME_HPP
 #define GAME_HPP
 
-#include <graphic/graphicsHelper.hpp>
-#include <utils/camera.hpp>
-#include <utils/data.hpp>
+#include "utils/data.hpp"
+
+#include "graphic/gameWindow.hpp"
 
 class Game
 {
-	GraphicsHelper *graphicsHelper;
-	GLFWwindow *window;
-	Data *data;
-	Camera *cam;
+	static void configureEnvironment();
+
+	GameWindow *window{};
+	Data *data{};
 
 public:
 	Game();

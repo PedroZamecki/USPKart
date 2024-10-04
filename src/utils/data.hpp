@@ -11,10 +11,11 @@ public:
 	Data() = default;
 	~Data()
 	{
-		objects.clear();
 		for (const auto &object : objects)
+		{
 			delete object;
-		delete &objects;
+		}
+		objects.clear();
 	}
 	std::pmr::list<Object *> objects;
 };
