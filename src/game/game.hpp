@@ -9,17 +9,16 @@
 
 class Game
 {
+	GraphicsHelper *graphicsHelper;
+	GLFWwindow *window;
+	Data *data;
+	Camera *cam;
+
 public:
 	Game();
 	~Game();
 
 	void run() const;
-
-private:
-	GraphicsHelper *graphicsHelper;
-	GLFWwindow *window;
-	Data *data;
-	Camera *cam;
 };
 
 #endif
