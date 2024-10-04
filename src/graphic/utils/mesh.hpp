@@ -1,13 +1,12 @@
 #ifndef MESH_HPP
 #define MESH_HPP
 
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <string>
 #include <vector>
 
+#include "resource/resourceManager.hpp"
 #include "shader.hpp"
 
 using namespace std;
@@ -20,16 +19,9 @@ struct Vertex
 	glm::vec3 Normal;
 	glm::vec2 TexCoords;
 	glm::vec3 Tangent;
-	glm::vec3 Bitangent;
+	glm::vec3 BiTangent;
 	int m_BoneIDs[MAX_BONE_INFLUENCE];
 	float m_Weights[MAX_BONE_INFLUENCE];
-};
-
-struct Texture
-{
-	unsigned int id;
-	string type;
-	string path;
 };
 
 class Mesh
