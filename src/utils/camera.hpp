@@ -4,15 +4,31 @@
 #include <glm/ext/quaternion_geometric.hpp>
 #include <glm/fwd.hpp>
 #include <glm/trigonometric.hpp>
+#include <mutex>
 
 #include "position.hpp"
 
 class Camera
 {
-public:
+	static Camera *instance;
+	static std::mutex mtx;
+
 	Camera();
 	Camera(Position pos, Position target, float pitch, float yaw, float roll, float fov, float aspectRatio, float near,
 		   float far);
+public:
+	static Camera *getInstance()
+	{
+		if (instance == nullptr)
+		{
+			std::lock_guard lock(mtx);
+			if (instance == nullptr)
+			{
+				instance = new Camera();
+			}
+		}
+		return instance;
+	}
 	Position pos, target;
 	float pitch, yaw, roll, fov, aspectRatio, near, far;
 

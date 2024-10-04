@@ -27,22 +27,19 @@ struct Vertex
 class Mesh
 {
 	// render data
-	unsigned int VBO{}, EBO{};
+	unsigned int VAO{}, VBO{}, EBO{};
 
 	// initializes all the buffer objects/arrays
 	void setupMesh();
 
-public:
 	// mesh Data
 	vector<Vertex> vertices;
 	vector<unsigned int> indices;
 	vector<Texture> textures;
-	unsigned int VAO{};
 
-	// constructor
+public:
 	Mesh(const vector<Vertex> &vertices, const vector<unsigned int> &indices, const vector<Texture> &textures);
 
-	// render the mesh
 	void Draw(const Shader &shader) const;
 };
 

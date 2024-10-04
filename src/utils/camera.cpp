@@ -3,6 +3,9 @@
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
 
+Camera *Camera::instance = nullptr;
+std::mutex Camera::mtx;
+
 Camera::Camera()
 {
 	this->pos = Position(-5, 2, -5	);
