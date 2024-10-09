@@ -24,19 +24,19 @@ class Model
 	// the required info is returned as a Texture struct.
 	std::vector<Texture> loadMaterialTextures(const aiMaterial *mat, aiTextureType type, const string &typeName);
 
-public:
 	// model data
 	std::vector<const Texture *> texturesLoaded; // stores all the textures loaded so far, optimization to make sure
-												 // textures aren't loaded more than once.
+	// textures aren't loaded more than once.
 	std::vector<Mesh> meshes;
 	string directory;
 	bool gammaCorrection;
 
+public:
 	// constructor, expects a filepath to a 3D model.
 	explicit Model(string const &path, bool gamma = false);
 
 	// draws the model, and thus all its meshes
-	void Draw(const Shader &shader) const;
+	void draw(const Shader &shader) const;
 };
 
 #endif // MODEL_HPP

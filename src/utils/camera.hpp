@@ -6,16 +6,13 @@
 #include <glm/trigonometric.hpp>
 #include <mutex>
 
+#include "game/config.hpp"
 #include "position.hpp"
 
 class Camera
 {
 	static Camera *instance;
 	static std::mutex mtx;
-
-	Camera();
-	Camera(Position pos, Position target, float pitch, float yaw, float roll, float fov, float aspectRatio, float near,
-		   float far);
 public:
 	static Camera *getInstance()
 	{
@@ -29,12 +26,15 @@ public:
 		}
 		return instance;
 	}
-	Position pos, target;
-	float pitch, yaw, roll, fov, aspectRatio, near, far;
+	Position pos{20, 5, 20}, target{0, 0, 0};;
+	float pitch{0}, yaw{0}, roll{0}, fov{80}, near{0.1}, far{4096};
 
-	void setAspectRatio(const int width, const int height)
+	void setPos(const Position &pos) { this->pos = pos; }
+
+	static float aspectRatio()
 	{
-		aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+		const auto config = Configuration::getInstance();
+		return static_cast<float>(config->width) / static_cast<float>(config->height);
 	}
 
 	[[nodiscard]] auto targetDist() const -> auto { return (target - pos).norm(); }

@@ -1,11 +1,13 @@
 #include <GL/glew.h>
 
+#include <chrono>
 #include <iostream>
 #include "gameWindow.hpp"
 
 #include "controls/controlsHandler.hpp"
 #include "game/config.hpp"
 #include "utils/camera.hpp"
+#include "utils/data.hpp"
 
 void GameWindow::setupOpenGL(const int width, const int height)
 {
@@ -85,7 +87,6 @@ GameWindow::GameWindow(const std::string &title, const GLFWimage *icon)
 								  {
 									  config->width = width;
 									  config->height = height;
-									  Camera::getInstance()->setAspectRatio(width, height);
 									  config->writeConfigurationFile();
 								  }
 								  setupOpenGL(width, height);
@@ -121,20 +122,34 @@ GameWindow::GameWindow(const std::string &title, const GLFWimage *icon)
 								  glfwSetWindowSize(window, config->width, config->height);
 								  glfwSetWindowAttrib(window, GLFW_DECORATED, !config->borderless);
 								  glfwSetWindowAttrib(window, GLFW_RESIZABLE, config->resizable);
-								  Camera::getInstance()->setAspectRatio(config->width, config->height);
 								  config->fullScreen = false;
 							  }
 							  else
 							  {
 								  const auto monitor = glfwGetPrimaryMonitor();
 								  const auto mode = glfwGetVideoMode(monitor);
-								  Camera::getInstance()->setAspectRatio(mode->width, mode->height);
 								  glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height,
 													   mode->refreshRate);
 								  config->fullScreen = true;
 							  }
 							  config->writeConfigurationFile();
 						  });
+	ch->insertKeyCallback(
+		GLFW_KEY_D, GLFW_PRESS, 0,
+		[this]() -> void
+		{
+			const auto cam = Camera::getInstance();
+			const auto angle = atan(cam->pos.x() / cam->pos.z()) + (cam->pos.z() < 0 ? M_PI : 0);
+			cam->setPos(Position(cam->pos.x() + cos(angle) * 0.1, cam->pos.y(), cam->pos.z() + sin(angle) * 0.1));
+		});
+	ch->insertKeyCallback(
+		GLFW_KEY_A, GLFW_PRESS, 0,
+		[this]() -> void
+		{
+			const auto cam = Camera::getInstance();
+			const auto angle = atan(cam->pos.x() / cam->pos.z()) + (cam->pos.z() < 0 ? M_PI : 0);
+			cam->setPos(Position(cam->pos.x() - cos(angle) * 0.1, cam->pos.y(), cam->pos.z() - sin(angle) * 0.1));
+		});
 }
 GameWindow::~GameWindow()
 {
@@ -142,12 +157,29 @@ GameWindow::~GameWindow()
 	Configuration::getInstance()->writeConfigurationFile();
 }
 
-void GameWindow::run() const
+void GameWindow::run(const Data *data) const
 {
+	const auto modelShader = Shader("shaders/model.vs", "shaders/model.fs");
+	const auto camera = Camera::getInstance();
+	auto lastTime = std::chrono::high_resolution_clock::now();
+	unsigned long nbFrames = 0;
 	while (!glfwWindowShouldClose(window))
 	{
+		const auto currentTime = std::chrono::high_resolution_clock::now();
+		const auto deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
+		lastTime = currentTime;
+		nbFrames++;
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		for (const auto &object : data->objects)
+		{
+			object->draw(modelShader, deltaTime);
+		}
+
 		glfwSwapBuffers(window);
 		glfwPollEvents();
+
+		glfwSetWindowTitle(window, ("FPS: " + std::to_string(1 / deltaTime)).c_str());
 	}
 }
