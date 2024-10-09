@@ -4,13 +4,15 @@
 #include <GLFW/glfw3.h>
 #include <string>
 
+#include "utils/data.hpp"
+
 class GameWindow {
 	GLFWwindow *window;
 	static void setupOpenGL(int width, int height);
 public:
 	explicit GameWindow(const std::string &title, const GLFWimage *icon);
 	~GameWindow();
-	void run() const;
+	void run(const Data *data) const;
 };
 
 #endif //GAME_WINDOW_HPP

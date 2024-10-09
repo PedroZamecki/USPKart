@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "resource/resourceManager.hpp"
-#include "shader.hpp"
+#include "shader/shader.hpp"
 
 using namespace std;
 

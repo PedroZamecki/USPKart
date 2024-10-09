@@ -47,14 +47,14 @@ void Configuration::readConfigurationFile()
 	nlohmann::json json = nlohmann::json::parse(buffer.str());
 
 	// Set the configuration.
-	width = json.contains("width") ? static_cast<int>(json["width"]) : 800;
-	height = json.contains("height") ? static_cast<int>(json["height"]) : 600;
-	resizable = json.contains("resizable") ? static_cast<bool>(json["resizable"]) : false;
-	fullScreen = json.contains("fullScreen") ? static_cast<bool>(json["fullScreen"]) : false;
-	borderless = json.contains("borderless") ? static_cast<bool>(json["borderless"]) : false;
-	vsync = json.contains("vsync") ? static_cast<bool>(json["vsync"]) : false;
-	posX = json.contains("posX") ? static_cast<int>(json["posX"]) : 0;
-	posY = json.contains("posY") ? static_cast<int>(json["posY"]) : 0;
+	width = json.value("width", width);
+	height = json.value("height", height);
+	resizable = json.value("resizable", resizable);
+	fullScreen = json.value("fullScreen", fullScreen);
+	borderless = json.value("borderless", borderless);
+	vsync = json.value("vsync", vsync);
+	posX = json.value("posX", posX);
+	posY = json.value("posY", posY);
 
 	if (width <= 0 || height <= 0 || width > 1920 * 16 || height > 1080 * 16)
 	{

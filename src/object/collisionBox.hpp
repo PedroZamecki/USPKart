@@ -6,14 +6,15 @@
 class CollisionBox
 {
 public:
-	CollisionBox();
-	CollisionBox(Position *pos, float width, float height, float depth);
-	~CollisionBox() { delete pos; }
+	explicit CollisionBox(Position *pos, const float width = 1, const float height = 1, const float depth = 1) :
+		pos(pos), width(width), height(height), depth(depth)
+	{
+	}
 	bool isInside(const CollisionBox *box) const;
 
 private:
 	Position *pos;
-	float width, height, depth;
+	float width{1}, height{1}, depth{1};
 };
 
-#endif //COLLISION_BOX_HPP
+#endif // COLLISION_BOX_HPP
