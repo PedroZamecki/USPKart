@@ -6,8 +6,11 @@
 
 #include "controls/controlsHandler.hpp"
 #include "game/config.hpp"
+#include "model/animatedModel.hpp"
 #include "utils/camera.hpp"
 #include "utils/data.hpp"
+
+#define WINDOW_TITLE std::string("USPKart v") + USP_KART_VERSION
 
 void GameWindow::setupOpenGL(const int width, const int height)
 {
@@ -163,6 +166,7 @@ void GameWindow::run(const Data *data) const
 	const auto camera = Camera::getInstance();
 	auto lastTime = std::chrono::high_resolution_clock::now();
 	unsigned long nbFrames = 0;
+	const auto *animatedModel = new AnimatedModel("assets/models/model.fbx");
 	while (!glfwWindowShouldClose(window))
 	{
 		const auto currentTime = std::chrono::high_resolution_clock::now();
@@ -180,6 +184,6 @@ void GameWindow::run(const Data *data) const
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
-		glfwSetWindowTitle(window, ("FPS: " + std::to_string(1 / deltaTime)).c_str());
+		glfwSetWindowTitle(window, (WINDOW_TITLE + " FPS: " + std::to_string(1 / deltaTime)).c_str());
 	}
 }

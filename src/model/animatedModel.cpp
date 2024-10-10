@@ -1,44 +1,9 @@
-#include "model.hpp"
+#include "animatedModel.hpp"
 
-#include <iostream>
+#include <assimp/postprocess.h>
+#include <glm/gtc/quaternion.hpp>
 
-Model::Model(string const &path, const bool gamma) : gammaCorrection(gamma) { loadModel(path); }
-
-void Model::draw(const Shader &shader) const
-{
-	for (const auto &mesh : meshes)
-		mesh.draw(shader);
-}
-
-void Model::loadModel(string const &path)
-{
-	const auto rm = ResourceManager::getInstance();
-	const auto scene = rm->loadScene(path);
-	// retrieve the directory path of the filepath
-	directory = path.substr(0, path.find_last_of('/'));
-
-	// process ASSIMP's root node recursively
-	processNode(scene->mRootNode, scene);
-}
-
-void Model::processNode(const aiNode *node, const aiScene *scene)
-{
-	// process each mesh located at the current node
-	for (unsigned int i = 0; i < node->mNumMeshes; i++)
-	{
-		// the node object only contains indices to index the actual objects in the scene.
-		// the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
-		aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-		meshes.push_back(processMesh(mesh, scene));
-	}
-	// after we've processed all the meshes (if any) we then recursively process each of the children nodes
-	for (unsigned int i = 0; i < node->mNumChildren; i++)
-	{
-		processNode(node->mChildren[i], scene);
-	}
-}
-
-Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
+Mesh AnimatedModel::processMesh(aiMesh *mesh, const aiScene *scene)
 {
 	// data to fill
 	std::vector<Vertex> vertices;
@@ -121,37 +86,44 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 	std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_height");
 	textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
-	// return a mesh object created from the extracted mesh data
+	extractBoneWeightForVertices(vertices, mesh, scene);
+
 	return {vertices, indices, textures};
 }
 
-std::vector<Texture> Model::loadMaterialTextures(const aiMaterial *mat, const aiTextureType type,
-												 const string &typeName)
+void AnimatedModel::extractBoneWeightForVertices(std::vector<Vertex> &vertices, const aiMesh *mesh,
+												 const aiScene *scene)
 {
-	const auto rm = ResourceManager::getInstance();
-	std::vector<Texture> textures;
-	for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
+	auto &boneInfoMap = m_BoneInfoMap;
+	int &boneCount = m_BoneCounter;
+
+	for (int boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex)
 	{
-		aiString str;
-		mat->GetTexture(type, i, &str);
-		// check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
-		bool skip = false;
-		for (const auto &texture : texturesLoaded)
+		int boneID = -1;
+		std::string boneName = mesh->mBones[boneIndex]->mName.C_Str();
+		if (boneInfoMap.find(boneName) == boneInfoMap.end())
 		{
-			if (std::strcmp(texture->getPath().data(), str.C_Str()) == 0)
-			{
-				textures.push_back(*texture);
-				skip = true; // a texture with the same filepath has already been loaded, continue to next one.
-				// (optimization)
-				break;
-			}
+			BoneInfo newBoneInfo;
+			newBoneInfo.id = boneCount;
+			newBoneInfo.offset = convertMatrixToGLMFormat(mesh->mBones[boneIndex]->mOffsetMatrix);
+			boneInfoMap[boneName] = newBoneInfo;
+			boneID = boneCount;
+			boneCount++;
 		}
-		if (!skip)
-		{ // if texture hasn't been loaded already, load it
-			const auto texture = rm->loadTexture(directory + "/" + str.C_Str(), typeName);
-			texturesLoaded.push_back(texture); // store it as texture loaded for entire model, to ensure we won't
-			// unnecessarily load duplicate textures.
+		else
+		{
+			boneID = boneInfoMap[boneName].id;
+		}
+		assert(boneID != -1);
+		const auto weights = mesh->mBones[boneIndex]->mWeights;
+		const int numWeights = mesh->mBones[boneIndex]->mNumWeights;
+
+		for (int weightIndex = 0; weightIndex < numWeights; ++weightIndex)
+		{
+			const int vertexId = weights[weightIndex].mVertexId;
+			const float weight = weights[weightIndex].mWeight;
+			assert(vertexId <= vertices.size());
+			setVertexBoneData(vertices[vertexId], boneID, weight);
 		}
 	}
-	return textures;
 }
