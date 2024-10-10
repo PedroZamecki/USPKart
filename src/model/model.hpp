@@ -10,6 +10,7 @@
 
 class Model
 {
+protected:
 	// loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes
 	// std::vector.
 	void loadModel(string const &path);

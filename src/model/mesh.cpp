@@ -8,7 +8,7 @@ Mesh::Mesh(const vector<Vertex> &vertices, const vector<unsigned int> &indices, 
 	setupMesh();
 }
 
-void Mesh::Draw(const Shader &shader) const
+void Mesh::draw(const Shader &shader) const
 {
 	// bind appropriate textures
 	unsigned int diffuseNr = 1;

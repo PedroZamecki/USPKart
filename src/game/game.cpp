@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 
+#include "model/animatedModel.hpp"
 #include "model/model.hpp"
 
 #define WINDOW_TITLE std::string("USPKart v") + USP_KART_VERSION
