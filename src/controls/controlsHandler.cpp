@@ -1,4 +1,5 @@
 #include "controlsHandler.hpp"
+#include <utils/logger.hpp>
 #include <iostream>
 
 ControlsHandler *ControlsHandler::instance = nullptr;
@@ -23,9 +24,10 @@ void ControlsHandler::executeKeyCallback(const int key, const int action, const 
 void ControlsHandler::insertKeyCallback(const int key, const int action, const int mods,
 										const std::function<void()> &callback)
 {
+	const auto logger = Logger::getInstance();
 	if (keyCallbacks.count(hash(key, action, mods)))
 	{
-		std::cerr << "Key callback already exists" << std::endl;
+		logger->error("Key callback for key" + std::string(glfwGetKeyName(key, glfwGetKeyScancode(key))) + "already exists");
 		return;
 	}
 	keyCallbacks.insert_or_assign(hash(key, action, mods), callback);

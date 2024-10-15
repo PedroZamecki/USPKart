@@ -5,6 +5,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <sstream>
+#include <utils/logger.hpp>
 
 Shader::Shader(const char *vertexPath, const char *fragmentPath)
 {
@@ -13,6 +14,7 @@ Shader::Shader(const char *vertexPath, const char *fragmentPath)
 	std::string fragmentCode;
 	std::ifstream vShaderFile;
 	std::ifstream fShaderFile;
+	const auto logger = Logger::getInstance();
 	// ensure ifstream objects can throw exceptions:
 	vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 	fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
@@ -23,7 +25,8 @@ Shader::Shader(const char *vertexPath, const char *fragmentPath)
 		fShaderFile.open(fragmentPath);
 		if (!vShaderFile.is_open() || !fShaderFile.is_open())
 		{
-			std::cout << "ERROR::SHADER::FILE_NOT_OPEN" << std::endl;
+			logger->error("Failed to open shader file");
+			throw std::runtime_error("Failed to open shader file");
 			return;
 		}
 		std::stringstream vShaderStream, fShaderStream;
@@ -39,7 +42,7 @@ Shader::Shader(const char *vertexPath, const char *fragmentPath)
 	}
 	catch (std::ifstream::failure &e)
 	{
-		std::cout << "ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ: " << e.what() << std::endl;
+		logger->error("Shader file not successfully read: " + std::string(e.what()));
 		return;
 	}
 	const char *vShaderCode = vertexCode.c_str();
@@ -133,14 +136,14 @@ void Shader::checkCompileErrors(const unsigned int shader, const std::string &ty
 {
 	int success;
 	char infoLog[1024];
+	const auto logger = Logger::getInstance();
 	if (type != "PROGRAM")
 	{
 		glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 		if (!success)
 		{
 			glGetShaderInfoLog(shader, 1024, nullptr, infoLog);
-			std::cout << "ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n"
-					  << infoLog << "\n -- ----------------------------------------------------- " << std::endl;
+			logger->error("Shader compilation error of type: " + type + ": " + infoLog);
 		}
 	}
 	else
@@ -149,8 +152,7 @@ void Shader::checkCompileErrors(const unsigned int shader, const std::string &ty
 		if (!success)
 		{
 			glGetProgramInfoLog(shader, 1024, nullptr, infoLog);
-			std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n"
-					  << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+			logger->error("Shader linking error of type: " + type + ": " + infoLog);
 		}
 	}
 }

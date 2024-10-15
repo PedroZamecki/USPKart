@@ -387,7 +387,7 @@ Objects:  {
 		Shading: Y
 		Culling: "CullingOff"
 	}
-	Material: 56842101, "Material::texture.png", "" {
+	Material: 56842101, "Material::model.png", "" {
 		Version: 102
 		ShadingModel: "lambert"
 		MultiLayer: 0
@@ -398,26 +398,26 @@ Objects:  {
 			P: "Opacity", "double", "Number", "",1
 		}
 	}
-	Texture: 60343488, "Texture::texture.png", "" {
+	Texture: 60343488, "Texture::model.png", "" {
 		Type: "TextureVideoClip"
 		Version: 202
-		TextureName: "Texture::texture.png"
-		Media: "Video::texture.png"
-		FileName: "/home/pedro/Downloads/texture.png"
-		RelativeFilename: "texture.png"
+		TextureName: "Texture::model.png"
+		Media: "Video::model.png"
+		FileName: "/home/pedro/Downloads/model.png"
+		RelativeFilename: "model.png"
 		ModelUVTranslation: 0,0
 		ModelUVScaling: 1,1
 		Texture_Alpha_Source: "None"
 		Cropping: 0,0,0,0
 	}
-	Video: 88678476, "Video::texture.png", "Clip" {
+	Video: 88678476, "Video::model.png", "Clip" {
 		Type: "Clip"
 		Properties70:  {
-			P: "Path", "KString", "XRefUrl", "", "/home/pedro/Downloads/texture.png"
+			P: "Path", "KString", "XRefUrl", "", "/home/pedro/Downloads/model.png"
 		}
 		UseMipMap: 0
-		Filename: "/home/pedro/Downloads/texture.png"
-		RelativeFilename: "texture.png"
+		Filename: "/home/pedro/Downloads/model.png"
+		RelativeFilename: "model.png"
 		Content: "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAjpJREFUOE99k0tME1EUhv87lGnFoCGhCRYXakJc+UALibglChiTiqnVABGLujCBAo07QkxQFyZapSBRCUlTHwNjDRt1gzFujCsVTayPgBtjGlngYgpYpnPNuWSmM/VxNzPn3nO+859/5rLavSmOopWKX7R2jnYPwJdbQNWvBXj1RVR410PRd4vzQc9zsGIAFVORuSgeipxCpbSECixD1Xei51sSw5s7MOB+9m9AmVpQkcwAd/sCaI9NYybaCI+UR2xlP859V/4O6KgCNhyLwMs0vDc2gVQ8ih7Gvdwu8f6idQuGq9sRcr1dA9hnJun2EVpcaXTFUmLvTOYhmtSPYrpkbwBZLhcAlGDKJsnFy4Sazbbue43T/hsFAMmmtRRcM9CEUWxXOBoJ4dXkJKhJ9GzYCaBkKqRns+sTnurbRdx0IoC22LRDFDUkiPCgUv+JW2MjuNwbRlqZsFRQxSFXGlnuRvf1+wJAhZ5gP+7Er4mYNfqTfCOWkZkaE0RKIAUHSr/A4MCMXoMd2c+4MDFlnZkjUh474r/Ny6VVzCnj2HOwBX2JJyLR7kd17gc0uRyr6lVrDNMr1lZ3k3ugQ5YMvHuQEN3JtMGu4/j6WHHMbRbZN9nJujiXGV0HAx+UBGpCYcwaPgHp7DkPjctYp15y+OIAdNaPcIBjNu+zPp872I9FlAmI6Yn9bmxreMMonn9Zy8UInJVgxZCQZW5oRimgXrGakLHFl8sBaK0f5zmjBBpkITcP6Y+/8H+/+m9C/gwN2O8ZzwAAAABJRU5ErkJggg=="
 	}
 	AnimationStack: 38493351, "AnimStack::idle", "" {

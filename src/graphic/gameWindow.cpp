@@ -5,11 +5,11 @@
 #include <thread>
 #include "gameWindow.hpp"
 
+#include <utils/logger.hpp>
 #include "controls/controlsHandler.hpp"
 #include "game/config.hpp"
-#include "model/animatedModel.hpp"
-#include "utils/camera.hpp"
 #include "game/data.hpp"
+#include "utils/camera.hpp"
 
 #define WINDOW_TITLE std::string("USPKart v") + USP_KART_VERSION
 
@@ -20,8 +20,6 @@ void rotateCamera(const float angle)
 	const auto newAngle = atan2(relativePos.z(), relativePos.x()) + angle;
 	const auto dist = sqrt(pow(relativePos.x(), 2) + pow(relativePos.z(), 2));
 	cam->pos = cam->target + Position(cos(newAngle) * dist, cam->pos.y(), sin(newAngle) * dist);
-	std::cout << cam->pos.toString() << std::endl;
-	std::cout << cam->targetDist() << std::endl;
 }
 
 void GameWindow::setupOpenGL(const int width, const int height)
@@ -41,10 +39,11 @@ void GameWindow::setupOpenGL(const int width, const int height)
 GameWindow::GameWindow(const std::string &title, const GLFWimage *icon)
 {
 	const auto c = Configuration::getInstance();
+	const auto logger = Logger::getInstance();
 
 	if (!glfwInit())
 	{
-		std::cerr << "Failed to initialize GLFW" << std::endl;
+		logger->error("Failed to initialize GLFW");
 		throw std::runtime_error("Failed to initialize GLFW");
 	}
 
@@ -69,7 +68,7 @@ GameWindow::GameWindow(const std::string &title, const GLFWimage *icon)
 
 	if (!window)
 	{
-		std::cerr << "Failed to create GLFW window" << std::endl;
+		logger->error("Failed to create GLFW window");
 		glfwTerminate();
 		throw std::runtime_error("Failed to create GLFW window");
 	}
@@ -80,10 +79,10 @@ GameWindow::GameWindow(const std::string &title, const GLFWimage *icon)
 	glfwMakeContextCurrent(window);
 	glewInit();
 
-	std::cout << "Video information:" << std::endl
-			  << "OpenGL version: " << glGetString(GL_VERSION) << std::endl
-			  << "OpenGL renderer: " << glGetString(GL_RENDERER) << std::endl
-			  << "OpenGL vendor: " << glGetString(GL_VENDOR) << std::endl;
+	logger->trace(std::string("Video information:\n") +
+				  "OpenGL version: " + reinterpret_cast<const char *>(glGetString(GL_VERSION)) + "\n" +
+				  "OpenGL renderer: " + reinterpret_cast<const char *>(glGetString(GL_RENDERER)) + "\n" +
+				  "OpenGL vendor: " + reinterpret_cast<const char *>(glGetString(GL_VENDOR)));
 
 	// Set up OpenGL
 	setupOpenGL(c->width, c->height);
@@ -149,24 +148,14 @@ GameWindow::GameWindow(const std::string &title, const GLFWimage *icon)
 							  }
 							  config->writeConfigurationFile();
 						  });
-	ch->insertKeyCallback(GLFW_KEY_D, GLFW_PRESS, 0,
-						  [this]() -> void
-						  {
-							  rotateCamera(0.0872665f);
-						  });
-	ch->insertKeyCallback(GLFW_KEY_A, GLFW_PRESS, 0,
-						  [this]() -> void
-						  {
-							  rotateCamera(-0.0872665f);
-						  });
+	ch->insertKeyCallback(GLFW_KEY_D, GLFW_PRESS, 0, [this]() -> void { rotateCamera(0.0872665f); });
+	ch->insertKeyCallback(GLFW_KEY_A, GLFW_PRESS, 0, [this]() -> void { rotateCamera(-0.0872665f); });
 	ch->insertKeyCallback(GLFW_KEY_W, GLFW_PRESS, 0,
 						  [this]() -> void
 						  {
 							  const auto cam = Camera::getInstance();
 							  const auto direction = (cam->target - cam->pos).normalize();
 							  cam->pos += direction * 2.0f; // Move closer to the target
-							  std::cout << cam->pos.toString() << std::endl;
-							  std::cout << cam->targetDist() << std::endl;
 						  });
 	ch->insertKeyCallback(GLFW_KEY_S, GLFW_PRESS, 0,
 						  [this]() -> void
@@ -174,8 +163,6 @@ GameWindow::GameWindow(const std::string &title, const GLFWimage *icon)
 							  const auto cam = Camera::getInstance();
 							  const auto direction = (cam->pos - cam->target).normalize();
 							  cam->pos += direction * 2.0f; // Move away from the target
-							  std::cout << cam->pos.toString() << std::endl;
-							  std::cout << cam->targetDist() << std::endl;
 						  });
 }
 GameWindow::~GameWindow()
@@ -186,19 +173,19 @@ GameWindow::~GameWindow()
 
 void GameWindow::run(const Data *data) const
 {
+	const auto logger = Logger::getInstance();
 	const auto modelShader = Shader("assets/shaders/model.vs", "assets/shaders/model.fs");
 	const auto animatedModelShader = Shader("assets/shaders/animatedModel.vs", "assets/shaders/animatedModel.fs");
 	const auto camera = Camera::getInstance();
 	auto lastTime = std::chrono::high_resolution_clock::now();
 	unsigned long nbFrames = 0;
-	const auto *animatedModel = new AnimatedModel("assets/models/model.fbx");
 	while (!glfwWindowShouldClose(window))
 	{
 		const auto frameStartTime = std::chrono::high_resolution_clock::now();
 		const auto delta = std::chrono::duration<float>(frameStartTime - lastTime).count();
 
 		modelShader.use();
-        modelShader.setMat4("projection", camera->getProjectionMatrix());
+		modelShader.setMat4("projection", camera->getProjectionMatrix());
 		modelShader.setMat4("view", camera->getViewMatrix());
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -208,11 +195,8 @@ void GameWindow::run(const Data *data) const
 			object->draw(modelShader, delta);
 		}
 
-		animatedModelShader.use();
-		animatedModelShader.setMat4("projection", camera->getProjectionMatrix());
-		animatedModelShader.setMat4("view", camera->getViewMatrix());
-
-		animatedModel->draw(animatedModelShader);
+		if (const auto err = glGetError())
+			logger->error("OpenGL error: " + std::to_string(err) + " at " + __FILE__ + ":" + std::to_string(__LINE__));
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -221,7 +205,7 @@ void GameWindow::run(const Data *data) const
 		nbFrames++;
 		// Only use the first 2 decimal places of the FPS
 		// Detecting where the dot is in the string
-		const auto fps = std::to_string(1/delta);
+		const auto fps = std::to_string(1 / delta);
 		const auto fpsString = fps.substr(0, fps.find('.') + 3);
 		glfwSetWindowTitle(window, (WINDOW_TITLE + " FPS: " + fpsString).c_str());
 		std::this_thread::sleep_for(std::chrono::milliseconds(delta < 0.001 ? 10 : 0));

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <sstream>
+#include <utils/logger.hpp>
 
 const auto configPath = "../config/config.json";
 
@@ -12,6 +13,7 @@ std::mutex Configuration::mtx;
 
 void Configuration::readConfigurationFile()
 {
+	const auto logger = Logger::getInstance();
 	// Create the directory if it doesn't exist.
 	if (const auto directory = "../config"; !std::filesystem::exists(directory))
 	{
@@ -24,14 +26,14 @@ void Configuration::readConfigurationFile()
 
 	if (!file.is_open())
 	{
-		std::cerr << "Failed to open the configuration file" << std::endl;
-		std::cout << "Creating a new configuration file..." << std::endl;
+		logger->error("Failed to open the configuration file");
+		logger->info("Creating a new configuration file...");
 		// Create a new configuration file.
 		std::fstream newFile;
 		newFile.open(configPath, std::ios::out);
 		if (!newFile.is_open())
 		{
-			std::cerr << "Failed to create the configuration file" << std::endl;
+			logger->error("Failed to create the configuration file");
 			return;
 		}
 		newFile.close();
@@ -58,7 +60,7 @@ void Configuration::readConfigurationFile()
 
 	if (width <= 0 || height <= 0 || width > 1920 * 16 || height > 1080 * 16)
 	{
-		std::cerr << "Invalid width or height in the configuration file" << std::endl;
+		logger->error("Invalid width or height in the configuration file");
 		width = 800;
 		height = 600;
 		writeConfigurationFile();
@@ -67,6 +69,7 @@ void Configuration::readConfigurationFile()
 
 void Configuration::writeConfigurationFile()
 {
+	const auto logger = Logger::getInstance();
 	// Write the JSON file with the configuration.
 	nlohmann::json json;
 	json["width"] = width;
@@ -82,7 +85,7 @@ void Configuration::writeConfigurationFile()
 	file.open(configPath, std::ios::out);
 	if (!file.is_open())
 	{
-		std::cerr << "Failed to open the configuration file" << std::endl;
+		logger->error("Failed to open the configuration file");
 		return;
 	}
 

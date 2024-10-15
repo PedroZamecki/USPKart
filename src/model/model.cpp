@@ -41,17 +41,17 @@ void Model::processNode(const aiNode *node, const aiScene *scene)
 Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 {
 	// data to fill
-	std::vector<Vertex> vertices;
-	std::vector<unsigned int> indices;
-	std::vector<Texture> textures;
+	vector<Vertex> vertices;
+	vector<unsigned int> indices;
+	vector<Texture> textures;
 
 	// walk through each of the mesh's vertices
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 	{
-		Vertex vertex{};
-		glm::vec3 vector; // we declare a placeholder std::vector since assimp uses its own std::vector class
-						  // that doesn't directly convert to glm's vec3 class so we transfer the data to this
-						  // placeholder glm::vec3 first.
+		Vertex vertex;
+		glm::vec3
+			vector; // we declare a placeholder vector since assimp uses its own vector class that doesn't directly
+					// convert to glm's vec3 class so we transfer the data to this placeholder glm::vec3 first.
 		// positions
 		vector.x = mesh->mVertices[i].x;
 		vector.y = mesh->mVertices[i].y;
@@ -79,7 +79,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 			vector.y = mesh->mTangents[i].y;
 			vector.z = mesh->mTangents[i].z;
 			vertex.Tangent = vector;
-			// bi-tangent
+			// bitangent
 			vector.x = mesh->mBitangents[i].x;
 			vector.y = mesh->mBitangents[i].y;
 			vector.z = mesh->mBitangents[i].z;
@@ -90,12 +90,12 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 
 		vertices.push_back(vertex);
 	}
-	// now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding
-	// vertex indices.
+	// now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex
+	// indices.
 	for (unsigned int i = 0; i < mesh->mNumFaces; i++)
 	{
 		aiFace face = mesh->mFaces[i];
-		// retrieve all indices of the face and store them in the indices std::vector
+		// retrieve all indices of the face and store them in the indices vector
 		for (unsigned int j = 0; j < face.mNumIndices; j++)
 			indices.push_back(face.mIndices[j]);
 	}
@@ -148,7 +148,11 @@ std::vector<Texture> Model::loadMaterialTextures(const aiMaterial *mat, const ai
 		}
 		if (!skip)
 		{ // if texture hasn't been loaded already, load it
-			const auto texture = rm->loadTexture(directory + "/" + str.C_Str(), typeName);
+			// Modify the path to search in the "textures" folder, for example:
+			// directory = "assets/models"
+			// we will need "assets/texture/models"
+			const auto texture = rm->loadTexture(directory.substr(0, directory.find_last_of('/')) + "/textures/" + str.C_Str(), typeName);
+			textures.push_back(*texture);
 			texturesLoaded.push_back(texture); // store it as texture loaded for entire model, to ensure we won't
 			// unnecessarily load duplicate textures.
 		}

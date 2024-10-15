@@ -5,6 +5,7 @@
 
 #include <SOIL2/SOIL2.h>
 #include <assimp/postprocess.h>
+#include <utils/logger.hpp>
 
 ResourceManager* ResourceManager::instance = nullptr;
 std::mutex ResourceManager::mtx;
@@ -18,6 +19,7 @@ ResourceManager::~ResourceManager()
 
 const Texture *ResourceManager::loadTexture(const std::string &filePath, const std::string &type)
 {
+	const auto logger = Logger::getInstance();
 	// Search in the textures map
 	for (const auto &[path, texture] : textures)
 		if (path == filePath)
@@ -29,13 +31,13 @@ const Texture *ResourceManager::loadTexture(const std::string &filePath, const s
 	glGenTextures(1, &textureId);
 
 	glBindTexture(GL_TEXTURE_2D, textureId);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
 	const unsigned char *image = SOIL_load_image(filePath.c_str(), &width, &height, nullptr, SOIL_LOAD_RGBA);
 	if (image == nullptr)
 	{
-		std::cerr << "Error: Texture in \"" << filePath << "\" not found." << std::endl;
+		logger->error("Error: Texture in \"" + filePath + "\" not found.");
 		return nullptr;
 	}
 
@@ -48,6 +50,7 @@ const Texture *ResourceManager::loadTexture(const std::string &filePath, const s
 
 const char *ResourceManager::loadAudio(std::string &filePath)
 {
+	const auto logger = Logger::getInstance();
 	// Search in the audio map
 	for (const auto &[path, audio] : audio)
 		if (path == filePath)
@@ -56,7 +59,7 @@ const char *ResourceManager::loadAudio(std::string &filePath)
 	std::ifstream file(filePath, std::ios::binary);
 	if (!file.is_open())
 	{
-		std::cerr << "Error: Audio in \"" << filePath << "\" not found." << std::endl;
+		logger->error("Error: Audio in \"" + filePath + "\" not found.");
 		return nullptr;
 	}
 
@@ -90,6 +93,7 @@ const void *ResourceManager::loadIcon(const std::string &filePath)
 
 const aiScene *ResourceManager::loadScene(const std::string &filePath)
 {
+	const auto logger = Logger::getInstance();
 	// Search in the scenes map
 	for (const auto &[path, scene] : scenes)
 		if (path == filePath)
@@ -100,7 +104,7 @@ const aiScene *ResourceManager::loadScene(const std::string &filePath)
 	// check for errors
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
 	{
-		std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
+		logger->error("ASSIMP:: " + std::string(importer.GetErrorString()));
 		return nullptr;
 	}
 	scenes[filePath] = scene;
