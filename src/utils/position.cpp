@@ -21,14 +21,6 @@ void Position::setPos(const float x, const float y, const float z)
 	this->z_ = z;
 }
 
-Position Position::operator+(Position const pos) const { return {x_ + pos.x(), y_ + pos.y(), z_ + pos.z()}; }
-
-Position Position::operator-(Position const pos) const { return {x_ - pos.x(), y_ - pos.y(), z_ - pos.z()}; }
-
-Position Position::operator*(float const scalar) const { return {x_ * scalar, y_ * scalar, z_ * scalar}; }
-
-Position Position::operator/(float const scalar) const { return {x_ / scalar, y_ / scalar, z_ / scalar}; }
-
 float Position::dot(Position const pos) const { return {x_ * pos.x() + y_ * pos.y() + z_ * pos.z()}; }
 
 Position Position::cross(Position const pos) const

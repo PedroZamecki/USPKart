@@ -35,6 +35,15 @@ protected:
 public:
 	// constructor, expects a filepath to a 3D model.
 	explicit Model(string const &path, bool gamma = false);
+	virtual ~Model() { 
+		for (auto &texture : texturesLoaded)
+		{
+			delete texture;
+		}
+
+		texturesLoaded.clear();
+		meshes.clear();
+	}
 
 	// draws the model, and thus all its meshes
 	void draw(const Shader &shader) const;

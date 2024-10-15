@@ -3,7 +3,7 @@
 #ifndef GAME_HPP
 #define GAME_HPP
 
-#include "utils/data.hpp"
+#include "game/data.hpp"
 
 #include "graphic/gameWindow.hpp"
 

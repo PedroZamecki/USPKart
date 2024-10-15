@@ -10,7 +10,7 @@ set(OpenGL_GL_PREFERENCE "GLVND")
 
 find_package(GLEW REQUIRED)
 find_package(glm REQUIRED)
-find_package(OpenGL REQUIRED)
+find_package(OpenGL REQUIRED COMPONENTS OpenGL)
 find_package(nlohmann_json REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(OpenAL CONFIG REQUIRED)
@@ -41,7 +41,7 @@ add_executable(USPKart ${SOURCE_FILES})
 
 target_include_directories(USPKart PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS})
 
-target_link_libraries(USPKart GLEW::GLEW
+target_link_libraries(USPKart PRIVATE GLEW::GLEW
         glfw
         OpenAL::OpenAL
         OpenGL::GL
@@ -64,6 +64,8 @@ function(copy_directory SRC_DIR DST_DIR)
             file(MAKE_DIRECTORY ${DST})
         else ()
             configure_file(${SRC} ${DST} COPYONLY)
+            # Write a message to the console
+            message(STATUS "Copying ${SRC} to ${DST}")
         endif ()
     endforeach ()
 endfunction()
@@ -71,9 +73,6 @@ endfunction()
 set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/assets")
 set(DESTINATION_DIR "${CMAKE_CURRENT_BINARY_DIR}/assets")
 
-copy_directory(${SOURCE_DIR} ${DESTINATION_DIR})
-
-set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/shaders")
-set(DESTINATION_DIR "${CMAKE_CURRENT_BINARY_DIR}/shaders")
+message(STATUS "Copying assets to build directory")
 
 copy_directory(${SOURCE_DIR} ${DESTINATION_DIR})

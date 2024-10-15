@@ -26,7 +26,7 @@ public:
 		}
 		return instance;
 	}
-	Position pos{20, 5, 20}, target{0, 0, 0};;
+	Position pos{20, 5, 0}, target{0, 0, 0};;
 	float pitch{0}, yaw{0}, roll{0}, fov{80}, near{0.1}, far{4096};
 
 	void setPos(const Position &pos) { this->pos = pos; }

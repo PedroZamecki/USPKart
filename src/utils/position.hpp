@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <glm/vec3.hpp>
+#include <string>
 
 class Position
 {
@@ -12,12 +13,18 @@ public:
 
 	void setPos(float x, float y, float z);
 
-	Position operator+(Position pos) const;
-	Position operator-(Position pos) const;
-	Position operator*(float scalar) const;
-	Position operator/(float scalar) const;
+	Position operator+(const Position pos) const { return {x_ + pos.x(), y_ + pos.y(), z_ + pos.z()}; }
+	Position operator+=(const Position pos) { *this = *this + pos; return *this; }
+	Position operator-(const Position pos) const { return {x_ - pos.x(), y_ - pos.y(), z_ - pos.z()}; }
+	Position operator-=(const Position pos) { *this = *this - pos; return *this; }
+	Position operator*(const float scalar) const { return {x_ * scalar, y_ * scalar, z_ * scalar}; }
+	Position operator/(const float scalar) const { return {x_ / scalar, y_ / scalar, z_ / scalar}; }
 
 	[[nodiscard]] auto toVec3() const -> glm::vec3 { return {x_, y_, z_}; };
+	[[nodiscard]] auto toString() const -> std::string
+	{
+		return "x: " + std::to_string(x_) + "; y: " + std::to_string(y_) + "; z: " + std::to_string(z_) + ";";
+	}
 	[[nodiscard]] auto norm() const { return sqrt(pow(x_, 2) + pow(y_, 2) + pow(z_, 2)); }
 	[[nodiscard]] auto dist(const Position pos) const -> double
 	{
@@ -27,6 +34,13 @@ public:
 	static auto dist(const Position pos1, const Position pos2) -> double
 	{
 		return sqrt(pow(pos1.x() - pos2.x(), 2) + pow(pos1.y() - pos2.y(), 2) + pow(pos1.z() - pos2.z(), 2));
+	}
+
+	[[nodiscard]] Position normalize() const
+	{
+		// Consider the position a vector and normalize it
+		const auto value = std::sqrt(x_*x_ + y_*y_ + z_*z_);
+		return	{x_ / value, y_ / value, z_ / value};
 	}
 
 	[[nodiscard]] float dot(Position pos) const;
