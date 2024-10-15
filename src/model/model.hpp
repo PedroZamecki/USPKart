@@ -13,13 +13,13 @@ class Model
 protected:
 	// loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes
 	// std::vector.
-	void loadModel(string const &path);
+	virtual void loadModel(string const &path);
 
 	// processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this
 	// process on its children nodes (if any).
-	void processNode(const aiNode *node, const aiScene *scene);
+	virtual void processNode(const aiNode *node, const aiScene *scene);
 
-	Mesh processMesh(aiMesh *mesh, const aiScene *scene);
+	virtual Mesh processMesh(aiMesh *mesh, const aiScene *scene);
 
 	// checks all material textures of a given type and loads the textures if they're not loaded yet.
 	// the required info is returned as a Texture struct.
@@ -46,7 +46,7 @@ public:
 	}
 
 	// draws the model, and thus all its meshes
-	void draw(const Shader &shader) const;
+	virtual void draw(const Shader &shader) const;
 };
 
 #endif // MODEL_HPP
