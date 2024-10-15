@@ -4,7 +4,7 @@
 #include <GLFW/glfw3.h>
 #include <string>
 
-#include "utils/data.hpp"
+#include "game/data.hpp"
 
 class GameWindow {
 	GLFWwindow *window;

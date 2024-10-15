@@ -6,6 +6,7 @@
 
 class Object
 {
+protected:
 	Position pos{0, 0, 0};
 	Model *model;
 	float width{1}, height{1}, depth{1}, angle{0};
@@ -19,7 +20,13 @@ public:
 		box = new CollisionBox(&pos, width, height, depth);
 		model = new Model(modelPath);
 	}
-	~Object();
+	explicit Object(Model *model, Position pos = {0, 0, 0}, const float width = 1,
+					const float height = 1, const float depth = 1, const float angle = 0) :
+		pos(pos), model(model), width(width), height(height), depth(depth), angle(angle)
+	{
+		box = new CollisionBox(&pos, width, height, depth);
+	}
+	~Object() { delete box; }
 	void draw(const Shader &shader, float deltaTime) const;
 };
 

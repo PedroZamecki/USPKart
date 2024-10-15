@@ -4,7 +4,7 @@
 #include "model.hpp"
 #include "utils/position.hpp"
 
-class AnimatedModel : Model
+class AnimatedModel : public Model
 {
 	std::map<std::string, BoneInfo> m_BoneInfoMap;
 	int m_BoneCounter = 0;
@@ -42,7 +42,6 @@ class AnimatedModel : Model
 	void extractBoneWeightForVertices(std::vector<Vertex> &vertices, const aiMesh *mesh, const aiScene *scene);
 
 public:
-	// Constructor?
 	explicit AnimatedModel(string const &path, const bool gamma = false) : Model(path, gamma) {}
 };
 

@@ -2,15 +2,27 @@
 
 #include <chrono>
 #include <iostream>
+#include <thread>
 #include "gameWindow.hpp"
 
 #include "controls/controlsHandler.hpp"
 #include "game/config.hpp"
 #include "model/animatedModel.hpp"
 #include "utils/camera.hpp"
-#include "utils/data.hpp"
+#include "game/data.hpp"
 
 #define WINDOW_TITLE std::string("USPKart v") + USP_KART_VERSION
+
+void rotateCamera(const float angle)
+{
+	const auto cam = Camera::getInstance();
+	const auto relativePos = cam->pos - cam->target;
+	const auto newAngle = atan2(relativePos.z(), relativePos.x()) + angle;
+	const auto dist = sqrt(pow(relativePos.x(), 2) + pow(relativePos.z(), 2));
+	cam->pos = cam->target + Position(cos(newAngle) * dist, cam->pos.y(), sin(newAngle) * dist);
+	std::cout << cam->pos.toString() << std::endl;
+	std::cout << cam->targetDist() << std::endl;
+}
 
 void GameWindow::setupOpenGL(const int width, const int height)
 {
@@ -137,22 +149,34 @@ GameWindow::GameWindow(const std::string &title, const GLFWimage *icon)
 							  }
 							  config->writeConfigurationFile();
 						  });
-	ch->insertKeyCallback(
-		GLFW_KEY_D, GLFW_PRESS, 0,
-		[this]() -> void
-		{
-			const auto cam = Camera::getInstance();
-			const auto angle = atan(cam->pos.x() / cam->pos.z()) + (cam->pos.z() < 0 ? M_PI : 0);
-			cam->setPos(Position(cam->pos.x() + cos(angle) * 0.1, cam->pos.y(), cam->pos.z() + sin(angle) * 0.1));
-		});
-	ch->insertKeyCallback(
-		GLFW_KEY_A, GLFW_PRESS, 0,
-		[this]() -> void
-		{
-			const auto cam = Camera::getInstance();
-			const auto angle = atan(cam->pos.x() / cam->pos.z()) + (cam->pos.z() < 0 ? M_PI : 0);
-			cam->setPos(Position(cam->pos.x() - cos(angle) * 0.1, cam->pos.y(), cam->pos.z() - sin(angle) * 0.1));
-		});
+	ch->insertKeyCallback(GLFW_KEY_D, GLFW_PRESS, 0,
+						  [this]() -> void
+						  {
+							  rotateCamera(0.0872665f);
+						  });
+	ch->insertKeyCallback(GLFW_KEY_A, GLFW_PRESS, 0,
+						  [this]() -> void
+						  {
+							  rotateCamera(-0.0872665f);
+						  });
+	ch->insertKeyCallback(GLFW_KEY_W, GLFW_PRESS, 0,
+						  [this]() -> void
+						  {
+							  const auto cam = Camera::getInstance();
+							  const auto direction = (cam->target - cam->pos).normalize();
+							  cam->pos += direction * 2.0f; // Move closer to the target
+							  std::cout << cam->pos.toString() << std::endl;
+							  std::cout << cam->targetDist() << std::endl;
+						  });
+	ch->insertKeyCallback(GLFW_KEY_S, GLFW_PRESS, 0,
+						  [this]() -> void
+						  {
+							  const auto cam = Camera::getInstance();
+							  const auto direction = (cam->pos - cam->target).normalize();
+							  cam->pos += direction * 2.0f; // Move away from the target
+							  std::cout << cam->pos.toString() << std::endl;
+							  std::cout << cam->targetDist() << std::endl;
+						  });
 }
 GameWindow::~GameWindow()
 {
@@ -162,28 +186,44 @@ GameWindow::~GameWindow()
 
 void GameWindow::run(const Data *data) const
 {
-	const auto modelShader = Shader("shaders/model.vs", "shaders/model.fs");
+	const auto modelShader = Shader("assets/shaders/model.vs", "assets/shaders/model.fs");
+	const auto animatedModelShader = Shader("assets/shaders/animatedModel.vs", "assets/shaders/animatedModel.fs");
 	const auto camera = Camera::getInstance();
 	auto lastTime = std::chrono::high_resolution_clock::now();
 	unsigned long nbFrames = 0;
 	const auto *animatedModel = new AnimatedModel("assets/models/model.fbx");
 	while (!glfwWindowShouldClose(window))
 	{
-		const auto currentTime = std::chrono::high_resolution_clock::now();
-		const auto deltaTime = std::chrono::duration<float>(currentTime - lastTime).count();
-		lastTime = currentTime;
-		nbFrames++;
+		const auto frameStartTime = std::chrono::high_resolution_clock::now();
+		const auto delta = std::chrono::duration<float>(frameStartTime - lastTime).count();
+
+		modelShader.use();
+        modelShader.setMat4("projection", camera->getProjectionMatrix());
+		modelShader.setMat4("view", camera->getViewMatrix());
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		for (const auto &object : data->objects)
 		{
-			object->draw(modelShader, deltaTime);
+			object->draw(modelShader, delta);
 		}
+
+		animatedModelShader.use();
+		animatedModelShader.setMat4("projection", camera->getProjectionMatrix());
+		animatedModelShader.setMat4("view", camera->getViewMatrix());
+
+		animatedModel->draw(animatedModelShader);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
-		glfwSetWindowTitle(window, (WINDOW_TITLE + " FPS: " + std::to_string(1 / deltaTime)).c_str());
+		lastTime = frameStartTime;
+		nbFrames++;
+		// Only use the first 2 decimal places of the FPS
+		// Detecting where the dot is in the string
+		const auto fps = std::to_string(1/delta);
+		const auto fpsString = fps.substr(0, fps.find('.') + 3);
+		glfwSetWindowTitle(window, (WINDOW_TITLE + " FPS: " + fpsString).c_str());
+		std::this_thread::sleep_for(std::chrono::milliseconds(delta < 0.001 ? 10 : 0));
 	}
 }

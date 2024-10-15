@@ -5,9 +5,7 @@
 
 #include "model/animatedModel.hpp"
 #include "model/model.hpp"
-
-#define WINDOW_TITLE std::string("USPKart v") + USP_KART_VERSION
-#define getPointer static_cast<Game *>(glfwGetWindowUserPointer(window))
+#include "utils/logger.hpp"
 
 void Game::configureEnvironment()
 {
@@ -43,9 +41,9 @@ void Game::configureEnvironment()
 
 Game::Game() : data(new Data)
 {
-	window = new GameWindow(WINDOW_TITLE, (GLFWimage *)ResourceManager::getInstance()->loadIcon("assets/icon.png"));
-	data->objects.push_front(new Object("assets/models/model.fbx", Position{0, 0, 0}, .01, .01, .01, 0));
-	data->objects.push_front(new Object("assets/models/model.fbx", Position{0, 2, 0}, .01, .01, .01, 0));
+	window = new GameWindow("Loading USP Kart...", (GLFWimage *)ResourceManager::getInstance()->loadIcon("assets/icon.png"));
+	data->objects.push_front(new Object("assets/models/model.fbx", Position{0, 0, 0}, 0.1, 1, 0.1));
+	data->objects.push_front(new Object("assets/models/model.fbx", Position{0, 2, 0}, 0.1, 0.1));
 }
 
 Game::~Game()
@@ -62,6 +60,8 @@ void Game::run() const
 
 int main()
 {
+	const auto logger = Logger::getInstance();
+	logger->info("Starting game");
 	const auto game = new Game();
 	game->run();
 	delete game;
