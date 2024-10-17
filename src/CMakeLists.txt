@@ -64,10 +64,10 @@ function(copy_directory SRC_DIR DST_DIR)
             file(MAKE_DIRECTORY ${DST})
         else ()
             configure_file(${SRC} ${DST} COPYONLY)
-            # Write a message to the console
-            message(STATUS "Copying ${SRC} to ${DST}")
         endif ()
     endforeach ()
+
+    message("-- Copying files from \"${SRC_DIR}\" to \"${DST_DIR}\" done")
 endfunction()
 
 set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/assets")

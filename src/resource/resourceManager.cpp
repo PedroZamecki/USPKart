@@ -5,17 +5,15 @@
 
 #include <SOIL2/SOIL2.h>
 #include <assimp/postprocess.h>
+#include <assimp/scene.h>
 #include <utils/logger.hpp>
 
-ResourceManager* ResourceManager::instance = nullptr;
+ResourceManager *ResourceManager::instance = nullptr;
 std::mutex ResourceManager::mtx;
 
 ResourceManager::ResourceManager() = default;
 
-ResourceManager::~ResourceManager()
-{
-	textures.clear();
-}
+ResourceManager::~ResourceManager() { textures.clear(); }
 
 const Texture *ResourceManager::loadTexture(const std::string &filePath, const std::string &type)
 {
@@ -45,7 +43,8 @@ const Texture *ResourceManager::loadTexture(const std::string &filePath, const s
 	SOIL_free_image_data(const_cast<unsigned char *>(image));
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	return textures[filePath] = new Texture{textureId, type, filePath};
+	return textures[filePath] = new Texture{textureId, type, filePath, static_cast<unsigned int>(width),
+	                                        static_cast<unsigned int>(height), nullptr};
 }
 
 const char *ResourceManager::loadAudio(std::string &filePath)

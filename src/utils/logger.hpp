@@ -7,9 +7,19 @@
 #include <memory>
 #include <mutex>
 
+#define critical(message) log(LogLevel::CRITICAL, message, __FILE__, __LINE__)
+#define error(message) log(LogLevel::ERROR, message, __FILE__, __LINE__)
+#define warning(message) log(LogLevel::WARNING, message, __FILE__, __LINE__)
+#define info(message) log(LogLevel::INFO, message, __FILE__, __LINE__)
+#define debug(message) log(LogLevel::DEBUG, message, __FILE__, __LINE__)
+
+#define glLog() if (const auto err = glGetError()) \
+							Logger::getInstance()->error("OpenGL error: (" + std::to_string(err) + ") - " + \
+								reinterpret_cast<const char *>(glewGetErrorString(err)))
+
 enum class LogLevel
 {
-	TRACE = 0,
+	DEBUG = 0,
 	INFO = 1,
 	WARNING = 2,
 	ERROR = 3,
@@ -39,15 +49,35 @@ class Logger
 		logFile.open(logName, std::ios_base::app);
 		if (!logFile.is_open())
 		{
-			error("Failed to open log file: " + logName);
+			log(LogLevel::ERROR, "Failed to open log file: " + logName, __FILE__, __LINE__);
 			throw std::runtime_error("Failed to open log file: " + logName);
 		}
 
 		logFile << "-------------------------------------------------------------------------------------\n"
-				<< std::put_time(std::localtime(&now), "Starting %Y-%m-%d %H:%M:%S\n") << std::endl;
+			<< std::put_time(std::localtime(&now), "Starting %Y-%m-%d %H:%M:%S\n") << std::endl;
 	}
 
-	void log(LogLevel level, const std::string &message)
+public:
+	Logger(const Logger &) = delete;
+	Logger &operator=(const Logger &) = delete;
+
+	static Logger *getInstance()
+	{
+		std::lock_guard<std::mutex> lock(mut);
+		if (instance == nullptr)
+		{
+			instance = std::unique_ptr<Logger>(new Logger());
+		}
+		return instance.get();
+	}
+
+	void setLogLevel(const LogLevel level)
+	{
+		std::lock_guard lock(mut);
+		logLevel = level;
+	}
+
+	void log(const LogLevel level, const std::string &message, const char *file, const int line)
 	{
 		if (level < logLevel)
 			return;
@@ -55,8 +85,8 @@ class Logger
 		const char *levelStr = nullptr;
 		switch (level)
 		{
-		case LogLevel::TRACE:
-			levelStr = "[TRACE]";
+		case LogLevel::DEBUG:
+			levelStr = "[DEBUG]";
 			break;
 		case LogLevel::INFO:
 			levelStr = "[INFO]";
@@ -75,46 +105,18 @@ class Logger
 			break;
 		}
 
-		std::ostream &out = (level == LogLevel::ERROR) ? std::cerr : std::cout;
-		out << levelStr << " " << message << std::endl;
+		const auto local =
+			(level >= LogLevel::ERROR ? " [" + std::string(file) + ":" + std::to_string(line) + "] " : " ");
+		std::ostream &out = (level >= LogLevel::ERROR) ? std::cerr : std::cout;
+		out << levelStr << local << message << std::endl;
 
 		if (logFile.is_open())
 		{
-			auto now = std::chrono::system_clock::now();
-			auto now_c = std::chrono::system_clock::to_time_t(now);
-			auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
+			const auto now = std::chrono::system_clock::now();
+			const auto now_c = std::chrono::system_clock::to_time_t(now);
+			const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
 			logFile << std::put_time(std::localtime(&now_c), "%Y-%m-%d %H:%M:%S") << '.' << std::setfill('0')
-					<< std::setw(3) << ms.count() << " - " << levelStr << " " << message << std::endl;
+				<< std::setw(3) << ms.count() << " - " << levelStr << local << message << std::endl;
 		}
 	}
-
-public:
-	Logger(const Logger &) = delete;
-	Logger &operator=(const Logger &) = delete;
-
-	static Logger *getInstance()
-	{
-		std::lock_guard<std::mutex> lock(mut);
-		if (instance == nullptr)
-		{
-			instance = std::unique_ptr<Logger>(new Logger());
-		}
-		return instance.get();
-	}
-
-	void setLogLevel(LogLevel level)
-	{
-		std::lock_guard<std::mutex> lock(mut);
-		logLevel = level;
-	}
-
-	void critical(const std::string &message) { log(LogLevel::CRITICAL, message); }
-
-	void error(const std::string &message) { log(LogLevel::ERROR, message); }
-
-	void warning(const std::string &message) { log(LogLevel::WARNING, message); }
-
-	void info(const std::string &message) { log(LogLevel::INFO, message); }
-
-	void trace(const std::string &message) { log(LogLevel::TRACE, message); }
 };
