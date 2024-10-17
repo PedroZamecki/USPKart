@@ -36,7 +36,7 @@ public:
 	// constructor, expects a filepath to a 3D model.
 	explicit Model(string const &path, bool gamma = false);
 	virtual ~Model() { 
-		for (auto &texture : texturesLoaded)
+		for (const auto &texture : texturesLoaded)
 		{
 			delete texture;
 		}

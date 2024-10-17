@@ -14,15 +14,21 @@ class Texture
 	unsigned int id{};
 	std::string type;
 	std::string path;
+	unsigned int width{};
+	unsigned int height{};
+	void *data{};
 
 public:
-	Texture(const unsigned int id, std::string type, std::string path) :
-		id(id), type(std::move(type)), path(std::move(path))
+	Texture(const unsigned int id, std::string type, std::string path, unsigned int width, unsigned int height, void *data) :
+		id(id), type(std::move(type)), path(std::move(path)), width(width), height(height), data(data)
 	{
 	}
 	[[nodiscard]] unsigned int getId() const { return id; }
 	[[nodiscard]] const std::string &getType() const { return type; }
 	[[nodiscard]] const std::string &getPath() const { return path; }
+	[[nodiscard]] unsigned int getWidth() const { return width; }
+	[[nodiscard]] unsigned int getHeight() const { return height; }
+	[[nodiscard]] void *getData() const { return data; }
 };
 
 class ResourceManager

@@ -70,66 +70,147 @@ Shader::Shader(const char *vertexPath, const char *fragmentPath)
 	glDeleteShader(fragment);
 }
 
-void Shader::use() const { glUseProgram(ID); }
+void Shader::use() const
+{
+	glUseProgram(ID);
+	if (const auto err = glGetError())
+	{
+		Logger::getInstance()->error("OpenGL error: (" + std::to_string(err) + ") - " +
+			reinterpret_cast<const char *>(glewGetErrorString(err)));
+		throw std::runtime_error("OpenGL error");
+	}
+}
 
 void Shader::setBool(const std::string &name, const bool value) const
 {
 	glUniform1i(glGetUniformLocation(ID, name.c_str()), static_cast<int>(value));
+	if (const auto err = glGetError())
+	{
+		Logger::getInstance()->error("OpenGL error: (" + std::to_string(err) + ") - " +
+			reinterpret_cast<const char *>(glewGetErrorString(err)));
+		throw std::runtime_error("OpenGL error");
+	}
 }
 
 void Shader::setInt(const std::string &name, const int value) const
 {
 	glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
+	if (const auto err = glGetError())
+	{
+		Logger::getInstance()->error("OpenGL error: (" + std::to_string(err) + ") - " +
+			reinterpret_cast<const char *>(glewGetErrorString(err)));
+		throw std::runtime_error("OpenGL error");
+	}
 }
 
 void Shader::setFloat(const std::string &name, const float value) const
 {
 	glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
+	if (const auto err = glGetError())
+	{
+		Logger::getInstance()->error("OpenGL error: (" + std::to_string(err) + ") - " +
+			reinterpret_cast<const char *>(glewGetErrorString(err)));
+		throw std::runtime_error("OpenGL error");
+	}
 }
 
 void Shader::setVec2(const std::string &name, const glm::vec2 &value) const
 {
 	glUniform2fv(glGetUniformLocation(ID, name.c_str()), 1, &value[0]);
+	if (const auto err = glGetError())
+	{
+		Logger::getInstance()->error("OpenGL error: (" + std::to_string(err) + ") - " +
+			reinterpret_cast<const char *>(glewGetErrorString(err)));
+		throw std::runtime_error("OpenGL error");
+	}
 }
 
 void Shader::setVec2(const std::string &name, const float x, const float y) const
 {
 	glUniform2f(glGetUniformLocation(ID, name.c_str()), x, y);
+	if (const auto err = glGetError())
+	{
+		Logger::getInstance()->error("OpenGL error: (" + std::to_string(err) + ") - " +
+			reinterpret_cast<const char *>(glewGetErrorString(err)));
+		throw std::runtime_error("OpenGL error");
+	}
 }
 
 void Shader::setVec3(const std::string &name, const glm::vec3 &value) const
 {
 	glUniform3fv(glGetUniformLocation(ID, name.c_str()), 1, &value[0]);
+	if (const auto err = glGetError())
+	{
+		Logger::getInstance()->error("OpenGL error: (" + std::to_string(err) + ") - " +
+			reinterpret_cast<const char *>(glewGetErrorString(err)));
+		throw std::runtime_error("OpenGL error");
+	}
 }
 
 void Shader::setVec3(const std::string &name, const float x, const float y, const float z) const
 {
 	glUniform3f(glGetUniformLocation(ID, name.c_str()), x, y, z);
+	if (const auto err = glGetError())
+	{
+		Logger::getInstance()->error("OpenGL error: (" + std::to_string(err) + ") - " +
+			reinterpret_cast<const char *>(glewGetErrorString(err)));
+		throw std::runtime_error("OpenGL error");
+	}
 }
 
 void Shader::setVec4(const std::string &name, const glm::vec4 &value) const
 {
 	glUniform4fv(glGetUniformLocation(ID, name.c_str()), 1, &value[0]);
+	if (const auto err = glGetError())
+	{
+		Logger::getInstance()->error("OpenGL error: (" + std::to_string(err) + ") - " +
+			reinterpret_cast<const char *>(glewGetErrorString(err)));
+		throw std::runtime_error("OpenGL error");
+	}
 }
 
 void Shader::setVec4(const std::string &name, const float x, const float y, const float z, const float w) const
 {
 	glUniform4f(glGetUniformLocation(ID, name.c_str()), x, y, z, w);
+	if (const auto err = glGetError())
+	{
+		Logger::getInstance()->error("OpenGL error: (" + std::to_string(err) + ") - " +
+			reinterpret_cast<const char *>(glewGetErrorString(err)));
+		throw std::runtime_error("OpenGL error");
+	}
 }
 
 void Shader::setMat2(const std::string &name, const glm::mat2 &mat) const
 {
 	glUniformMatrix2fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+	if (const auto err = glGetError())
+	{
+		Logger::getInstance()->error("OpenGL error: (" + std::to_string(err) + ") - " +
+			reinterpret_cast<const char *>(glewGetErrorString(err)));
+		throw std::runtime_error("OpenGL error");
+	}
 }
 
 void Shader::setMat3(const std::string &name, const glm::mat3 &mat) const
 {
 	glUniformMatrix3fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+	if (const auto err = glGetError())
+	{
+		Logger::getInstance()->error("OpenGL error: (" + std::to_string(err) + ") - " +
+			reinterpret_cast<const char *>(glewGetErrorString(err)));
+		throw std::runtime_error("OpenGL error");
+	}
 }
 
 void Shader::setMat4(const std::string &name, const glm::mat4 &mat) const
 {
 	glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+	if (const auto err = glGetError())
+	{
+		Logger::getInstance()->error("OpenGL error: (" + std::to_string(err) + ") - " +
+			reinterpret_cast<const char *>(glewGetErrorString(err)));
+		throw std::runtime_error("OpenGL error");
+	}
 }
 
 void Shader::checkCompileErrors(const unsigned int shader, const std::string &type)

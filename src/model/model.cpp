@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-Model::Model(string const &path, const bool gamma) : gammaCorrection(gamma) { loadModel(path); }
+Model::Model(string const &path, const bool gamma) : gammaCorrection(gamma) { Model::loadModel(path); }
 
 void Model::draw(const Shader &shader) const
 {
@@ -151,7 +151,8 @@ std::vector<Texture> Model::loadMaterialTextures(const aiMaterial *mat, const ai
 			// Modify the path to search in the "textures" folder, for example:
 			// directory = "assets/models"
 			// we will need "assets/texture/models"
-			const auto texture = rm->loadTexture(directory.substr(0, directory.find_last_of('/')) + "/textures/" + str.C_Str(), typeName);
+			const auto texture = rm->loadTexture(
+				directory.substr(0, directory.find_last_of('/')) + "/textures/" + str.C_Str(), typeName);
 			textures.push_back(*texture);
 			texturesLoaded.push_back(texture); // store it as texture loaded for entire model, to ensure we won't
 			// unnecessarily load duplicate textures.

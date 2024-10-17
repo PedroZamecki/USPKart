@@ -26,7 +26,7 @@ void Configuration::readConfigurationFile()
 
 	if (!file.is_open())
 	{
-		logger->error("Failed to open the configuration file");
+		logger->warning("Failed to open the configuration file");
 		logger->info("Creating a new configuration file...");
 		// Create a new configuration file.
 		std::fstream newFile;

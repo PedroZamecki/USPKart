@@ -10,18 +10,18 @@ void Game::configureEnvironment()
 {
 	const auto logger = Logger::getInstance();
 #ifdef _WIN32
-	logger->trace("Running on Windows");
+	logger->debug("Running on Windows");
 #elif __linux__
 	if (const std::string sessionType = std::getenv("XDG_SESSION_TYPE"); !sessionType.empty())
 	{
 		if (std::string(sessionType) == "wayland")
 		{
-			logger->trace("Running on Linux (Wayland)");
+			logger->debug("Running on Linux (Wayland)");
 			putenv(const_cast<char *>("GDK_BACKEND=wayland"));
 		}
 		else if (sessionType == "x11")
 		{
-			logger->trace("Running on Linux (X11)");
+			logger->debug("Running on Linux (X11)");
 			putenv(const_cast<char *>("GDK_BACKEND=x11"));
 		}
 		else
@@ -43,8 +43,8 @@ Game::Game() : data(new Data)
 {
 	window =
 		new GameWindow("Loading USP Kart...", (GLFWimage *)ResourceManager::getInstance()->loadIcon("assets/icon.png"));
-	data->objects.push_front(new Object("assets/models/model.fbx", Position{0, 0, 0}));
-	data->objects.push_front(new Object("assets/models/model.fbx", Position{0, 2, 0}));
+	data->objects.push_front(new Object("assets/models/model.fbx", Position{0, 0, 0}, 0.01, 0.01, 0.01));
+	data->objects.push_front(new Object("assets/models/model.fbx", Position{0, 2, 0}, 0.01, 0.01, 0.01));
 }
 
 Game::~Game()
@@ -61,7 +61,6 @@ void Game::run() const
 
 int main()
 {
-	const auto logger = Logger::getInstance();
 	const auto game = new Game();
 	game->run();
 	delete game;

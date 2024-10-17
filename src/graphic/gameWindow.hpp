@@ -6,13 +6,15 @@
 
 #include "game/data.hpp"
 
-class GameWindow {
+class GameWindow
+{
 	GLFWwindow *window;
 	static void setupOpenGL(int width, int height);
+
 public:
 	explicit GameWindow(const std::string &title, const GLFWimage *icon);
 	~GameWindow();
 	void run(const Data *data) const;
 };
 
-#endif //GAME_WINDOW_HPP
+#endif // GAME_WINDOW_HPP
