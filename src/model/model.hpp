@@ -26,7 +26,7 @@ protected:
 	std::vector<Texture> loadMaterialTextures(const aiMaterial *mat, aiTextureType type, const string &typeName);
 
 	// model data
-	std::vector<const Texture *> texturesLoaded; // stores all the textures loaded so far, optimization to make sure
+	std::vector<Texture> texturesLoaded; // stores all the textures loaded so far, optimization to make sure
 	// textures aren't loaded more than once.
 	std::vector<Mesh> meshes;
 	string directory;
@@ -35,12 +35,8 @@ protected:
 public:
 	// constructor, expects a filepath to a 3D model.
 	explicit Model(string const &path, bool gamma = false);
-	virtual ~Model() { 
-		for (const auto &texture : texturesLoaded)
-		{
-			delete texture;
-		}
-
+	virtual ~Model()
+	{
 		texturesLoaded.clear();
 		meshes.clear();
 	}
