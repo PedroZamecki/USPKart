@@ -138,9 +138,9 @@ std::vector<Texture> Model::loadMaterialTextures(const aiMaterial *mat, const ai
 		bool skip = false;
 		for (const auto &texture : texturesLoaded)
 		{
-			if (std::strcmp(texture->getPath().data(), str.C_Str()) == 0)
+			if (std::strcmp(texture.getPath().data(), str.C_Str()) == 0)
 			{
-				textures.push_back(*texture);
+				textures.push_back(texture);
 				skip = true; // a texture with the same filepath has already been loaded, continue to next one.
 				// (optimization)
 				break;
@@ -148,12 +148,8 @@ std::vector<Texture> Model::loadMaterialTextures(const aiMaterial *mat, const ai
 		}
 		if (!skip)
 		{ // if texture hasn't been loaded already, load it
-			// Modify the path to search in the "textures" folder, for example:
-			// directory = "assets/models"
-			// we will need "assets/texture/models"
-			const auto texture = rm->loadTexture(
-				directory.substr(0, directory.find_last_of('/')) + "/textures/" + str.C_Str(), typeName);
-			textures.push_back(*texture);
+			const auto texture = rm->loadTexture(directory + '/' + str.C_Str(), typeName);
+			textures.push_back(texture);
 			texturesLoaded.push_back(texture); // store it as texture loaded for entire model, to ensure we won't
 			// unnecessarily load duplicate textures.
 		}

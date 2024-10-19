@@ -1,5 +1,7 @@
-#pragma once
+#ifndef LOGGER_HPP
+#define LOGGER_HPP
 
+#include <execinfo.h>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
@@ -13,9 +15,10 @@
 #define info(message) log(LogLevel::INFO, message, __FILE__, __LINE__)
 #define debug(message) log(LogLevel::DEBUG, message, __FILE__, __LINE__)
 
-#define glLog() if (const auto err = glGetError()) \
-							Logger::getInstance()->error("OpenGL error: (" + std::to_string(err) + ") - " + \
-								reinterpret_cast<const char *>(glewGetErrorString(err)))
+#define glLog()                                                                                                        \
+	if (const auto err = glGetError())                                                                                 \
+	Logger::getInstance()->error("OpenGL error: (" + std::to_string(err) + ") - " +                                    \
+								 reinterpret_cast<const char *>(glewGetErrorString(err)))
 
 enum class LogLevel
 {
@@ -54,7 +57,7 @@ class Logger
 		}
 
 		logFile << "-------------------------------------------------------------------------------------\n"
-			<< std::put_time(std::localtime(&now), "Starting %Y-%m-%d %H:%M:%S\n") << std::endl;
+				<< std::put_time(std::localtime(&now), "Starting %Y-%m-%d %H:%M:%S\n") << std::endl;
 	}
 
 public:
@@ -63,7 +66,7 @@ public:
 
 	static Logger *getInstance()
 	{
-		std::lock_guard<std::mutex> lock(mut);
+		std::lock_guard lock(mut);
 		if (instance == nullptr)
 		{
 			instance = std::unique_ptr<Logger>(new Logger());
@@ -116,7 +119,9 @@ public:
 			const auto now_c = std::chrono::system_clock::to_time_t(now);
 			const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
 			logFile << std::put_time(std::localtime(&now_c), "%Y-%m-%d %H:%M:%S") << '.' << std::setfill('0')
-				<< std::setw(3) << ms.count() << " - " << levelStr << local << message << std::endl;
+					<< std::setw(3) << ms.count() << " - " << levelStr << local << message << std::endl;
 		}
 	}
 };
+
+#endif // LOGGER_HPP

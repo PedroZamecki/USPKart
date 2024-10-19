@@ -3,7 +3,6 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
-#include <SOIL2/SOIL2.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <utils/logger.hpp>
@@ -15,7 +14,7 @@ ResourceManager::ResourceManager() = default;
 
 ResourceManager::~ResourceManager() { textures.clear(); }
 
-const Texture *ResourceManager::loadTexture(const std::string &filePath, const std::string &type)
+Texture ResourceManager::loadTexture(const std::string &filePath, const std::string &type)
 {
 	const auto logger = Logger::getInstance();
 	// Search in the textures map
@@ -32,19 +31,18 @@ const Texture *ResourceManager::loadTexture(const std::string &filePath, const s
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-	const unsigned char *image = SOIL_load_image(filePath.c_str(), &width, &height, nullptr, SOIL_LOAD_RGBA);
+	unsigned char *image = SOIL_load_image(filePath.c_str(), &width, &height, nullptr, SOIL_LOAD_RGBA);
 	if (image == nullptr)
 	{
 		logger->error("Error: Texture in \"" + filePath + "\" not found.");
-		return nullptr;
+		throw std::runtime_error("Error: Texture in \"" + filePath + "\" not found.");
 	}
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-	SOIL_free_image_data(const_cast<unsigned char *>(image));
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	return textures[filePath] = new Texture{textureId, type, filePath, static_cast<unsigned int>(width),
-	                                        static_cast<unsigned int>(height), nullptr};
+	const auto texture = Texture(textureId, type, filePath, width, height, image);
+	return textures.try_emplace(filePath, texture).first->second;
 }
 
 const char *ResourceManager::loadAudio(std::string &filePath)
