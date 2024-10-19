@@ -5,6 +5,7 @@
 
 #include "model/model.hpp"
 #include "object/kart.hpp"
+#include "object/track.hpp"
 #include "utils/logger.hpp"
 
 void Game::configureEnvironment()
@@ -44,6 +45,7 @@ Game::Game() : data(new Data)
 {
 	window =
 		new GameWindow("Loading USP Kart...", (GLFWimage *)ResourceManager::getInstance()->loadIcon("assets/icon.png"));
+	data->objects.push_front(new Track());
 	data->objects.push_front(new Kart());
 }
 

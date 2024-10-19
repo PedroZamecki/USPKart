@@ -33,7 +33,7 @@ public:
 	bool resizable{false};
 	bool fullScreen{false};
 	bool borderless{false};
-	bool vsync{false};
+	bool vsync{true};
 	int posX{0};
 	int posY{0};
 
