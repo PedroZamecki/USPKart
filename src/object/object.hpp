@@ -30,7 +30,7 @@ public:
 
 	void rotate(const float value) { angle += value; }
 
-	void run(const float angle) { pitch += angle; }
+	void adjustPitch(const float value) { pitch += value; }
 
 	explicit Object(const std::string &modelPath, Position pos = {0, 0, 0}, const float width = 1,
 					const float height = 1, const float depth = 1, const float pitch = 0, const float angle = 0,

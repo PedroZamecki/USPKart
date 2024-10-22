@@ -211,7 +211,6 @@ void GameWindow::run(const Data *data) const
 
 		for (const auto &object : data->objects)
 		{
-			object->move(Position{0, 0.001, 0} * std::sin(delta));
 			object->draw(modelShader, delta, {1});
 		}
 
