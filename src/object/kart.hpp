@@ -1,6 +1,7 @@
 #ifndef KART_HPP
 #define KART_HPP
 
+#include "controls/controlsHandler.hpp"
 #include "object.hpp"
 
 class Wheel final : public Object
@@ -14,7 +15,7 @@ public:
 	{
 	}
 
-	void steer(const float value) { steeringAngle += value; }
+	void steer(const float value) { steeringAngle = value; }
 
 	glm::mat4 getModel(const glm::mat4 &baseModel) override
 	{
@@ -28,6 +29,8 @@ public:
 		return m_model;
 	}
 
+	[[nodiscard]] float getSteeringAngle() const { return steeringAngle; }
+
 	void draw(const Shader &shader, const float deltaTime, const glm::mat4 baseModel) override
 	{
 
@@ -36,21 +39,42 @@ public:
 	}
 };
 
-class Kart final : public Object
+class Kart : public Object
 {
 	float speed{0.0f};
+	float steeringAngle{0.0f};
 	Wheel wheels[4] = {Wheel(pos + Position{10, 4, 12.5} / 16), Wheel(pos + Position{10, 4, -12.5} / 16),
 					   Wheel(pos + Position{-10, 4, 12.5} / 16, true), Wheel(pos + Position{-10, 4, -12.5} / 16, true)};
 
 public:
-	Kart() : Object("assets/models/kart.obj", Position{0, 0, 0}) {}
+	Kart() : Object("assets/models/kart.obj", Position{0, 0, 0})
+	{
+		const auto controls = ControlsHandler::getInstance();
+		controls->insertKeyCallback(GLFW_KEY_W, [this]() { speed += 0.1f; });
+		controls->insertKeyCallback(GLFW_KEY_S, [this]() { speed -= 0.1f; });
+		controls->insertKeyCallback(GLFW_KEY_A, [this]() { steeringAngle += 0.1f; });
+		controls->insertKeyCallback(GLFW_KEY_D, [this]() { steeringAngle -= 0.1f; });
+	}
+
+	[[nodiscard]] float getSteeringAngle() const { return steeringAngle; }
+
+	void update(const float deltaTime)
+    {
+		pos += Position{speed * sin(angle), 0, speed * cos(angle)} * deltaTime;
+		speed *= 0.99f;
+		steeringAngle *= 0.9f;
+		angle += steeringAngle;
+    }
 
 	void draw(const Shader &shader, const float deltaTime, const glm::mat4 baseModel) override
 	{
+		update(deltaTime);
 		Object::draw(shader, deltaTime, baseModel);
+		wheels[0].steer(steeringAngle);
+		wheels[2].steer(steeringAngle);
 		for (auto &wheel : wheels)
 		{
-			wheel.adjustPitch(speed * deltaTime * 0.1f);
+			wheel.adjustPitch(speed * deltaTime);
 			wheel.draw(shader, deltaTime, getModel(baseModel));
 		}
 	}

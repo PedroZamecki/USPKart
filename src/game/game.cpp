@@ -4,7 +4,7 @@
 #include <string>
 
 #include "model/model.hpp"
-#include "object/kart.hpp"
+#include "object/player.hpp"
 #include "object/track.hpp"
 #include "utils/logger.hpp"
 
@@ -46,7 +46,7 @@ Game::Game() : data(new Data)
 	window =
 		new GameWindow("Loading USP Kart...", (GLFWimage *)ResourceManager::getInstance()->loadIcon("assets/icon.png"));
 	data->objects.push_front(new Track());
-	data->objects.push_front(new Kart());
+	data->objects.push_front(new Player());
 }
 
 Game::~Game()

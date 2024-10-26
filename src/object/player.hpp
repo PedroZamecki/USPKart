@@ -1,17 +1,13 @@
 #ifndef PLAYER_HPP
 #define PLAYER_HPP
+
 #include "character.hpp"
 
-class Player : Character
+class Player final : public Character
 {
 public:
-	Player();
-	~Player();
-
-private:
-	Position pos;
-	float width, height, depth;
-	CollisionBox box;
+	Player() = default;
+	bool isPlayer() override { return true; }
 };
 
 #endif //PLAYER_HPP

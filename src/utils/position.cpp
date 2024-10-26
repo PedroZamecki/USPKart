@@ -6,6 +6,12 @@ Position::Position()
 	y_ = 0.0f;
 	z_ = 0.0f;
 }
+Position::Position(const glm::vec3 vector)
+{
+	x_ = vector.x;
+	y_ = vector.y;
+	z_ = vector.z;
+}
 
 Position::Position(const float x, const float y, const float z)
 {

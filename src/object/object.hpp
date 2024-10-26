@@ -24,6 +24,11 @@ public:
 		return m_model;
 	}
 
+	[[nodiscard]] Position getPos() const { return pos; }
+	[[nodiscard]] float getAngle() const { return angle; }
+
+	virtual bool isPlayer() { return false; }
+
 	void move(const Position &value) { pos += value; }
 
 	void resize(const float value) { scale += value; }

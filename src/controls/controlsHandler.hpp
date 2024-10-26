@@ -14,7 +14,7 @@ class ControlsHandler
 	explicit ControlsHandler();
 	~ControlsHandler();
 
-	std::map<unsigned int, std::function<void()>> keyCallbacks;
+	std::map<unsigned int, std::vector<std::function<void()>>> keyCallbacks;
 	int keyStates[GLFW_KEY_LAST]{};
 
 public:
@@ -32,7 +32,7 @@ public:
 	}
 
 	void executeKeyCallback(int key, int action, int mods);
-	void insertKeyCallback(int key, int action, int mods, const std::function<void()> &callback);
+	void insertKeyCallback(int key, const std::function<void()> &callback);
 	[[nodiscard]] int getKeyState(const int key) const { return keyStates[key]; }
 };
 

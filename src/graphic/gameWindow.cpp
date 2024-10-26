@@ -6,22 +6,14 @@
 #include "gameWindow.hpp"
 
 #include <utils/logger.hpp>
+#include "camera/camera.hpp"
 #include "controls/controlsHandler.hpp"
 #include "game/config.hpp"
 #include "game/data.hpp"
+#include "object/player.hpp"
 #include "skybox.hpp"
-#include "utils/camera.hpp"
 
 #define WINDOW_TITLE std::string("USPKart v") + USP_KART_VERSION
-
-void rotateCamera(const float angle)
-{
-	const auto cam = Camera::getInstance();
-	const auto relativePos = cam->pos - cam->target;
-	const auto newAngle = atan2(relativePos.z(), relativePos.x()) + angle;
-	const auto dist = sqrt(pow(relativePos.x(), 2) + pow(relativePos.z(), 2));
-	cam->pos = cam->target + Position(cos(newAngle) * dist, cam->pos.y(), sin(newAngle) * dist);
-}
 
 void GameWindow::setupOpenGL(const int width, const int height)
 {
@@ -133,10 +125,9 @@ GameWindow::GameWindow(const std::string &title, const GLFWimage *icon)
 
 	const auto ch = ControlsHandler::getInstance();
 
-	ch->insertKeyCallback(GLFW_KEY_ESCAPE, GLFW_PRESS, 0,
-						  [this]() -> void { glfwSetWindowShouldClose(window, GLFW_TRUE); });
+	ch->insertKeyCallback(GLFW_KEY_ESCAPE, [this]() -> void { glfwSetWindowShouldClose(window, GLFW_TRUE); });
 
-	ch->insertKeyCallback(GLFW_KEY_F, GLFW_PRESS, 0,
+	ch->insertKeyCallback(GLFW_KEY_F,
 						  [this]() -> void
 						  {
 							  // Set fullscreen
@@ -161,22 +152,6 @@ GameWindow::GameWindow(const std::string &title, const GLFWimage *icon)
 							  }
 							  config->writeConfigurationFile();
 						  });
-	ch->insertKeyCallback(GLFW_KEY_D, GLFW_PRESS, 0, [this]() -> void { rotateCamera(0.0872665f); });
-	ch->insertKeyCallback(GLFW_KEY_A, GLFW_PRESS, 0, [this]() -> void { rotateCamera(-0.0872665f); });
-	ch->insertKeyCallback(GLFW_KEY_W, GLFW_PRESS, 0,
-						  [this]() -> void
-						  {
-							  const auto cam = Camera::getInstance();
-							  const auto direction = (cam->target - cam->pos).normalize();
-							  cam->pos += direction * 2.0f; // Move closer to the target
-						  });
-	ch->insertKeyCallback(GLFW_KEY_S, GLFW_PRESS, 0,
-						  [this]() -> void
-						  {
-							  const auto cam = Camera::getInstance();
-							  const auto direction = (cam->pos - cam->target).normalize();
-							  cam->pos += direction * 2.0f; // Move away from the target
-						  });
 }
 
 GameWindow::~GameWindow()
@@ -187,12 +162,12 @@ GameWindow::~GameWindow()
 
 void GameWindow::run(const Data *data) const
 {
-	const auto logger = Logger::getInstance();
 	const auto modelShader = Shader("assets/shaders/model.vs", "assets/shaders/model.fs");
 	const auto skybox = Skybox({"assets/textures/skybox/right.jpg", "assets/textures/skybox/left.jpg",
 								"assets/textures/skybox/top.jpg", "assets/textures/skybox/bottom.jpg",
 								"assets/textures/skybox/front.jpg", "assets/textures/skybox/back.jpg"});
 	const auto camera = Camera::getInstance();
+	camera->setState(new CameraBehindState);
 	auto lastTime = std::chrono::high_resolution_clock::now();
 	unsigned long nbFrames = 0;
 	while (!glfwWindowShouldClose(window))
@@ -212,6 +187,11 @@ void GameWindow::run(const Data *data) const
 		for (const auto &object : data->objects)
 		{
 			object->draw(modelShader, delta, {1});
+			// If the object is the player, update the camera
+			if (object->isPlayer())
+			{
+				camera->update(dynamic_cast<const Player *>(object));
+			}
 		}
 
 		// Desenho da skybox

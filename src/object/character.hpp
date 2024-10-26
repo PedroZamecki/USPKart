@@ -1,17 +1,12 @@
 #ifndef CHARACTER_HPP
 #define CHARACTER_HPP
 
-#include "object.hpp"
+#include "kart.hpp"
 
-class Character : Object
+class Character : public Kart
 {
 public:
-	Character();
-	~Character();
-
-private:
-	Position pos;
-	CollisionBox box;
+	Character() = default;
 };
 
 #endif //CHARACTER_HPP
