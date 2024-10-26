@@ -9,7 +9,16 @@ class Position
 {
 public:
 	Position();
+	explicit Position(glm::vec3 vector);
 	Position(float x, float y, float z);
+
+	// operators
+	Position& operator=(const glm::vec3 vector) { x_ = vector.x; y_ = vector.y; z_ = vector.z; return *this; }
+	Position& operator=(const Position pos) { x_ = pos.x(); y_ = pos.y(); z_ = pos.z(); return *this; }
+	bool operator==(const Position pos) const { return x_ == pos.x() && y_ == pos.y() && z_ == pos.z(); }
+	bool operator==(const glm::vec3 vector) const { return x_ == vector.x && y_ == vector.y && z_ == vector.z; }
+	bool operator!=(const Position pos) const { return x_ != pos.x() || y_ != pos.y() || z_ != pos.z(); }
+	bool operator!=(const glm::vec3 vector) const { return x_ != vector.x || y_ != vector.y || z_ != vector.z; }
 
 	void setPos(float x, float y, float z);
 
