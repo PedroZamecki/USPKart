@@ -163,11 +163,19 @@ GameWindow::~GameWindow()
 void GameWindow::run(const Data *data) const
 {
 	const auto modelShader = Shader("assets/shaders/model.vs", "assets/shaders/model.fs");
+	const auto boxShader = Shader("assets/shaders/box.vs", "assets/shaders/box.fs");
 	const auto skybox = Skybox({"assets/textures/skybox/right.jpg", "assets/textures/skybox/left.jpg",
 								"assets/textures/skybox/top.jpg", "assets/textures/skybox/bottom.jpg",
 								"assets/textures/skybox/front.jpg", "assets/textures/skybox/back.jpg"});
 	const auto camera = Camera::getInstance();
 	camera->setState(new CameraBehindState);
+
+	bool drawBoxes = false;
+	ControlsHandler::getInstance()->insertKeyCallback(GLFW_KEY_B, [&drawBoxes]() -> void
+	{
+		Logger::getInstance()->info("Toggling boxes: " + std::string(((drawBoxes = !drawBoxes)) ? "on" : "off"));
+	});
+
 	auto lastTime = std::chrono::high_resolution_clock::now();
 	unsigned long nbFrames = 0;
 	while (!glfwWindowShouldClose(window))
@@ -176,17 +184,18 @@ void GameWindow::run(const Data *data) const
 		const auto delta = std::chrono::duration<float>(frameStartTime - lastTime).count();
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glLog();
 
-		modelShader.use();
-		modelShader.setMat4("projection", camera->getProjectionMatrix());
-		modelShader.setMat4("view", camera->getViewMatrix());
+		const auto projection = camera->getProjectionMatrix();
+		const auto view = camera->getViewMatrix();
 
-		glLog();
+		modelShader.setMat4("projection", projection);
+		modelShader.setMat4("view", view);
+		boxShader.setMat4("projection", projection);
+		boxShader.setMat4("view", view);
 
 		for (const auto &object : data->objects)
 		{
-			object->draw(modelShader, delta, {1});
+			object->draw(modelShader, delta, {1}, drawBoxes, boxShader);
 			// If the object is the player, update the camera
 			if (object->isPlayer())
 			{
@@ -194,10 +203,7 @@ void GameWindow::run(const Data *data) const
 			}
 		}
 
-		// Desenho da skybox
-		skybox.draw(camera->getViewMatrix(), camera->getProjectionMatrix());
-
-		glLog();
+		skybox.draw(view, projection);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

@@ -5,10 +5,6 @@
 
 #include "utils/logger.hpp"
 
-void setupSkybox()
-{
-}
-
 unsigned int loadCubemap(const std::vector<std::string> &faces)
 {
 	unsigned int textureID;
@@ -108,7 +104,6 @@ void Skybox::draw(const glm::mat4 &view, const glm::mat4 &projection) const
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
-	// glLog();
 	glBindVertexArray(0);
 	glDepthFunc(GL_LESS);
 }

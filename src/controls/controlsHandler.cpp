@@ -1,6 +1,4 @@
 #include "controlsHandler.hpp"
-#include <iostream>
-#include <utils/logger.hpp>
 
 ControlsHandler *ControlsHandler::instance = nullptr;
 std::mutex ControlsHandler::mtx;

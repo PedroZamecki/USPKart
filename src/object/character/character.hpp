@@ -44,21 +44,18 @@ public:
 		// Calculate the new angle of the kart based on the current speed and steering angle
 		float angularSpeed = speed / L * std::tan(steeringAngle);
 		if (speed > 0 && acceleratingState == BREAKING)
-		{
 			// Apply drifting logic
-			angularSpeed *= 1.6f; // Example: increase angular speed by 60% when drifting
-		}
+			angularSpeed *= 1.3f; // Example: increase angular speed by 30% when drifting
 		const auto angleChange = angularSpeed * deltaTime;
 
 		// Calculate the new position of the kart based on the current speed and angle
-		const auto angle = this->angle + angleChange;
+		angle += angleChange;
 		const auto sinAngle = std::sin(angle);
 		const auto cosAngle = std::cos(angle);
 		const auto posChange = Position{speed * sinAngle, 0, speed * cosAngle} * deltaTime;
 
 		// Update the position and angle of the kart
-		this->angle = angle;
-		this->pos += posChange;
+		pos += posChange;
 	}
 
 	virtual void update(const float deltaTime)
@@ -104,7 +101,7 @@ public:
 		case BREAKING:
 			{
 				// Change the acceleration based on the steering angle, the bigger the angle, the slower the kart stops
-				acceleration = 10.0f * (1.0f - std::abs(steeringAngle) / maxSteeringAngle);
+				acceleration = 15.0f * (1.0f - std::abs(steeringAngle) / maxSteeringAngle);
 				maxSpeed = 0.0f;
 				break;
 			}
@@ -117,10 +114,10 @@ public:
 		updateBicycleModel(deltaTime);
 	}
 
-	void draw(const Shader &shader, const float deltaTime, const glm::mat4 baseModel) override
+	void draw(const Shader &shader, const float deltaTime, const glm::mat4 baseModel, const bool drawBoxes, const Shader &boxShader) override
 	{
 		update(deltaTime);
-		Kart::draw(shader, deltaTime, baseModel);
+		Kart::draw(shader, deltaTime, baseModel, drawBoxes, boxShader);
 	}
 };
 
