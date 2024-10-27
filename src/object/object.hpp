@@ -3,6 +3,7 @@
 
 #include "collisionBox.hpp"
 #include "model/model.hpp"
+#include "utils/position.hpp"
 
 class Object
 {
@@ -10,7 +11,7 @@ protected:
 	Position pos{0, 0, 0};
 	Model model;
 	float width{1}, height{1}, depth{1}, pitch{0}, angle{0}, yaw{0}, scale{1};
-	CollisionBox box = CollisionBox(&pos, width, height, depth);
+	CollisionBox box = CollisionBox(&pos, &yaw, &pitch, &angle, width, height, depth);
 
 public:
 	virtual glm::mat4 getModel(const glm::mat4 &baseModel)
@@ -37,30 +38,37 @@ public:
 
 	void adjustPitch(const float value) { pitch += value; }
 
-	explicit Object(const std::string &modelPath, Position pos = {0, 0, 0}, const float width = 1,
+	explicit Object(const std::string &modelPath, const Position &pos = {0, 0, 0}, const float width = 1,
 					const float height = 1, const float depth = 1, const float pitch = 0, const float angle = 0,
 					const float yaw = 0, const float scale = 1) :
 		pos(pos), model(modelPath), width(width), height(height), depth(depth), pitch(pitch), angle(angle), yaw(yaw),
 		scale(scale)
 	{
-		box = CollisionBox(&pos, width, height, depth);
+		box = CollisionBox(&this->pos, &this->yaw, &this->pitch, &this->angle, width, height, depth);
 	}
 
-	explicit Object(const Model &model, Position pos = {0, 0, 0}, const float width = 1, const float height = 1,
+	explicit Object(const Model &model, const Position &pos = {0, 0, 0}, const float width = 1, const float height = 1,
 					const float depth = 1, const float pitch = 0, const float angle = 0, const float yaw = 0,
 					const float scale = 1) :
 		pos(pos), model(model), width(width), height(height), depth(depth), pitch(pitch), angle(angle), yaw(yaw),
 		scale(scale)
 	{
-		box = CollisionBox(&pos, width, height, depth);
+		box = CollisionBox(&this->pos, &this->yaw, &this->pitch, &this->angle, width, height, depth);
 	}
 
 	virtual ~Object() = default;
 
-	virtual void draw(const Shader &shader, float deltaTime, const glm::mat4 baseModel)
+	virtual void draw(const Shader &shader, float deltaTime, const glm::mat4 baseModel, const bool drawBoxes,
+					  const Shader &boxShader)
 	{
-		shader.setMat4("model", getModel(baseModel));
+		const auto newModel = getModel(baseModel);
+		shader.use();
+		shader.setMat4("model", newModel);
 		model.draw(shader);
+		if (drawBoxes)
+		{
+			box.draw(boxShader, newModel);
+		}
 	}
 };
 
