@@ -5,13 +5,7 @@
 class Track final : public Object
 {
 public:
-	Track() : Object("assets/models/track.obj") {}
-
-	void draw(const Shader &shader, float deltaTime, const glm::mat4 baseModel) override
-	{
-		shader.setMat4("model", {1});
-		model.draw(shader);
-	}
+	Track() : Object("assets/models/track.obj", {0, 0, 0}, 2048, 0, 2048, 0, 0, 0, 2) {}
 };
 
 #endif // TRACK_HPP
