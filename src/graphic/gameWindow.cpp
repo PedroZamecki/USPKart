@@ -10,7 +10,7 @@
 #include "controls/controlsHandler.hpp"
 #include "game/config.hpp"
 #include "game/data.hpp"
-#include "object/player.hpp"
+#include "object/character/player.hpp"
 #include "skybox.hpp"
 
 #define WINDOW_TITLE std::string("USPKart v") + USP_KART_VERSION

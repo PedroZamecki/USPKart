@@ -1,7 +1,6 @@
 #ifndef LOGGER_HPP
 #define LOGGER_HPP
 
-#include <execinfo.h>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
@@ -15,9 +14,9 @@
 #define info(message) log(LogLevel::INFO, message, __FILE__, __LINE__)
 #define debug(message) log(LogLevel::DEBUG, message, __FILE__, __LINE__)
 
-#define glLog()                                                                                                        \
-	if (const auto err = glGetError())                                                                                 \
-	Logger::getInstance()->error("OpenGL error: (" + std::to_string(err) + ") - " +                                    \
+#define glLog()																											\
+	if (const auto err = glGetError())                                                                             \
+	Logger::getInstance()->error("OpenGL error: (" + std::to_string(err) + ") - " +       \
 								 reinterpret_cast<const char *>(glewGetErrorString(err)))
 
 enum class LogLevel

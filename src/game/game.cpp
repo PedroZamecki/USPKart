@@ -4,7 +4,7 @@
 #include <string>
 
 #include "model/model.hpp"
-#include "object/player.hpp"
+#include "object/character/player.hpp"
 #include "object/track.hpp"
 #include "utils/logger.hpp"
 

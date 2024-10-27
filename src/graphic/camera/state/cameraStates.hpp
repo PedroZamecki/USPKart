@@ -1,7 +1,7 @@
 #ifndef CAMERA_STATE_HPP
 #define CAMERA_STATE_HPP
 
-#include "object/player.hpp"
+#include "object/character/player.hpp"
 
 class Camera;
 class Position;
