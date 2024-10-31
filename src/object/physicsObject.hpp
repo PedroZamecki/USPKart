@@ -20,9 +20,12 @@ public:
 	void resize(const float value) override { scale += value; }
 	void adjustPitch(const float value) override { angle.y += value; }
 	glm::vec3 getVelocity() const { return velocity; }
+	float getMass() override { return mass; }
 
 	void treatCollision(Object &other)
 	{
+		if (mass == 0)
+			return;
 		// Get collision data
 		const auto [penetration, normal, point] = box.getCollisionForce(other.getBox());
 
@@ -30,12 +33,14 @@ public:
 		{
 			// Calculate the collision force
 			const auto collisionForce = normal * -penetration;
+			const auto otherMass = other.getMass();
+			const auto massesSum = otherMass + mass;
+			const auto proportion = otherMass ? mass / massesSum : 1;
+			const auto otherProportion = -otherMass / massesSum;
 
-			// Move the object in the opposite direction of the collision force
-			move(Position(collisionForce * (mass / (mass + other.getMass()))));
-
-			// Move the other object in the opposite direction of the collision force
-			other.move(Position(-collisionForce * (other.getMass() / (mass + other.getMass()))));
+			// Move the objects in the opposite direction of the collision force
+			move(Position(collisionForce * proportion));
+			other.move(Position(collisionForce * otherProportion));
 
 			// Apply impulse to velocities
 			const float restitution = 0.5f; // Bounce factor
@@ -48,11 +53,11 @@ public:
 			}
 
 			float j = -(1.0f + restitution) * velAlongNormal;
-			j /= (1.0f / mass + 1.0f / other.getMass());
+			j /= otherMass ? (1 / mass + 1 / otherMass) : 1 / mass;
 
 			glm::vec3 impulse = j * normal;
 			velocity += impulse / mass;
-			other.getVelocity() -= impulse / other.getMass();
+			other.getVelocity() -= otherMass ? (impulse / otherMass) : glm::vec3{0};
 		}
 	}
 };

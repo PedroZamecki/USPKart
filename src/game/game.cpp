@@ -47,15 +47,12 @@ Game::Game()
 		new GameWindow("Loading USP Kart...", (GLFWimage *)ResourceManager::getInstance()->loadIcon("assets/icon.png"));
 }
 
-Game::~Game()
-{
-	delete window;
-}
+Game::~Game() { delete window; }
 
 void Game::run() const
 {
 	const auto data = new Data;
-	data->objects.push_back(new PhysicsObject("assets/models/block.obj", {2, .5, 2}));
+	data->objects.push_back(new Object("assets/models/block.obj", {2, .5, 2}));
 	configureEnvironment();
 	window->run(data);
 	delete data;
