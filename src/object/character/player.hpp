@@ -31,10 +31,6 @@ public:
 		// speed == 0 -> never break
 		// speed > 0 -> break if accelerating == -1
 		breakingState = static_cast<CharacterBreakingState>(getSpeed() > 0.1 && acceleratingState == -1);
-
-
-		Logger::getInstance()->info("Steering: " + std::to_string(steerState) + " Accelerating: " +
-									std::to_string(acceleratingState) + " Breaking: " + std::to_string(breakingState));
 	}
 };
 

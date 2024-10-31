@@ -77,21 +77,20 @@ void CollisionBox::draw(const Shader &shader, const glm::mat4 &model) const
 	glLog();
 }
 
-std::vector<glm::vec3> CollisionBox::get2DProjectedVertices() const
+std::vector<glm::vec3> CollisionBox::get3DProjectedVertices() const
 {
-	// We won't consider the height of the object
 	glm::mat4 projection{1};
-	projection = rotate(projection, angle->x, glm::vec3{1, 0, 0});
-	projection = rotate(projection, angle->y, glm::vec3{0, 1, 0});
-	projection = rotate(projection, angle->z, glm::vec3{0, 0, 1});
-	projection = translate(projection, pos->toVec3());
+	projection = glm::translate(projection, pos->toVec3());
+	projection = glm::rotate(projection, angle->x, glm::vec3{1, 0, 0});
+	projection = glm::rotate(projection, angle->y, glm::vec3{0, 1, 0});
+	projection = glm::rotate(projection, angle->z, glm::vec3{0, 0, 1});
 
 	std::vector<glm::vec3> projectedVertices;
 	for (size_t i = 0; i < vertices.size(); i += 3)
 	{
 		const auto vertex = glm::vec4(vertices[i], vertices[i + 1], vertices[i + 2], 1.0f);
 		const auto projectedVertex = projection * vertex;
-		projectedVertices.emplace_back(projectedVertex.x, 0.0f, projectedVertex.y);
+		projectedVertices.emplace_back(projectedVertex.x, projectedVertex.y, projectedVertex.z);
 	}
 
 	return projectedVertices;
@@ -99,48 +98,62 @@ std::vector<glm::vec3> CollisionBox::get2DProjectedVertices() const
 
 CollisionData CollisionBox::getCollisionForce(const CollisionBox &other) const
 {
-	const auto vertices1 = get2DProjectedVertices();
-	const auto vertices2 = other.get2DProjectedVertices();
-
-	// Check if the boxes are colliding
-	const auto checkCollision = [](const std::vector<glm::vec3> &v1, const std::vector<glm::vec3> &v2) -> bool
+	const auto projection = [](float max, float min) -> float { return std::max(0.0f, std::min(max, min)); };
+	const auto doesCollide = [](float min1, float max1, float min2, float max2) -> bool
+	{ return max1 >= min2 && max2 >= min1; };
+	const auto getOverlap = [](float min1, float max1, float min2, float max2) -> float
 	{
-		const auto [min1, max1] = std::minmax_element(v1.begin(), v1.end(), [](const auto &a, const auto &b) -> bool
-													  { return a.x < b.x; });
-		const auto [min2, max2] = std::minmax_element(v2.begin(), v2.end(), [](const auto &a, const auto &b) -> bool
-													  { return a.x < b.x; });
-
-		return min1->x <= max2->x && max1->x >= min2->x;
+		const auto overlap1 = max1 - min2;
+		const auto overlap2 = max2 - min1;
+		return std::min(overlap1, overlap2);
 	};
 
-	if (!checkCollision(vertices1, vertices2))
-		return {};
+	const auto vertices1 = get3DProjectedVertices();
+	const auto vertices2 = other.get3DProjectedVertices();
 
-	// Calculate the penetration
-	const auto getPenetration = [](const glm::vec3 &v1, const glm::vec3 &v2) -> std::tuple<float, glm::vec3, glm::vec3>
+	CollisionData collisionData;
+	collisionData.penetration = std::numeric_limits<float>::max();
+
+	for (size_t i = 0; i < vertices1.size(); i += 4)
 	{
-		const auto penetration = std::abs(v1.x - v2.x);
-		const auto normal = glm::normalize(v1 - v2);
-		const auto point = (v1 + v2) / 2.0f;
-		return {penetration, normal, point};
-	};
+		const auto normal =
+			glm::normalize(glm::cross(vertices1[i + 1] - vertices1[i], vertices1[i + 2] - vertices1[i]));
+		const auto minMax1 =
+			std::minmax_element(vertices1.begin(), vertices1.end(), [&normal](const glm::vec3 &a, const glm::vec3 &b)
+								{ return glm::dot(a, normal) < glm::dot(b, normal); });
+		const auto minMax2 =
+			std::minmax_element(vertices2.begin(), vertices2.end(), [&normal](const glm::vec3 &a, const glm::vec3 &b)
+								{ return glm::dot(a, normal) < glm::dot(b, normal); });
 
-	float penetration = std::numeric_limits<float>::max();
-	glm::vec3 normal{0};
-	glm::vec3 point{0};
+		const auto min1 = glm::dot(*minMax1.first, normal);
+		const auto max1 = glm::dot(*minMax1.second, normal);
+		const auto min2 = glm::dot(*minMax2.first, normal);
+		const auto max2 = glm::dot(*minMax2.second, normal);
 
-	for (const auto &vertex1 : vertices1)
-	{
-		for (const auto &vertex2 : vertices2)
+		if (!doesCollide(min1, max1, min2, max2))
 		{
-			if (const auto [pen, n, p] = getPenetration(vertex1, vertex2); pen < penetration)
-			{
-				penetration = pen;
-				normal = n;
-				point = p;
-			}
+			return {0, {}, {}};
+		}
+
+		const auto overlap = getOverlap(min1, max1, min2, max2);
+		if (overlap < collisionData.penetration)
+		{
+			collisionData.penetration = overlap;
+			collisionData.normal = normal;
+			collisionData.point = vertices1[i];
 		}
 	}
 
-	return {penetration, normal, point};
+	// Ensure the normal points from this box to the other box
+	glm::vec3 centerDiff = other.pos->toVec3() - pos->toVec3();
+	if (glm::dot(centerDiff, collisionData.normal) < 0)
+	{
+		collisionData.normal = -collisionData.normal;
+	}
+
+	// Zero out the Y component of the normal
+	collisionData.normal.y = 0.0f;
+	collisionData.normal = glm::normalize(collisionData.normal);
+
+	return collisionData;
 }
