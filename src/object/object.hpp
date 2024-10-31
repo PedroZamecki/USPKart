@@ -10,7 +10,7 @@ class Object
 protected:
 	Position pos{0, 0, 0};
 	Model model;
-	float width{1}, height{1}, depth{1}, scale{1};
+	float width{1}, height{1}, depth{1}, scale{1}, mass{100};
 	glm::vec3 angle{0};
 	CollisionBox box = CollisionBox(&pos, &angle, width, height, depth);
 
@@ -32,13 +32,15 @@ public:
 	[[nodiscard]] float getWidth() const { return width; }
 	[[nodiscard]] float getHeight() const { return height; }
 	[[nodiscard]] float getDepth() const { return depth; }
+	[[nodiscard]] float getMass() const { return mass; }
+	[[nodiscard]] glm::vec3 getVelocity() const { return {0, 0, 0}; }
 
 	// Do nothing by default
 	virtual void move(const Position &value) {}
 	virtual void resize(const float value) {}
 	virtual void rotate(const float value) {}
 	virtual void adjustPitch(const float value) {}
-	virtual void treatCollision(const Object &other){};
+	virtual void treatCollision(Object &other){};
 
 	explicit Object(const std::string &modelPath, const Position &pos = {0, 0, 0}, const float width = 1,
 					const float height = 1, const float depth = 1, const glm::vec3 angle = {0, 0, 0},

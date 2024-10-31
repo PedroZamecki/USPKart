@@ -61,7 +61,7 @@ public:
 		for (const auto &wheel : wheels)
 		{
 			wheel->adjustPitch(getSpeed() * deltaTime);
-			wheel->draw(shader, deltaTime, getModel(baseModel), drawBoxes, boxShader);
+			wheel->draw(shader, deltaTime, getModel(baseModel), false, boxShader);
 		}
 	}
 };

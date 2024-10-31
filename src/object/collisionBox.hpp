@@ -27,7 +27,7 @@ class CollisionBox
 public:
 	explicit CollisionBox(Position *pos, glm::vec3 *angle, float width = 1, float height = 1, float depth = 1);
 	void draw(const Shader &shader, const glm::mat4 &model) const;
-	[[nodiscard]] std::vector<glm::vec3> get2DProjectedVertices() const;
+	std::vector<glm::vec3> get3DProjectedVertices() const;
 	[[nodiscard]] CollisionData getCollisionForce(const CollisionBox &other) const;
 };
 
