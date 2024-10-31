@@ -13,10 +13,15 @@ enum CharacterSteeringState
 
 enum CharacterAcceleratingState
 {
-	BREAKING = -2,
 	REVERSING = -1,
 	NOT_ACCELERATING = 0,
 	ACCELERATING = 1,
+};
+
+enum CharacterBreakingState
+{
+	NOT_BREAKING = 0,
+	BREAKING = 1
 };
 
 class Character : public Kart
@@ -24,12 +29,14 @@ class Character : public Kart
 protected:
 	CharacterSteeringState steerState{NOT_STEERING};
 	CharacterAcceleratingState acceleratingState{NOT_ACCELERATING};
+	CharacterBreakingState breakingState{NOT_BREAKING};
 
 public:
 	Character() = default;
 
 	void updateBicycleModel(const float deltaTime)
 	{
+		const auto speed = getSpeed();
 		if (speed == 0)
 			return;
 
@@ -43,19 +50,12 @@ public:
 
 		// Calculate the new angle of the kart based on the current speed and steering angle
 		float angularSpeed = speed / L * std::tan(steeringAngle);
-		if (speed > 0 && acceleratingState == BREAKING)
-			// Apply drifting logic
-			angularSpeed *= 1.3f; // Example: increase angular speed by 30% when drifting
 		const auto angleChange = angularSpeed * deltaTime;
 
-		// Calculate the new position of the kart based on the current speed and angle
-		angle += angleChange;
-		const auto sinAngle = std::sin(angle);
-		const auto cosAngle = std::cos(angle);
-		const auto posChange = Position{speed * sinAngle, 0, speed * cosAngle} * deltaTime;
+		// Update the angle of the kart
+		angle.y += angleChange;
 
-		// Update the position and angle of the kart
-		pos += posChange;
+		velocity = forward() * getSpeed();
 	}
 
 	virtual void update(const float deltaTime)
@@ -70,51 +70,48 @@ public:
 		// The bigger the angleDifference, the faster the steering
 		const float steeringSpeed =
 			targetSteeringAngle != 0.0f ? glm::clamp(angleDifference / targetSteeringAngle, 0.1f, 1.0f) : 1.0f;
-		const float steeringAngleChange = 2 * steeringSpeed * deltaTime;
+		const float steeringAngleChange = 1.5f * steeringSpeed * deltaTime;
 
 		steeringAngle += glm::clamp(angleDifference, -steeringAngleChange, steeringAngleChange);
 
 		// Calculate the new speed of the kart based on the current accelerating state
+		float maxSpeed{30};
+		float minSpeed{-12};
+		float targetSpeed{0}; // Change this based on the current state
+		float acceleration{5};
 
-		float acceleration{};
-		float maxSpeed{};
-		switch (acceleratingState)
+		if (acceleratingState == ACCELERATING)
 		{
-		case ACCELERATING:
-			{
-				acceleration = 10.0f;
-				maxSpeed = 20.0f;
-				break;
-			}
-		case NOT_ACCELERATING:
-			{
-				acceleration = 5.0f;
-				maxSpeed = 0.0f;
-				break;
-			}
-		case REVERSING:
-			{
-				acceleration = 10.0f;
-				maxSpeed = -6.0f;
-				break;
-			}
-		case BREAKING:
-			{
-				// Change the acceleration based on the steering angle, the bigger the angle, the slower the kart stops
-				acceleration = 15.0f * (1.0f - std::abs(steeringAngle) / maxSteeringAngle);
-				maxSpeed = 0.0f;
-				break;
-			}
+			targetSpeed = maxSpeed;
+			acceleration = 15;
+		}
+		else if (acceleratingState == REVERSING)
+		{
+			targetSpeed = minSpeed;
+			acceleration = -6;
 		}
 
-		const float speedChange = acceleration * deltaTime;
-		const float speedDifference = maxSpeed - speed;
-		speed += glm::clamp(speedDifference, -speedChange, speedChange);
+		if (breakingState == BREAKING)
+		{
+			targetSpeed = 0;
+			acceleration = -20;
+		}
 
+		// Adjust the speed towards the target
+		float speedDifference = targetSpeed - getSpeed();
+		float speedChange = acceleration * deltaTime;
+
+
+		// Update the bicycle model
 		updateBicycleModel(deltaTime);
+
+		// Update the position of the kart based on the current speed
+		velocity += forward() * glm::clamp(speedDifference, -speedChange, speedChange);
+		pos += Position{velocity * deltaTime};
 	}
 
-	void draw(const Shader &shader, const float deltaTime, const glm::mat4 baseModel, const bool drawBoxes, const Shader &boxShader) override
+	void draw(const Shader &shader, const float deltaTime, const glm::mat4 baseModel, const bool drawBoxes,
+			  const Shader &boxShader) override
 	{
 		update(deltaTime);
 		Kart::draw(shader, deltaTime, baseModel, drawBoxes, boxShader);

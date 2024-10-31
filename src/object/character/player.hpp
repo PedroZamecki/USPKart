@@ -2,14 +2,21 @@
 #define PLAYER_HPP
 
 #include "character.hpp"
+#include "controls/controlsHandler.hpp"
 
 class Player final : public Character
 {
 public:
-	Player() = default;
-	bool isPlayer() override { return true; }
+	Player()
+	{
+		const auto controls = ControlsHandler::getInstance();
+		controls->insertKeyCallback(GLFW_KEY_UP, [this]() -> void { checkState(); }, ALL);
+		controls->insertKeyCallback(GLFW_KEY_DOWN, [this]() -> void { checkState(); }, ALL);
+		controls->insertKeyCallback(GLFW_KEY_LEFT, [this]() -> void { checkState(); }, ALL);
+		controls->insertKeyCallback(GLFW_KEY_RIGHT, [this]() -> void { checkState(); }, ALL);
+	}
 
-	void update(const float deltaTime) override
+	void checkState()
 	{
 		const auto controls = ControlsHandler::getInstance();
 		const auto upPressed = controls->getKeyState(GLFW_KEY_UP) > GLFW_RELEASE;
@@ -19,19 +26,15 @@ public:
 
 		steerState = static_cast<CharacterSteeringState>(leftPressed - rightPressed);
 
-		// To see the accelerating state you need to check the speed of the kart,
-		// The difference between not accelerating, breaking and reversing is the direction of the speed
+		acceleratingState = static_cast<CharacterAcceleratingState>(upPressed - downPressed);
 
-		// If the kart is accelerating, check if it is also reversing
-		// If the kart is not accelerating, check if it is breaking or reversing
-		if (upPressed == downPressed)
-			acceleratingState = upPressed ? BREAKING : NOT_ACCELERATING;
-		else if (upPressed)
-			acceleratingState = (speed < 0) ? BREAKING : ACCELERATING;
-		else if (downPressed)
-			acceleratingState = (speed > 0) ? BREAKING : REVERSING;
+		// speed == 0 -> never break
+		// speed > 0 -> break if accelerating == -1
+		breakingState = static_cast<CharacterBreakingState>(getSpeed() > 0.1 && acceleratingState == -1);
 
-		Character::update(deltaTime);
+
+		Logger::getInstance()->info("Steering: " + std::to_string(steerState) + " Accelerating: " +
+									std::to_string(acceleratingState) + " Breaking: " + std::to_string(breakingState));
 	}
 };
 

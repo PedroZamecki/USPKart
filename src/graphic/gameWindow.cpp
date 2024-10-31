@@ -193,14 +193,14 @@ void GameWindow::run(const Data *data) const
 		boxShader.setMat4("projection", projection);
 		boxShader.setMat4("view", view);
 
+		camera->update(data->player);
+
 		for (const auto &object : data->objects)
 		{
 			object->draw(modelShader, delta, {1}, drawBoxes, boxShader);
-			// If the object is the player, update the camera
-			if (object->isPlayer())
-			{
-				camera->update(dynamic_cast<const Player *>(object));
-			}
+			for (const auto &other : data->objects)
+				if (object != other && object != data->track && other != data->track)
+					object->treatCollision(*other);
 		}
 
 		skybox.draw(view, projection);

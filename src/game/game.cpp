@@ -41,24 +41,24 @@ void Game::configureEnvironment()
 #endif
 }
 
-Game::Game() : data(new Data)
+Game::Game()
 {
 	window =
 		new GameWindow("Loading USP Kart...", (GLFWimage *)ResourceManager::getInstance()->loadIcon("assets/icon.png"));
-	data->objects.push_front(new Track());
-	data->objects.push_front(new Player());
 }
 
 Game::~Game()
 {
 	delete window;
-	delete data;
 }
 
 void Game::run() const
 {
+	const auto data = new Data;
+	data->objects.push_back(new Object("assets/models/block.obj", {2, .5, 2}));
 	configureEnvironment();
 	window->run(data);
+	delete data;
 }
 
 int main()
