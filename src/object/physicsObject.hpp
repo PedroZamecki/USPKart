@@ -35,7 +35,7 @@ public:
 			move(Position(collisionForce * (mass / (mass + other.getMass()))));
 
 			// Move the other object in the opposite direction of the collision force
-			other.move(Position(+collisionForce * (other.getMass() / (mass + other.getMass()))));
+			other.move(Position(-collisionForce * (other.getMass() / (mass + other.getMass()))));
 
 			// Apply impulse to velocities
 			const float restitution = 0.5f; // Bounce factor
