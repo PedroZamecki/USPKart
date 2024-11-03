@@ -1,4 +1,7 @@
 #include "model.hpp"
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
+#include "utils/logger.hpp"
 
 #include <iostream>
 
@@ -12,8 +15,14 @@ void Model::draw(const Shader &shader) const
 
 void Model::loadModel(string const &path)
 {
-	const auto rm = ResourceManager::getInstance();
-	const auto scene = rm->loadScene(path);
+	const auto scene = importer.ReadFile(
+		path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+	// check for errors
+	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
+	{
+		Logger::getInstance()->error("ASSIMP:: " + std::string(importer.GetErrorString()));
+		exit(1);
+	}
 	// retrieve the directory path of the filepath
 	directory = path.substr(0, path.find_last_of('/'));
 

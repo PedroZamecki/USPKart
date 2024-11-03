@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "mesh.hpp"
-#include "resource/resourceManager.hpp"
+#include <assimp/Importer.hpp>
 
 class Model
 {
@@ -31,6 +31,7 @@ protected:
 	std::vector<Mesh> meshes;
 	string directory;
 	bool gammaCorrection;
+	Assimp::Importer importer;
 
 public:
 	// constructor, expects a filepath to a 3D model.

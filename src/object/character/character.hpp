@@ -32,7 +32,10 @@ protected:
 	CharacterBreakingState breakingState{NOT_BREAKING};
 
 public:
-	Character() = default;
+	Character(const Position &pos = {0, .5, 0}, const glm::vec3 angle = glm::vec3{0}, const float scale = 1) :
+		Kart(pos, angle, scale)
+	{
+	}
 
 	void updateBicycleModel(const float deltaTime)
 	{

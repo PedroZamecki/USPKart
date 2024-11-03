@@ -3,9 +3,9 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
-#include <assimp/postprocess.h>
-#include <assimp/scene.h>
 #include <utils/logger.hpp>
+
+#include "model/model.hpp"
 
 ResourceManager *ResourceManager::instance = nullptr;
 std::mutex ResourceManager::mtx;
@@ -16,7 +16,8 @@ ResourceManager::~ResourceManager() { textures.clear(); }
 
 Texture ResourceManager::loadTexture(const std::string &filePath, const std::string &type)
 {
-	const auto logger = Logger::getInstance();
+	std::lock_guard<std::mutex> lock(texturesMutex);
+
 	// Search in the textures map
 	for (const auto &[path, texture] : textures)
 		if (path == filePath)
@@ -34,7 +35,7 @@ Texture ResourceManager::loadTexture(const std::string &filePath, const std::str
 	unsigned char *image = SOIL_load_image(filePath.c_str(), &width, &height, nullptr, SOIL_LOAD_RGBA);
 	if (image == nullptr)
 	{
-		logger->error("Error: Texture in \"" + filePath + "\" not found.");
+		Logger::getInstance()->error("Error: Texture in \"" + filePath + "\" not found.");
 		throw std::runtime_error("Error: Texture in \"" + filePath + "\" not found.");
 	}
 
@@ -47,7 +48,8 @@ Texture ResourceManager::loadTexture(const std::string &filePath, const std::str
 
 const char *ResourceManager::loadAudio(std::string &filePath)
 {
-	const auto logger = Logger::getInstance();
+	std::lock_guard<std::mutex> lock(audioMutex);
+
 	// Search in the audio map
 	for (const auto &[path, audio] : audio)
 		if (path == filePath)
@@ -56,7 +58,7 @@ const char *ResourceManager::loadAudio(std::string &filePath)
 	std::ifstream file(filePath, std::ios::binary);
 	if (!file.is_open())
 	{
-		logger->error("Error: Audio in \"" + filePath + "\" not found.");
+		Logger::getInstance()->error("Error: Audio in \"" + filePath + "\" not found.");
 		return nullptr;
 	}
 
@@ -74,6 +76,7 @@ const char *ResourceManager::loadAudio(std::string &filePath)
 
 const void *ResourceManager::loadIcon(const std::string &filePath)
 {
+	std::lock_guard<std::mutex> lock(iconsMutex);
 	// Search in the icons map
 	for (const auto &[path, icon] : icons)
 		if (path == filePath)
@@ -88,22 +91,14 @@ const void *ResourceManager::loadIcon(const std::string &filePath)
 	return icon;
 }
 
-const aiScene *ResourceManager::loadScene(const std::string &filePath)
-{
-	const auto logger = Logger::getInstance();
-	// Search in the scenes map
-	for (const auto &[path, scene] : scenes)
-		if (path == filePath)
-			return scene;
+const Model *ResourceManager::loadModel(const std::string &filePath) {
+	std::lock_guard<std::mutex> lock(modelsMutex);
 
-	const auto scene = importer.ReadFile(
-		filePath, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
-	// check for errors
-	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
-	{
-		logger->error("ASSIMP:: " + std::string(importer.GetErrorString()));
-		return nullptr;
-	}
-	scenes[filePath] = scene;
-	return scene;
+	// Search in the models map
+	for (const auto &[path, model] : models)
+		if (path == filePath)
+			return model;
+
+	const auto model = new Model(filePath);
+	return models[filePath] = model;
 }

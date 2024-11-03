@@ -4,6 +4,7 @@
 #include <list>
 
 #include "object/character/player.hpp"
+#include "object/character/aiChar.hpp"
 #include "object/object.hpp"
 #include "object/track.hpp"
 
@@ -15,10 +16,12 @@ public:
 
 	Data()
 	{
+		const auto ai = new AIChar({3, 0.5, 3});
 		track = new Track();
 		player = new Player();
 		objects.push_front(track);
 		objects.push_front(player);
+		objects.push_front(ai);
 	}
 
 	~Data()
