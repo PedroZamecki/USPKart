@@ -4,8 +4,6 @@
 #define RESOURCE_MANAGER_HPP
 
 #include <SOIL2/SOIL2.h>
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
 #include <fstream>
 #include <map>
 #include <mutex>
@@ -34,14 +32,20 @@ public:
 	[[nodiscard]] unsigned char *getData() const { return data; }
 };
 
+class Model;
+
 class ResourceManager
 {
 	std::map<std::string, const Texture> textures;
+	std::map<std::string, const Model *> models;
 	std::map<std::string, const char *> audio;
-	std::map<std::string, const aiScene *> scenes;
 	std::map<std::string, const void *> icons;
 
-	Assimp::Importer importer;
+	std::mutex texturesMutex;
+	std::mutex modelsMutex;
+	std::mutex audioMutex;
+	std::mutex iconsMutex;
+
 	ResourceManager();
 	~ResourceManager();
 
@@ -66,7 +70,7 @@ public:
 	Texture loadTexture(const std::string &filePath, const std::string &type = "texture_diffuse");
 	const char *loadAudio(std::string &filePath);
 	const void *loadIcon(const std::string &filePath);
-	const aiScene *loadScene(const std::string &filePath);
+	const Model *loadModel(const std::string &filePath);
 };
 
 #endif

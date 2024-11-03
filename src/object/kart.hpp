@@ -42,8 +42,8 @@ protected:
 	Wheel *wheels[4] = {&frontWheels[0], &frontWheels[1], &backWheels[0], &backWheels[1]};
 
 public:
-	explicit Kart(const Position &pos = {0, .5, 0}) :
-		PhysicsObject("assets/models/kart.obj", pos, 18.0f / 16.0f, 1, 44.0f / 16.0f)
+	Kart(const Position &pos = {0, .5, 0}, const glm::vec3 angle = glm::vec3{0}, const float scale = 1) :
+		PhysicsObject("assets/models/kart.obj", pos, 18.0f / 16.0f, 1, 44.0f / 16.0f, angle, scale)
 	{
 	}
 

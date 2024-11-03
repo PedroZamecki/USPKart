@@ -9,7 +9,7 @@ class Object
 {
 protected:
 	Position pos{0, 0, 0};
-	Model model;
+	const Model *model;
 	float width{1}, height{1}, depth{1}, scale{1}, mass{1};
 	glm::vec3 angle{0};
 	CollisionBox box = CollisionBox(&pos, &angle, width, height, depth);
@@ -45,7 +45,7 @@ public:
 	explicit Object(const std::string &modelPath, const Position &pos = {0, 0, 0}, const float width = 1,
 					const float height = 1, const float depth = 1, const glm::vec3 angle = {0, 0, 0},
 					const float scale = 1) :
-		pos(pos), model(modelPath), width(width), height(height), depth(depth), angle(angle), scale(scale),
+		pos(pos), model(ResourceManager::getInstance()->loadModel(modelPath)), width(width), height(height), depth(depth), angle(angle), scale(scale),
 		box(CollisionBox(&this->pos, &this->angle, width, height, depth))
 	{
 	}
@@ -78,7 +78,7 @@ public:
 		const auto newModel = getModel(baseModel);
 		shader.use();
 		shader.setMat4("model", newModel);
-		model.draw(shader);
+		model->draw(shader);
 		if (drawBoxes)
 		{
 			box.draw(boxShader, newModel);
