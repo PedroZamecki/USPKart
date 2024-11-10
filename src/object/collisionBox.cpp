@@ -8,152 +8,164 @@
 #include "utils/logger.hpp"
 #include "utils/position.hpp"
 
-CollisionBox::CollisionBox(Position *pos, glm::vec3 *angle, const float width, const float height, const float depth) :
-	pos(pos), angle(angle), width(width), height(height), depth(depth)
+CollisionBox::CollisionBox(Position *pos, glm::vec3 *angle, glm::vec3 *scale, const float *width, const float *height,
+						   const float *depth) :
+	pos(pos), angle(angle), scale(scale), width(width), height(height), depth(depth)
 {
-	vertices = {// Front face
-				-width / 2, -height / 2, depth / 2, width / 2, -height / 2, depth / 2, width / 2, height / 2, depth / 2,
-				-width / 2, height / 2, depth / 2,
-				// Back face
-				-width / 2, -height / 2, -depth / 2, width / 2, -height / 2, -depth / 2, width / 2, height / 2,
-				-depth / 2, -width / 2, height / 2, -depth / 2,
-				// Left face
-				-width / 2, -height / 2, -depth / 2, -width / 2, -height / 2, depth / 2, -width / 2, height / 2,
-				depth / 2, -width / 2, height / 2, -depth / 2,
-				// Right face
-				width / 2, -height / 2, -depth / 2, width / 2, -height / 2, depth / 2, width / 2, height / 2, depth / 2,
-				width / 2, height / 2, -depth / 2,
-				// Top face
-				-width / 2, height / 2, -depth / 2, width / 2, height / 2, -depth / 2, width / 2, height / 2, depth / 2,
-				-width / 2, height / 2, depth / 2,
-				// Bottom face
-				-width / 2, -height / 2, -depth / 2, width / 2, -height / 2, -depth / 2, width / 2, -height / 2,
-				depth / 2, -width / 2, -height / 2, depth / 2};
-
-	const unsigned int indices[] = {0,	1,	1,	2,	2,	3,	3,	0,	4,	5,	5,	6,	6,	7,	7,	4,
-									8,	9,	9,	10, 10, 11, 11, 8,	12, 13, 13, 14, 14, 15, 15, 12,
-									16, 17, 17, 18, 18, 19, 19, 16, 20, 21, 21, 22, 22, 23, 23, 20};
-
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
-
-	glLog();
-
-	glBindVertexArray(VAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(vertices.size() * sizeof(float)), vertices.data(),
-				 GL_STATIC_DRAW);
-
-	glLog();
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-	glEnableVertexAttribArray(0);
-
-	glLog();
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-	glLog();
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-
-	glLog();
-}
-
-void CollisionBox::draw(const Shader &shader, const glm::mat4 &model) const
-{
-	shader.use();
-	shader.setMat4("model", model);
-
-	glBindVertexArray(VAO);
-	glLineWidth(2);
-	glDrawElements(GL_LINES, 72, GL_UNSIGNED_INT, nullptr);
-	glBindVertexArray(0);
-
-	glLog();
-}
-
-std::vector<glm::vec3> CollisionBox::get3DProjectedVertices() const
-{
-	glm::mat4 projection{1};
-	projection = glm::translate(projection, pos->toVec3());
-	projection = glm::rotate(projection, angle->x, glm::vec3{1, 0, 0});
-	projection = glm::rotate(projection, angle->y, glm::vec3{0, 1, 0});
-	projection = glm::rotate(projection, angle->z, glm::vec3{0, 0, 1});
-
-	std::vector<glm::vec3> projectedVertices;
-	for (size_t i = 0; i < vertices.size(); i += 3)
+	// We'll create an ellipsis in the y=0 plane to represent the collision box
+	// for drawing purposes only we'll represent it as a cylinder
+	const auto segments = 30;
+	const auto step = 2 * M_PI / segments;
+	for (auto i = 0; i <= segments; i++)
 	{
-		const auto vertex = glm::vec4(vertices[i], vertices[i + 1], vertices[i + 2], 1.0f);
-		const auto projectedVertex = projection * vertex;
-		projectedVertices.emplace_back(projectedVertex.x, projectedVertex.y, projectedVertex.z);
+		const auto angle = i * step;
+		const auto x = cos(angle) * *width / 2;
+		const auto z = sin(angle) * *depth / 2;
+
+		// Bottom
+		vertices.push_back(x);
+		vertices.push_back(-*height / 2);
+		vertices.push_back(z);
+
+		// Top
+		vertices.push_back(x);
+		vertices.push_back(*height / 2);
+		vertices.push_back(z);
 	}
 
+	// Indices
+	for (auto i = 0; i < segments; i++)
+	{
+		// Bottom
+		indices.push_back(i * 2);
+		indices.push_back(i * 2 + 2);
+
+		// Top
+		indices.push_back(i * 2 + 1);
+		indices.push_back(i * 2 + 3);
+
+		// Sides
+		indices.push_back(i * 2);
+		indices.push_back(i * 2 + 1);
+		indices.push_back(i * 2 + 2);
+		indices.push_back(i * 2 + 3);
+
+		// Close the cylinder
+		if (i == segments - 1)
+		{
+			indices.push_back(0);
+			indices.push_back(2 * segments);
+			indices.push_back(1);
+			indices.push_back(2 * segments + 1);
+		}
+	}
+
+	// Create the VAO, VBO and EBO
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+
+	// Position attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+	glEnableVertexAttribArray(0);
+
+	// Unbind the VBO
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	// Unbind the VAO
+	glBindVertexArray(0);
+
+	// Check for errors
+	glLog();
+}
+
+void CollisionBox::draw(const Shader &shader) const
+{
+	// We'll draw the collision box as a wireframe cylinder
+	shader.use();
+	shader.setMat4("model", getTransformMatrix());
+
+	glBindVertexArray(VAO);
+
+	glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, indices.data());
+
+	// Unbind the VAO
+	glBindVertexArray(0);
+
+	// Check for errors
+	glLog();
+}
+
+std::vector<glm::vec2> CollisionBox::get2DProjectedVertices() const
+{
+	const auto matrix = getTransformMatrix();
+	std::vector<glm::vec2> projectedVertices;
+	for (auto i = 0; i < vertices.size(); i += 3)
+		projectedVertices.emplace_back(vertices[i], vertices[i + 2]);
+
+	for (auto &vertex : projectedVertices)
+	{
+		glm::vec4 vec{vertex.x, 0, vertex.y, 1};
+		vec = matrix * vec;
+		vertex = {vec.x, vec.z};
+	}
 	return projectedVertices;
+}
+
+glm::mat4 CollisionBox::getTransformMatrix() const
+{
+	glm::mat4 matrix{1};
+	matrix = glm::translate(matrix, *pos);
+	matrix = glm::scale(matrix, glm::vec3(scale->x, scale->y, scale->z));
+	matrix = glm::rotate(matrix, angle->x, glm::vec3{1, 0, 0});
+	matrix = glm::rotate(matrix, angle->y, glm::vec3{0, 1, 0});
+	matrix = glm::rotate(matrix, angle->z, glm::vec3{0, 0, 1});
+	return matrix;
+}
+
+bool CollisionBox::linesIntersect(const glm::vec2 &p1, const glm::vec2 &p2, const glm::vec2 &q1, const glm::vec2 &q2,
+								  glm::vec3 &intersection) const
+{
+	auto s1 = p2 - p1;
+	auto s2 = q2 - q1;
+
+	float s = (-s1.y * (p1.x - q1.x) + s1.x * (p1.y - q1.y)) / (-s2.x * s1.y + s1.x * s2.y);
+	float t = (s2.x * (p1.y - q1.y) - s2.y * (p1.x - q1.x)) / (-s2.x * s1.y + s1.x * s2.y);
+
+	if (s >= 0 && s <= 1 && t >= 0 && t <= 1)
+	{
+		intersection = {p1.x + (t * s1.x), 0, p1.y + (t * s1.y)};
+		return true;
+	}
+
+	return false;
 }
 
 CollisionData CollisionBox::getCollisionForce(const CollisionBox &other) const
 {
-	const auto projection = [](float max, float min) -> float { return std::max(0.0f, std::min(max, min)); };
-	const auto doesCollide = [](float min1, float max1, float min2, float max2) -> bool
-	{ return max1 >= min2 && max2 >= min1; };
-	const auto getOverlap = [](float min1, float max1, float min2, float max2) -> float
+	const auto vertices1 = get2DProjectedVertices();
+	const auto vertices2 = other.get2DProjectedVertices();
+
+	for (size_t i = 0; i < vertices1.size(); i += 2)
 	{
-		const auto overlap1 = max1 - min2;
-		const auto overlap2 = max2 - min1;
-		return std::min(overlap1, overlap2);
-	};
+		const auto p1 = vertices1[i];
+		const auto p2 = vertices1[(i + 2) % vertices1.size()];
 
-	const auto vertices1 = get3DProjectedVertices();
-	const auto vertices2 = other.get3DProjectedVertices();
-
-	CollisionData collisionData;
-	collisionData.penetration = std::numeric_limits<float>::max();
-
-	for (size_t i = 0; i < vertices1.size(); i += 4)
-	{
-		const auto normal =
-			glm::normalize(glm::cross(vertices1[i + 1] - vertices1[i], vertices1[i + 2] - vertices1[i]));
-		const auto minMax1 =
-			std::minmax_element(vertices1.begin(), vertices1.end(), [&normal](const glm::vec3 &a, const glm::vec3 &b)
-								{ return glm::dot(a, normal) < glm::dot(b, normal); });
-		const auto minMax2 =
-			std::minmax_element(vertices2.begin(), vertices2.end(), [&normal](const glm::vec3 &a, const glm::vec3 &b)
-								{ return glm::dot(a, normal) < glm::dot(b, normal); });
-
-		const auto min1 = glm::dot(*minMax1.first, normal);
-		const auto max1 = glm::dot(*minMax1.second, normal);
-		const auto min2 = glm::dot(*minMax2.first, normal);
-		const auto max2 = glm::dot(*minMax2.second, normal);
-
-		if (!doesCollide(min1, max1, min2, max2))
+		for (size_t j = 0; j < vertices2.size(); j += 2)
 		{
-			return {0, {}, {}};
-		}
+			const auto q1 = vertices2[j];
+			const auto q2 = vertices2[(j + 2) % vertices2.size()];
 
-		const auto overlap = getOverlap(min1, max1, min2, max2);
-		if (overlap < collisionData.penetration)
-		{
-			collisionData.penetration = overlap;
-			collisionData.normal = normal;
-			collisionData.point = vertices1[i];
+			glm::vec3 intersection;
+			if (linesIntersect(p1, p2, q1, q2, intersection))
+			{
+				glm::vec3 normal = glm::normalize(glm::vec3{p2.y - p1.y, 0, p1.x - p2.x});
+				return {glm::length(p2 - p1), normal, intersection};
+			}
 		}
 	}
 
-	// Ensure the normal points from this box to the other box
-	glm::vec3 centerDiff = other.pos->toVec3() - pos->toVec3();
-	if (glm::dot(centerDiff, collisionData.normal) < 0)
-	{
-		collisionData.normal = -collisionData.normal;
-	}
-
-	// Zero out the Y component of the normal
-	collisionData.normal.y = 0.0f;
-	collisionData.normal = glm::normalize(collisionData.normal);
-
-	return collisionData;
+	return {0, {}, {}};
 }

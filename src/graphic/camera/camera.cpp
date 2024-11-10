@@ -6,6 +6,6 @@
 Camera *Camera::instance = nullptr;
 std::mutex Camera::mtx;
 
-glm::mat4 Camera::getViewMatrix() const { return lookAt(pos.toVec3(), target.toVec3(), up()); }
+glm::mat4 Camera::getViewMatrix() const { return lookAt(pos, target, up()); }
 
 glm::mat4 Camera::getProjectionMatrix() const { return glm::perspective(glm::radians(fov), aspectRatio(), near, far); }

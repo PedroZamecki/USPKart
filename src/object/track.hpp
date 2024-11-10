@@ -5,7 +5,7 @@
 class Track final : public Object
 {
 public:
-	Track() : Object("assets/models/track.obj", {0, -1, 0}, 256, 2, 256) {}
+	Track() : Object("assets/models/track.obj", {0, 0, 0}, 0, 0, 0) {}
 };
 
 #endif // TRACK_HPP

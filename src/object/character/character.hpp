@@ -32,7 +32,7 @@ protected:
 	CharacterBreakingState breakingState{NOT_BREAKING};
 
 public:
-	Character(const Position &pos = {0, .5, 0}, const glm::vec3 angle = glm::vec3{0}, const float scale = 1) :
+	Character(const Position &pos = {0, .5, 0}, const glm::vec3 angle = glm::vec3{0}, const glm::vec3 scale = {1, 1, 1}) :
 		Kart(pos, angle, scale)
 	{
 	}
@@ -49,7 +49,7 @@ public:
 
 		const auto frontWheel = (frontWheels[0].getPos() + frontWheels[1].getPos()) * 0.5f;
 		const auto backWheel = (backWheels[0].getPos() + backWheels[1].getPos()) * 0.5f;
-		const auto L = glm::distance(frontWheel.toVec3(), backWheel.toVec3());
+		const auto L = glm::distance(glm::vec3(frontWheel), glm::vec3(backWheel));
 
 		// Calculate the new angle of the kart based on the current speed and steering angle
 		float angularSpeed = speed / L * std::tan(steeringAngle);
@@ -104,13 +104,15 @@ public:
 		float speedDifference = targetSpeed - getSpeed();
 		float speedChange = acceleration * deltaTime;
 
-
 		// Update the bicycle model
 		updateBicycleModel(deltaTime);
 
 		// Update the position of the kart based on the current speed
 		velocity += forward() * glm::clamp(speedDifference, -speedChange, speedChange);
 		pos += Position{velocity * deltaTime};
+
+		// Update the object velocity
+		objectVelocity = velocity;
 	}
 
 	void draw(const Shader &shader, const float deltaTime, const glm::mat4 baseModel, const bool drawBoxes,
