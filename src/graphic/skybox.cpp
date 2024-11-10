@@ -1,7 +1,7 @@
 #include "skybox.hpp"
-#include <iostream>
-#include <SOIL2/SOIL2.h>
 #include <GL/glew.h>
+#include <SOIL2/SOIL2.h>
+#include <iostream>
 
 #include "utils/logger.hpp"
 
@@ -17,7 +17,7 @@ unsigned int loadCubemap(const std::vector<std::string> &faces)
 		if (unsigned char *data = SOIL_load_image(faces[i].c_str(), &width, &height, nullptr, 0))
 		{
 			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE,
-			             data);
+						 data);
 			SOIL_free_image_data(data);
 		}
 		else
@@ -39,50 +39,24 @@ Skybox::Skybox(const std::vector<std::string> &faces)
 {
 	cubemapTexture = loadCubemap(faces);
 
-	constexpr float skyboxVertices[] = {
-		// positions
-		-1.0f, 1.0f, -1.0f,
-		-1.0f, -1.0f, -1.0f,
-		1.0f, -1.0f, -1.0f,
-		1.0f, -1.0f, -1.0f,
-		1.0f, 1.0f, -1.0f,
-		-1.0f, 1.0f, -1.0f,
+	constexpr float skyboxVertices[] = {// positions
+										-1.0f, 1.0f,  -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,	 -1.0f, -1.0f,
+										1.0f,  -1.0f, -1.0f, 1.0f,	1.0f,  -1.0f, -1.0f, 1.0f,	-1.0f,
 
-		-1.0f, -1.0f, 1.0f,
-		-1.0f, -1.0f, -1.0f,
-		-1.0f, 1.0f, -1.0f,
-		-1.0f, 1.0f, -1.0f,
-		-1.0f, 1.0f, 1.0f,
-		-1.0f, -1.0f, 1.0f,
+										-1.0f, -1.0f, 1.0f,	 -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,	-1.0f,
+										-1.0f, 1.0f,  -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, -1.0f, 1.0f,
 
-		1.0f, -1.0f, -1.0f,
-		1.0f, -1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, -1.0f,
-		1.0f, -1.0f, -1.0f,
+										1.0f,  -1.0f, -1.0f, 1.0f,	-1.0f, 1.0f,  1.0f,	 1.0f,	1.0f,
+										1.0f,  1.0f,  1.0f,	 1.0f,	1.0f,  -1.0f, 1.0f,	 -1.0f, -1.0f,
 
-		-1.0f, -1.0f, 1.0f,
-		-1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f,
-		1.0f, -1.0f, 1.0f,
-		-1.0f, -1.0f, 1.0f,
+										-1.0f, -1.0f, 1.0f,	 -1.0f, 1.0f,  1.0f,  1.0f,	 1.0f,	1.0f,
+										1.0f,  1.0f,  1.0f,	 1.0f,	-1.0f, 1.0f,  -1.0f, -1.0f, 1.0f,
 
-		-1.0f, 1.0f, -1.0f,
-		1.0f, 1.0f, -1.0f,
-		1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f,
-		-1.0f, 1.0f, 1.0f,
-		-1.0f, 1.0f, -1.0f,
+										-1.0f, 1.0f,  -1.0f, 1.0f,	1.0f,  -1.0f, 1.0f,	 1.0f,	1.0f,
+										1.0f,  1.0f,  1.0f,	 -1.0f, 1.0f,  1.0f,  -1.0f, 1.0f,	-1.0f,
 
-		-1.0f, -1.0f, -1.0f,
-		-1.0f, -1.0f, 1.0f,
-		1.0f, -1.0f, -1.0f,
-		1.0f, -1.0f, -1.0f,
-		-1.0f, -1.0f, 1.0f,
-		1.0f, -1.0f, 1.0f
-	};
+										-1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  1.0f,	 -1.0f, -1.0f,
+										1.0f,  -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  1.0f,	 -1.0f, 1.0f};
 
 	glGenVertexArrays(1, &skyboxVAO);
 	glGenBuffers(1, &skyboxVBO);
