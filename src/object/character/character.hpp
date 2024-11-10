@@ -32,8 +32,8 @@ protected:
 	CharacterBreakingState breakingState{NOT_BREAKING};
 
 public:
-	Character(const Position &pos = {0, .5, 0}, const glm::vec3 angle = glm::vec3{0}, const glm::vec3 scale = {1, 1, 1}) :
-		Kart(pos, angle, scale)
+	Character(const Position &pos = {0, .5, 0}, const glm::vec3 angle = glm::vec3{0},
+			  const glm::vec3 scale = {1, 1, 1}) : Kart(pos, angle, scale)
 	{
 	}
 
@@ -77,42 +77,35 @@ public:
 
 		steeringAngle += glm::clamp(angleDifference, -steeringAngleChange, steeringAngleChange);
 
-		// Calculate the new speed of the kart based on the current accelerating state
 		float maxSpeed{30};
 		float minSpeed{-12};
-		float targetSpeed{0}; // Change this based on the current state
-		float acceleration{5};
+		float targetSpeed{0};
+		float accelerationValue{5};
 
 		if (acceleratingState == ACCELERATING)
 		{
 			targetSpeed = maxSpeed;
-			acceleration = 15;
+			accelerationValue = 15;
 		}
 		else if (acceleratingState == REVERSING)
 		{
 			targetSpeed = minSpeed;
-			acceleration = -6;
+			accelerationValue = -6;
 		}
 
 		if (breakingState == BREAKING)
 		{
 			targetSpeed = 0;
-			acceleration = -20;
+			accelerationValue = -20;
 		}
 
-		// Adjust the speed towards the target
 		float speedDifference = targetSpeed - getSpeed();
-		float speedChange = acceleration * deltaTime;
+		acceleration = forward() * glm::clamp(speedDifference, -accelerationValue, accelerationValue);
 
-		// Update the bicycle model
 		updateBicycleModel(deltaTime);
 
-		// Update the position of the kart based on the current speed
-		velocity += forward() * glm::clamp(speedDifference, -speedChange, speedChange);
+		velocity += acceleration * deltaTime;
 		pos += Position{velocity * deltaTime};
-
-		// Update the object velocity
-		objectVelocity = velocity;
 	}
 
 	void draw(const Shader &shader, const float deltaTime, const glm::mat4 baseModel, const bool drawBoxes,
