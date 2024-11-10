@@ -76,7 +76,7 @@ void Shader::use() const
 	if (const auto err = glGetError())
 	{
 		Logger::getInstance()->error("OpenGL error: (" + std::to_string(err) + ") - " +
-			reinterpret_cast<const char *>(glewGetErrorString(err)));
+									 reinterpret_cast<const char *>(glewGetErrorString(err)));
 		throw std::runtime_error("OpenGL error");
 	}
 }
@@ -88,7 +88,7 @@ void Shader::setBool(const std::string &name, const bool value) const
 	if (const auto err = glGetError())
 	{
 		Logger::getInstance()->error("OpenGL error: (" + std::to_string(err) + ") - " +
-			reinterpret_cast<const char *>(glewGetErrorString(err)));
+									 reinterpret_cast<const char *>(glewGetErrorString(err)));
 		throw std::runtime_error("OpenGL error");
 	}
 }
@@ -100,7 +100,7 @@ void Shader::setInt(const std::string &name, const int value) const
 	if (const auto err = glGetError())
 	{
 		Logger::getInstance()->error("OpenGL error: (" + std::to_string(err) + ") - " +
-			reinterpret_cast<const char *>(glewGetErrorString(err)));
+									 reinterpret_cast<const char *>(glewGetErrorString(err)));
 		throw std::runtime_error("OpenGL error");
 	}
 }
@@ -112,7 +112,7 @@ void Shader::setFloat(const std::string &name, const float value) const
 	if (const auto err = glGetError())
 	{
 		Logger::getInstance()->error("OpenGL error: (" + std::to_string(err) + ") - " +
-			reinterpret_cast<const char *>(glewGetErrorString(err)));
+									 reinterpret_cast<const char *>(glewGetErrorString(err)));
 		throw std::runtime_error("OpenGL error");
 	}
 }
@@ -124,7 +124,7 @@ void Shader::setVec2(const std::string &name, const glm::vec2 &value) const
 	if (const auto err = glGetError())
 	{
 		Logger::getInstance()->error("OpenGL error: (" + std::to_string(err) + ") - " +
-			reinterpret_cast<const char *>(glewGetErrorString(err)));
+									 reinterpret_cast<const char *>(glewGetErrorString(err)));
 		throw std::runtime_error("OpenGL error");
 	}
 }
@@ -136,7 +136,7 @@ void Shader::setVec2(const std::string &name, const float x, const float y) cons
 	if (const auto err = glGetError())
 	{
 		Logger::getInstance()->error("OpenGL error: (" + std::to_string(err) + ") - " +
-			reinterpret_cast<const char *>(glewGetErrorString(err)));
+									 reinterpret_cast<const char *>(glewGetErrorString(err)));
 		throw std::runtime_error("OpenGL error");
 	}
 }
@@ -148,7 +148,7 @@ void Shader::setVec3(const std::string &name, const glm::vec3 &value) const
 	if (const auto err = glGetError())
 	{
 		Logger::getInstance()->error("OpenGL error: (" + std::to_string(err) + ") - " +
-			reinterpret_cast<const char *>(glewGetErrorString(err)));
+									 reinterpret_cast<const char *>(glewGetErrorString(err)));
 		throw std::runtime_error("OpenGL error");
 	}
 }
@@ -160,7 +160,7 @@ void Shader::setVec3(const std::string &name, const float x, const float y, cons
 	if (const auto err = glGetError())
 	{
 		Logger::getInstance()->error("OpenGL error: (" + std::to_string(err) + ") - " +
-			reinterpret_cast<const char *>(glewGetErrorString(err)));
+									 reinterpret_cast<const char *>(glewGetErrorString(err)));
 		throw std::runtime_error("OpenGL error");
 	}
 }
@@ -172,7 +172,7 @@ void Shader::setVec4(const std::string &name, const glm::vec4 &value) const
 	if (const auto err = glGetError())
 	{
 		Logger::getInstance()->error("OpenGL error: (" + std::to_string(err) + ") - " +
-			reinterpret_cast<const char *>(glewGetErrorString(err)));
+									 reinterpret_cast<const char *>(glewGetErrorString(err)));
 		throw std::runtime_error("OpenGL error");
 	}
 }
@@ -184,7 +184,7 @@ void Shader::setVec4(const std::string &name, const float x, const float y, cons
 	if (const auto err = glGetError())
 	{
 		Logger::getInstance()->error("OpenGL error: (" + std::to_string(err) + ") - " +
-			reinterpret_cast<const char *>(glewGetErrorString(err)));
+									 reinterpret_cast<const char *>(glewGetErrorString(err)));
 		throw std::runtime_error("OpenGL error");
 	}
 }
@@ -196,7 +196,7 @@ void Shader::setMat2(const std::string &name, const glm::mat2 &mat) const
 	if (const auto err = glGetError())
 	{
 		Logger::getInstance()->error("OpenGL error: (" + std::to_string(err) + ") - " +
-			reinterpret_cast<const char *>(glewGetErrorString(err)));
+									 reinterpret_cast<const char *>(glewGetErrorString(err)));
 		throw std::runtime_error("OpenGL error");
 	}
 }
@@ -208,7 +208,7 @@ void Shader::setMat3(const std::string &name, const glm::mat3 &mat) const
 	if (const auto err = glGetError())
 	{
 		Logger::getInstance()->error("OpenGL error: (" + std::to_string(err) + ") - " +
-			reinterpret_cast<const char *>(glewGetErrorString(err)));
+									 reinterpret_cast<const char *>(glewGetErrorString(err)));
 		throw std::runtime_error("OpenGL error");
 	}
 }
@@ -220,7 +220,7 @@ void Shader::setMat4(const std::string &name, const glm::mat4 &mat) const
 	if (const auto err = glGetError())
 	{
 		Logger::getInstance()->error("OpenGL error: (" + std::to_string(err) + ") - " +
-			reinterpret_cast<const char *>(glewGetErrorString(err)));
+									 reinterpret_cast<const char *>(glewGetErrorString(err)));
 		throw std::runtime_error("OpenGL error");
 	}
 }

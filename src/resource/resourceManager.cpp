@@ -91,7 +91,8 @@ const void *ResourceManager::loadIcon(const std::string &filePath)
 	return icon;
 }
 
-const Model *ResourceManager::loadModel(const std::string &filePath) {
+const Model *ResourceManager::loadModel(const std::string &filePath)
+{
 	std::lock_guard<std::mutex> lock(modelsMutex);
 
 	// Search in the models map

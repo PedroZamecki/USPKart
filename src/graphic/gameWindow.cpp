@@ -171,10 +171,9 @@ void GameWindow::run(const Data *data) const
 	camera->setState(new CameraBehindState);
 
 	bool drawBoxes = false;
-	ControlsHandler::getInstance()->insertKeyCallback(GLFW_KEY_B, [&drawBoxes]() -> void
-	{
-		Logger::getInstance()->info("Toggling boxes: " + std::string(((drawBoxes = !drawBoxes)) ? "on" : "off"));
-	});
+	ControlsHandler::getInstance()->insertKeyCallback(
+		GLFW_KEY_B, [&drawBoxes]() -> void
+		{ Logger::getInstance()->info("Toggling boxes: " + std::string(((drawBoxes = !drawBoxes)) ? "on" : "off")); });
 
 	auto lastTime = std::chrono::high_resolution_clock::now();
 	unsigned long nbFrames = 0;

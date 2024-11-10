@@ -29,7 +29,8 @@ class CollisionBox
 	std::vector<float> vertices;
 	std::vector<unsigned int> indices;
 
-	bool linesIntersect(const glm::vec2 &p1, const glm::vec2 &p2, const glm::vec2 &q1, const glm::vec2 &q2, glm::vec3 &intersection) const;
+	bool linesIntersect(const glm::vec2 &p1, const glm::vec2 &p2, const glm::vec2 &q1, const glm::vec2 &q2,
+						glm::vec3 &intersection) const;
 
 public:
 	explicit CollisionBox(Position *pos, glm::vec3 *angle, glm::vec3 *scale, const float *width, const float *height,

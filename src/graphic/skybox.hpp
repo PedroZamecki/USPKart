@@ -1,10 +1,10 @@
 #ifndef SKYBOX_HPP
 #define SKYBOX_HPP
 
-#include <vector>
-#include <string>
 #include <glm/glm.hpp>
 #include <shader/shader.hpp>
+#include <string>
+#include <vector>
 
 class Skybox
 {

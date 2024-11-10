@@ -15,10 +15,8 @@ void updateCameraPosition(Camera *camera, const Player *player, const bool inver
 	camera->setTargetDist(3 + abs(player->getSpeed()) / 10);
 
 	const auto dist = camera->getTargetDist();
-	camera->pos = camera->target +
-		Position(dist * std::sin(newAngle), dist * std::sin(heightAngle),
-				 dist * std::cos(newAngle));
-
+	camera->pos =
+		camera->target + Position(dist * std::sin(newAngle), dist * std::sin(heightAngle), dist * std::cos(newAngle));
 }
 
 void CameraBehindState::update(Camera *camera, const Player *player)

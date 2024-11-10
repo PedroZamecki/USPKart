@@ -5,8 +5,8 @@
 #include <string>
 #include <vector>
 
-#include "mesh.hpp"
 #include <assimp/Importer.hpp>
+#include "mesh.hpp"
 
 class Model
 {
