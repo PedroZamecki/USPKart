@@ -21,8 +21,8 @@ public:
 	glm::mat4 getModel(const glm::mat4 &baseModel) override
 	{
 		auto m_model = baseModel;
-		m_model = glm::translate(m_model, pos.toVec3());
-		m_model = glm::scale(m_model, glm::vec3(scale, scale, scale));
+		m_model = glm::translate(m_model, pos);
+		m_model = glm::scale(m_model, glm::vec3(scale.x, scale.y, scale.z));
 		m_model = glm::rotate(m_model, steeringAngle, glm::vec3(0.0f, 1.0f, 0.0f));
 		m_model = glm::rotate(m_model, angle.x, glm::vec3(1.0f, 0.0f, 0.0f));
 		m_model = glm::rotate(m_model, (inverted * glm::radians(180.0f)) + angle.y, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -42,7 +42,7 @@ protected:
 	Wheel *wheels[4] = {&frontWheels[0], &frontWheels[1], &backWheels[0], &backWheels[1]};
 
 public:
-	Kart(const Position &pos = {0, .5, 0}, const glm::vec3 angle = glm::vec3{0}, const float scale = 1) :
+	Kart(const Position &pos = {0, .5, 0}, const glm::vec3 angle = glm::vec3{0}, const glm::vec3 scale = {1, 1, 1}) :
 		PhysicsObject("assets/models/kart.obj", pos, 18.0f / 16.0f, 1, 44.0f / 16.0f, angle, scale)
 	{
 	}
