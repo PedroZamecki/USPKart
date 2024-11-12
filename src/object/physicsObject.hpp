@@ -15,6 +15,8 @@ protected:
 	glm::vec3 velocity{0};
 	glm::vec3 acceleration{0};
 	glm::vec3 angularVelocity{0};
+	glm::vec3 objectVelocity{0};
+	float inertia{1};
 
 public:
 	PhysicsObject(const std::string &modelPath, const Position &pos, const float width = 1, const float height = 1,
@@ -29,7 +31,10 @@ public:
 	void move(const glm::vec3 &value) override { pos += value; }
 	void resize(const float value) override { scale *= value; }
 	void rotate(const float value) override { angle.y += value; }
+	float getInertia() override { return inertia; }
 	float getMass() override { return mass; }
+	glm::vec3 getObjectVelocity() { return objectVelocity; }
+	void setObjectVelocity(const glm::vec3 &value) { objectVelocity = value; }
 
 	void resolveCollision(Object &other, const glm::vec3 &collisionForce, const glm::vec3 &normal, float penetration)
 	{
@@ -56,7 +61,7 @@ public:
 
 		glm::vec3 impulse = normal * j;
 		velocity += impulse / mass;
-		if (otherMass)
+		if(otherMass)
 			*other.getVelocity() += impulse / otherMass;
 	}
 
@@ -70,26 +75,17 @@ public:
 		}
 	}
 
-	void applyFriction(float deltaTime)
+	void draw(const Shader &shader, float deltaTime, glm::mat4 baseModel, bool drawBoxes, const Shader &boxShader) override
 	{
-		glm::vec3 frictionForce = -velocity * 0.1f;
-		acceleration += frictionForce / mass;
-	}
+		// Update the position of the object
+		pos += objectVelocity;
+		// Update the angle of the object
+		angle += angularVelocity;
+		// Update the velocity of the object
+		objectVelocity += acceleration;
+		// Update the angular velocity of the object
+		angularVelocity += acceleration / inertia;
 
-	void updatePhysics(float deltaTime)
-	{
-		velocity += acceleration * deltaTime;
-		pos += velocity * deltaTime;
-		angularVelocity += acceleration * deltaTime;
-		angle += angularVelocity * deltaTime;
-		applyFriction(deltaTime);
-		acceleration = glm::vec3(0);
-	}
-
-	void draw(const Shader &shader, float deltaTime, glm::mat4 baseModel, bool drawBoxes,
-			  const Shader &boxShader) override
-	{
-		updatePhysics(deltaTime);
 		Object::draw(shader, deltaTime, baseModel, drawBoxes, boxShader);
 	}
 };
