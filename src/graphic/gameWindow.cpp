@@ -12,6 +12,7 @@
 #include "game/data.hpp"
 #include "object/character/player.hpp"
 #include "skybox.hpp"
+#include "controllers/mapController.hpp"
 
 #define WINDOW_TITLE std::string("USPKart v") + USP_KART_VERSION
 
@@ -171,9 +172,18 @@ void GameWindow::run(const Data *data) const
 	camera->setState(new CameraBehindState);
 
 	bool drawBoxes = false;
-	ControlsHandler::getInstance()->insertKeyCallback(
+
+	auto mapController = MapController("assets/map/default.ppm");
+
+	const auto ch = ControlsHandler::getInstance();
+	
+	ch->insertKeyCallback(
 		GLFW_KEY_B, [&drawBoxes]() -> void
 		{ Logger::getInstance()->info("Toggling boxes: " + std::string(((drawBoxes = !drawBoxes)) ? "on" : "off")); });
+	ch->insertKeyCallback(GLFW_KEY_T, [&mapController, data]() -> void 
+		{ mapController.saveModifiedPPM("Teste.ppm", data->objects); });
+	ch->insertKeyCallback(GLFW_KEY_P, [data]() -> void 
+		{ Logger::getInstance()->info("Player position: " + std::to_string(data->player->getPos().x) + ", " + std::to_string(data->player->getPos().z)); });
 
 	auto lastTime = std::chrono::high_resolution_clock::now();
 	unsigned long nbFrames = 0;

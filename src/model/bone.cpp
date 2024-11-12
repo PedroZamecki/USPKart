@@ -1,7 +1,3 @@
-//
-// Created by pedro on 09/10/24.
-//
-
 #include "bone.hpp"
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
