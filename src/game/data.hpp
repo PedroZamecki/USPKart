@@ -2,6 +2,8 @@
 #define DATA_HPP
 
 #include <vector>
+#include <algorithm>
+#include <random>
 
 #include "object/character/aiChar.hpp"
 #include "object/character/player.hpp"
@@ -16,27 +18,37 @@ public:
 
 	Data()
 	{
-		track = new Track();
-		player = new Player();
-		objects.push_back(track);
-		objects.push_back(player);
-		objects.push_back(new AIChar({3, .5, 3}));
-		objects.push_back(new AIChar({5, .5, 3}));
-		objects.push_back(new AIChar({7, .5, 3}));
-		objects.push_back(new AIChar({9, .5, 3}));
-		objects.push_back(new AIChar({11, .5, 3}));
-		// objects.push_back(new Object("assets/models/block.obj", {128, 0.5, 0}, 1, 1, 1, {0, 0, 0}, {1, 1, 256}));
-		// objects.push_back(new Object("assets/models/block.obj", {-128, .5, 0}, 1, 1, 1, {0, 0, 0}, {1, 1, 256}));
-		// objects.push_back(new Object("assets/models/block.obj", {0, 0.5, 128}, 1, 1, 1, {0, 0, 0}, {1, 1, 256}));
-		// objects.push_back(new Object("assets/models/block.obj", {0, .5, -128}, 1, 1, 1, {0, 0, 0}, {1, 1, 256}));
+		auto positions = std::vector<Position>{
+			{-100, .5, 50},
+			{-100, .5, 38},
+			{-100, .5, 26},
+			{-100, .5, 14},
+			{-92, .5, 44},
+			{-92, .5, 32},
+			{-92, .5, 20},
+		};
+
+		auto angle = glm::vec3{0, 3.14159265, 0};
+
+		// Randomize the positions
+		std::random_device rd;
+		std::mt19937 g(rd());
+		std::shuffle(positions.begin(), positions.end(), g);
+
+		objects.push_back(track = new Track());
+		objects.push_back(player = new Player(positions[0], angle));
+		objects.push_back(new AIChar(positions[1], angle));
+		objects.push_back(new AIChar(positions[2], angle));
+		objects.push_back(new AIChar(positions[3], angle));
+		objects.push_back(new AIChar(positions[4], angle));
+		objects.push_back(new AIChar(positions[5], angle));
+		objects.push_back(new AIChar(positions[6], angle));
 	}
 
 	~Data()
 	{
 		for (const auto &object : objects)
-		{
 			delete object;
-		}
 		objects.clear();
 	}
 	std::vector<Object *> objects;

@@ -7,7 +7,7 @@
 class Player final : public Character
 {
 public:
-	Player()
+	Player(Position pos, glm::vec3 angle): Character(pos, angle)
 	{
 		const auto controls = ControlsHandler::getInstance();
 		controls->insertKeyCallback(GLFW_KEY_UP, [this]() -> void { checkState(); }, ALL);

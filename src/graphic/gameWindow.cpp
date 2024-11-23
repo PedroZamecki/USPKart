@@ -7,12 +7,12 @@
 
 #include <utils/logger.hpp>
 #include "camera/camera.hpp"
+#include "controllers/mapController.hpp"
 #include "controls/controlsHandler.hpp"
 #include "game/config.hpp"
 #include "game/data.hpp"
 #include "object/character/player.hpp"
 #include "skybox.hpp"
-#include "controllers/mapController.hpp"
 
 #define WINDOW_TITLE std::string("USPKart v") + USP_KART_VERSION
 
@@ -173,17 +173,32 @@ void GameWindow::run(const Data *data) const
 
 	bool drawBoxes = false;
 
-	auto mapController = MapController("assets/map/default.ppm");
+	auto mapController = MapController("assets/map/default.pgm",
+									   {{{175, 508}, {90, 508}},
+										{{426, 132}, {426, 73}},
+										{{838, 786}, {838, 1014}},
+										{{441, 438}, {441, 261}},
+										{{377, 817}, {365, 1013}}
+										});
 
 	const auto ch = ControlsHandler::getInstance();
-	
+
 	ch->insertKeyCallback(
 		GLFW_KEY_B, [&drawBoxes]() -> void
 		{ Logger::getInstance()->info("Toggling boxes: " + std::string(((drawBoxes = !drawBoxes)) ? "on" : "off")); });
-	ch->insertKeyCallback(GLFW_KEY_T, [&mapController, data]() -> void 
-		{ mapController.saveModifiedPPM("Teste.ppm", data->objects); });
-	ch->insertKeyCallback(GLFW_KEY_P, [data]() -> void 
-		{ Logger::getInstance()->info("Player position: " + std::to_string(data->player->getPos().x) + ", " + std::to_string(data->player->getPos().z)); });
+	ch->insertKeyCallback(GLFW_KEY_T,
+						  [&mapController, data]() -> void
+						  {
+							  mapController.saveModifiedPPM("Teste.ppm", data->objects, data->player->getPos().x,
+															data->player->getPos().z, 0);
+						  });
+	ch->insertKeyCallback(GLFW_KEY_P,
+						  [data]() -> void
+						  {
+							  Logger::getInstance()->info(
+								  "Player position: " + std::to_string(data->player->getPos().x) + ", " +
+								  std::to_string(data->player->getPos().z));
+						  });
 
 	auto lastTime = std::chrono::high_resolution_clock::now();
 	unsigned long nbFrames = 0;
