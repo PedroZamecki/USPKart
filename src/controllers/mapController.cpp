@@ -6,24 +6,72 @@
 #include <sstream>
 #include <thread>
 #include "object/object.hpp"
+#include "utils/logger.hpp"
 
-int coordTransform(float num, int maxCoord) { return static_cast<int>(num * 4 + maxCoord / 2); }
+// Grayscale color
+#define ROAD 0
+#define BRIDGE 50
+#define ROADSIDE 70
+#define OFF_ROAD 170
+#define WATER 200
+#define WALL 255
 
-MapController::MapController(const std::string &ppmFilePath) { loadPPM(ppmFilePath); }
+// Colors
+#define ROAD_COLOR {ROAD, ROAD, ROAD}
+#define BRIDGE_COLOR {BRIDGE, BRIDGE, BRIDGE}
+#define ROADSIDE_COLOR {ROADSIDE, ROADSIDE, ROADSIDE}
+#define OFF_ROAD_COLOR {OFF_ROAD, OFF_ROAD, OFF_ROAD}
+#define WATER_COLOR {WATER, WATER, WATER}
+#define WALL_COLOR {WALL, WALL, WALL}
+#define CHECKPOINT_COLOR {0, 0, 255}
+#define OBJECT_COLOR {255, 0, 0}
+#define PATH_COLOR {0, 255, 0}
 
-void MapController::loadPPM(const std::string &ppmFilePath)
+// Code
+#define ROAD_CODE 0
+#define BRIDGE_CODE 1
+#define ROADSIDE_CODE 2
+#define OFF_ROAD_CODE 3
+#define WATER_CODE 4
+#define WALL_CODE 5
+#define CHECKPOINT_CODE 6
+#define OBJECT_CODE 7
+#define PATH_CODE 8
+#define UKNOWN_CODE 9
+
+// Cost
+#define ROAD_COST 1.0
+#define BRIDGE_COST 1.3
+#define ROADSIDE_COST 1.5
+#define OFF_ROAD_COST 2.0
+#define WATER_COST 5.0
+#define WALL_COST std::numeric_limits<double>::infinity()
+
+int coordTransform(float num, int maxCoord)
+{
+	return std::max(std::min(static_cast<int>(num * 4 + maxCoord / 2), maxCoord), 0);
+}
+
+MapController::MapController(const std::string &ppmFilePath,
+							 const std::vector<std::pair<std::pair<int, int>, std::pair<int, int>>> &checkpoints)
+{
+	this->checkpoints = checkpoints;
+	loadPGM(ppmFilePath);
+}
+
+void MapController::loadPGM(const std::string &ppmFilePath)
 {
 	std::ifstream file(ppmFilePath);
 	if (!file.is_open())
 	{
-		throw std::runtime_error("Failed to open PPM file");
+		throw std::runtime_error("Failed to open PGM file");
 	}
 
 	std::string line;
 	std::getline(file, line);
-	if (line != "P6")
+	if (line != "P2")
 	{
-		throw std::runtime_error("Invalid PPM file format");
+		throw std::runtime_error("Invalid PGM file format");
 	}
 
 	int width, height;
@@ -32,27 +80,36 @@ void MapController::loadPPM(const std::string &ppmFilePath)
 
 	int maxColor;
 	file >> maxColor;
-	file.get(); // Consume the newline character
 
 	for (int y = 0; y < height; y++)
 	{
 		for (int x = 0; x < width; x++)
 		{
-			char r, g, b;
-			file.read(&r, 1);
-			file.read(&g, 1);
-			file.read(&b, 1);
-			if (r == 255 && g == 255 && b == 255)
+			int color;
+			file >> color;
+			switch (color)
 			{
-				map[y][x] = 0; // White pixel
-			}
-			else if (r == 0 && g == 0 && b == 0)
-			{
-				map[y][x] = 1; // Black pixel
-			}
-			else
-			{
-				map[y][x] = (static_cast<int>(r) << 16) | (static_cast<int>(g) << 8) | static_cast<int>(b);
+			case ROAD:
+				map[y][x] = ROAD_CODE;
+				break;
+			case BRIDGE:
+				map[y][x] = BRIDGE_CODE;
+				break;
+			case ROADSIDE:
+				map[y][x] = ROADSIDE_CODE;
+				break;
+			case OFF_ROAD:
+				map[y][x] = OFF_ROAD_CODE;
+				break;
+			case WATER:
+				map[y][x] = WATER_CODE;
+				break;
+			case WALL:
+				map[y][x] = WALL_CODE;
+				break;
+			default:
+				map[y][x] = UKNOWN_CODE;
+				break;
 			}
 		}
 	}
@@ -62,75 +119,89 @@ void MapController::loadPPM(const std::string &ppmFilePath)
 
 void MapController::loadTrackObjects(const std::vector<std::string> &objects) { trackObjects = objects; }
 
-// TODO: Implement this function properly
-// Find the shortest path using A* algorithm
-std::vector<std::pair<int, int>> MapController::findShortestPath(int startX, int startY, int endX, int endY)
+struct Node
 {
-	// A* algorithm implementation
-	struct Node
+	int x, y;
+	double cost, heuristic;
+	Node *parent;
+
+	Node(int x, int y, double cost, double heuristic, Node *parent = nullptr) :
+		x(x), y(y), cost(cost), heuristic(heuristic), parent(parent)
 	{
-		int x, y;
-		int g, h;
-		Node *parent;
+	}
+
+	double totalCost() const { return cost + heuristic; }
+
+	bool operator>(const Node &other) const { return totalCost() > other.totalCost(); }
+};
+
+std::vector<std::pair<int, int>> MapController::findPath(int x, int y, int lastCheckpointIndex,
+														 const std::vector<Object *> &objects)
+{
+	auto checkpoint = checkpoints[lastCheckpointIndex];
+	int goalX = (checkpoint.first.first + checkpoint.second.first) / 2;
+	int goalY = (checkpoint.first.second + checkpoint.second.second) / 2;
+
+	auto heuristic = [goalX, goalY](int x, int y)
+	{ return std::sqrt(std::pow(goalX - x, 2) + std::pow(goalY - y, 2)); };
+
+	auto getCost = [this](int x, int y)
+	{
+		switch (map[y][x])
+		{
+		case ROAD_CODE:
+			return ROAD_COST;
+		case BRIDGE_CODE:
+			return BRIDGE_COST;
+		case ROADSIDE_CODE:
+			return ROADSIDE_COST;
+		case OFF_ROAD_CODE:
+			return OFF_ROAD_COST;
+		case WATER_CODE:
+			return WATER_COST;
+		case WALL_CODE:
+			return WALL_COST;
+		default:
+			return WALL_COST;
+		}
 	};
 
-	auto compare = [](const Node *a, const Node *b) { return a->g + a->h > b->g + b->h; };
-
-	std::priority_queue<Node *, std::vector<Node *>, decltype(compare)> openSet(compare);
+	std::priority_queue<Node, std::vector<Node>, std::greater<Node>> openSet;
 	std::vector<std::vector<bool>> closedSet(map.size(), std::vector<bool>(map[0].size(), false));
-	std::vector<std::vector<Node *>> nodes(map.size(), std::vector<Node *>(map[0].size(), nullptr));
 
-	Node *start = new Node{startX, startY, 0, 0, nullptr};
-	start->h = std::abs(endX - startX) + std::abs(endY - startY);
-	openSet.push(start);
+	openSet.emplace(x, y, 0, heuristic(x, y));
 
 	while (!openSet.empty())
 	{
-		Node *current = openSet.top();
+		Node current = openSet.top();
 		openSet.pop();
 
-		if (current->x == endX && current->y == endY)
+		if (current.x == goalX && current.y == goalY)
 		{
 			std::vector<std::pair<int, int>> path;
-			while (current != nullptr)
+			for (Node *node = &current; node != nullptr; node = node->parent)
 			{
-				path.emplace_back(current->x, current->y);
-				current = current->parent;
+				path.emplace_back(node->x, node->y);
 			}
+			std::reverse(path.begin(), path.end());
 			return path;
 		}
 
-		closedSet[current->y][current->x] = true;
+		if (closedSet[current.y][current.x])
+			continue;
 
-		for (int dy = -1; dy <= 1; dy++)
+		closedSet[current.y][current.x] = true;
+
+		const std::vector<std::pair<int, int>> directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+		for (const auto &dir : directions)
 		{
-			for (int dx = -1; dx <= 1; dx++)
+			int newX = current.x + dir.first;
+			int newY = current.y + dir.second;
+
+			if (newX >= 0 && newX < map[0].size() && newY >= 0 && newY < map.size() && !closedSet[newY][newX])
 			{
-				if (dx == 0 && dy == 0)
-				{
-					continue;
-				}
-
-				int x = current->x + dx;
-				int y = current->y + dy;
-				if (x < 0 || x >= map[0].size() || y < 0 || y >= map.size() || map[y][x] == 1 || closedSet[y][x])
-				{
-					continue;
-				}
-
-				Node *neighbor = nodes[y][x];
-				if (neighbor == nullptr)
-				{
-					neighbor = new Node{x, y, current->g + 1, 0, current};
-					neighbor->h = std::abs(endX - x) + std::abs(endY - y);
-					nodes[y][x] = neighbor;
-					openSet.push(neighbor);
-				}
-				else if (current->g + 1 < neighbor->g)
-				{
-					neighbor->g = current->g + 1;
-					neighbor->parent = current;
-				}
+				double newCost = current.cost + getCost(newX, newY);
+				openSet.emplace(newX, newY, newCost, heuristic(newX, newY), new Node(current));
 			}
 		}
 	}
@@ -157,10 +228,18 @@ std::vector<std::vector<int>> MapController::getWeightedMap(const std::vector<Ob
 		}
 
 		// Find the bounding box of the polygon
-		int minX = std::min_element(points.begin(), points.end(), [](const auto &a, const auto &b) { return a.first < b.first; })->first;
-		int maxX = std::max_element(points.begin(), points.end(), [](const auto &a, const auto &b) { return a.first < b.first; })->first;
-		int minY = std::min_element(points.begin(), points.end(), [](const auto &a, const auto &b) { return a.second < b.second; })->second;
-		int maxY = std::max_element(points.begin(), points.end(), [](const auto &a, const auto &b) { return a.second < b.second; })->second;
+		int minX = std::min_element(points.begin(), points.end(),
+									[](const auto &a, const auto &b) { return a.first < b.first; })
+					   ->first;
+		int maxX = std::max_element(points.begin(), points.end(),
+									[](const auto &a, const auto &b) { return a.first < b.first; })
+					   ->first;
+		int minY = std::min_element(points.begin(), points.end(),
+									[](const auto &a, const auto &b) { return a.second < b.second; })
+					   ->second;
+		int maxY = std::max_element(points.begin(), points.end(),
+									[](const auto &a, const auto &b) { return a.second < b.second; })
+					   ->second;
 
 		// Scanline fill algorithm
 		for (int y = minY; y <= maxY; y++)
@@ -183,9 +262,44 @@ std::vector<std::vector<int>> MapController::getWeightedMap(const std::vector<Ob
 				{
 					if (x >= 0 && x < width && y >= 0 && y < height)
 					{
-						weightedMap[y][x] = 2;
+						weightedMap[y][x] = OBJECT_CODE;
 					}
 				}
+			}
+		}
+	}
+
+	for (const auto &checkpoint : checkpoints)
+	{
+		int x1 = checkpoint.first.first;
+		int y1 = checkpoint.first.second;
+		int x2 = checkpoint.second.first;
+		int y2 = checkpoint.second.second;
+
+		int dx = std::abs(x2 - x1);
+		int dy = std::abs(y2 - y1);
+		int sx = (x1 < x2) ? 1 : -1;
+		int sy = (y1 < y2) ? 1 : -1;
+		int err = dx - dy;
+
+		while (true)
+		{
+			if (x1 >= 0 && x1 < width && y1 >= 0 && y1 < height)
+			{
+				weightedMap[y1][x1] = CHECKPOINT_CODE;
+			}
+			if (x1 == x2 && y1 == y2)
+				break;
+			int e2 = 2 * err;
+			if (e2 > -dy)
+			{
+				err -= dy;
+				x1 += sx;
+			}
+			if (e2 < dx)
+			{
+				err += dx;
+				y1 += sy;
 			}
 		}
 	}
@@ -193,67 +307,101 @@ std::vector<std::vector<int>> MapController::getWeightedMap(const std::vector<Ob
 	return weightedMap;
 }
 
-void MapController::saveModifiedPPM(const std::string &outputFilePath, const std::vector<Object *> &objects)
+void MapController::saveModifiedPPM(const std::string &outputFilePath, const std::vector<Object *> &objects, int x,
+									int y, int lastCheckpointIndex)
 {
 	// Create a snapshot of the map and objects
 	auto mapSnapshot = map;
 	std::vector<Object *> objectsSnapshot = objects;
 
+	const int convertedX = coordTransform(x, map[0].size());
+	const int convertedY = coordTransform(y, map.size());
+
 	// Run the save operation in a separate thread
-	std::thread([this, mapSnapshot, objectsSnapshot, outputFilePath]() {
-		auto weightedMap = getWeightedMap(objectsSnapshot);
-
-		int width = weightedMap[0].size();
-		int height = weightedMap.size();
-
-		// Create a color map from the original PPM
-		std::vector<std::vector<std::tuple<char, char, char>>> colorMap(height, std::vector<std::tuple<char, char, char>>(width));
-		for (int y = 0; y < height; y++)
+	std::thread saveThread(
+		[this, mapSnapshot, objectsSnapshot, outputFilePath, convertedX, convertedY, lastCheckpointIndex]()
 		{
-			for (int x = 0; x < width; x++)
-			{
-				int cell = mapSnapshot[y][x];
-				if (cell == 0)
-					colorMap[y][x] = std::make_tuple((char)255, (char)255, (char)255);
-				else if (cell == 1)
-					colorMap[y][x] = std::make_tuple((char)0, (char)0, (char)0);
-				else
-					colorMap[y][x] = std::make_tuple((char)(cell & 0xFF), (char)(cell & 0xFF), (char)(cell & 0xFF));
-			}
-		}
+			auto weightedMap = getWeightedMap(objectsSnapshot);
 
-		// Modify the color map based on the weighted map
-		for (int y = 0; y < height; y++)
-		{
-			for (int x = 0; x < width; x++)
+			int width = weightedMap[0].size();
+			int height = weightedMap.size();
+
+			// Create a color map from the original PPM
+			std::vector<std::vector<std::tuple<unsigned char, unsigned char, unsigned char>>> colorMap(
+				height, std::vector<std::tuple<unsigned char, unsigned char, unsigned char>>(width));
+			for (int y = 0; y < height; y++)
 			{
-				if (weightedMap[y][x] == 2)
+				for (int x = 0; x < width; x++)
 				{
-					colorMap[y][x] = std::make_tuple((char)255, (char)0, (char)0);
+					switch (weightedMap[y][x])
+					{
+					case ROAD_CODE:
+						colorMap[y][x] = ROAD_COLOR;
+						break;
+					case BRIDGE_CODE:
+						colorMap[y][x] = BRIDGE_COLOR;
+						break;
+					case ROADSIDE_CODE:
+						colorMap[y][x] = ROADSIDE_COLOR;
+						break;
+					case OFF_ROAD_CODE:
+						colorMap[y][x] = OFF_ROAD_COLOR;
+						break;
+					case WATER_CODE:
+						colorMap[y][x] = WATER_COLOR;
+						break;
+					case WALL_CODE:
+						colorMap[y][x] = WALL_COLOR;
+						break;
+					case CHECKPOINT_CODE:
+						colorMap[y][x] = CHECKPOINT_COLOR;
+						break;
+					case OBJECT_CODE:
+						colorMap[y][x] = OBJECT_COLOR;
+						break;
+					case PATH_CODE:
+						colorMap[y][x] = PATH_COLOR;
+						break;
+					default:
+						colorMap[y][x] = ROAD_COLOR;
+						break;
+					}
 				}
 			}
-		}
 
-		std::ofstream file(outputFilePath, std::ios::binary);
-		if (!file.is_open())
-		{
-			throw std::runtime_error("Failed to open output PPM file");
-		}
-
-		// Write the PPM header
-		file << "P6\n";
-		file << width << " " << height << "\n";
-		file << "255\n";
-
-		// Write the pixel data
-		for (const auto &row : colorMap)
-		{
-			for (const auto &color : row)
+			// Find the shortest path and paint it green
+			auto path = findPath(convertedX, convertedY, lastCheckpointIndex, objectsSnapshot);
+			for (const auto &point : path)
 			{
-				file << std::get<0>(color) << std::get<1>(color) << std::get<2>(color);
+				int x = point.first;
+				int y = point.second;
+				if (x >= 0 && x < width && y >= 0 && y < height)
+				{
+					colorMap[y][x] = PATH_COLOR;
+				}
 			}
-		}
 
-		file.close();
-	}).detach();
+			std::ofstream file(outputFilePath, std::ios::binary);
+			if (!file.is_open())
+			{
+				throw std::runtime_error("Failed to open output PPM file");
+			}
+
+			// Write the PPM header
+			file << "P6\n";
+			file << width << " " << height << "\n";
+			file << "255\n";
+
+			// Write the pixel data
+			for (const auto &row : colorMap)
+			{
+				for (const auto &color : row)
+				{
+					file << std::get<0>(color) << std::get<1>(color) << std::get<2>(color);
+				}
+			}
+
+			file.close();
+		});
+	saveThread.detach();
 }
