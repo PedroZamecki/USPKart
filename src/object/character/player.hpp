@@ -7,13 +7,14 @@
 class Player final : public Character
 {
 public:
-	Player(Position pos, glm::vec3 angle): Character(pos, angle)
+	Player(std::vector<Object *> &objects, Position pos, glm::vec3 angle) : Character(objects, pos, angle)
 	{
 		const auto controls = ControlsHandler::getInstance();
 		controls->insertKeyCallback(GLFW_KEY_UP, [this]() -> void { checkState(); }, ALL);
 		controls->insertKeyCallback(GLFW_KEY_DOWN, [this]() -> void { checkState(); }, ALL);
 		controls->insertKeyCallback(GLFW_KEY_LEFT, [this]() -> void { checkState(); }, ALL);
 		controls->insertKeyCallback(GLFW_KEY_RIGHT, [this]() -> void { checkState(); }, ALL);
+		controls->insertKeyCallback(GLFW_KEY_T, [this]() -> void { printMapState(); }, PRESS);
 	}
 
 	void checkState()
@@ -31,6 +32,11 @@ public:
 		// speed == 0 -> never break
 		// speed > 0 -> break if accelerating == -1
 		breakingState = static_cast<CharacterBreakingState>(getSpeed() > 0.1 && acceleratingState == -1);
+	}
+
+	void printMapState()
+	{
+		mapController.saveModifiedPPM("Teste.ppm", pos.x, pos.z, checkpointIdx, filterObjects(), this);
 	}
 };
 

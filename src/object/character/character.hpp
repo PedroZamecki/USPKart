@@ -1,7 +1,9 @@
 #ifndef CHARACTER_HPP
 #define CHARACTER_HPP
 
+#include <thread>
 #include "../kart.hpp"
+#include "controllers/mapController.hpp"
 #include "utils/logger.hpp"
 
 enum CharacterSteeringState
@@ -30,11 +32,33 @@ protected:
 	CharacterSteeringState steerState{NOT_STEERING};
 	CharacterAcceleratingState acceleratingState{NOT_ACCELERATING};
 	CharacterBreakingState breakingState{NOT_BREAKING};
+	std::vector<Object *> &objects;
+	MapController mapController;
+	std::thread pathThread;
+	int checkpointIdx{0};
 
 public:
-	Character(const Position &pos = {0, .5, 0}, const glm::vec3 angle = glm::vec3{0},
-			  const glm::vec3 scale = {1, 1, 1}) : Kart(pos, angle, scale)
+	Character(std::vector<Object *> &objects, const Position &pos = {0, .5, 0}, const glm::vec3 angle = glm::vec3{0},
+			  const glm::vec3 scale = {1, 1, 1}) :
+		Kart(pos, angle, scale), objects(objects), mapController("assets/map/default.pgm",
+																 {{{175, 508}, {90, 508}},
+																  {{426, 132}, {426, 73}},
+																  {{838, 786}, {838, 1014}},
+																  {{441, 438}, {441, 261}},
+																  {{377, 817}, {365, 1013}}})
 	{
+		pathThread = std::thread(&Character::updatePath, this);
+		pathThread.detach();
+	}
+
+	std::vector<Object *> filterObjects()
+	{
+		std::vector<Object *> filteredObjects;
+		for (const auto &object : objects)
+			if (object != this)
+				filteredObjects.push_back(object);
+
+		return filteredObjects;
 	}
 
 	void updateBicycleModel(const float deltaTime)
@@ -120,6 +144,29 @@ public:
 	{
 		update(deltaTime);
 		Kart::draw(shader, deltaTime, baseModel, drawBoxes, boxShader);
+	}
+
+	void updatePath()
+	{
+		while (true)
+		{
+			const auto path = mapController.findPath(
+				pos.x, pos.z, mapController.getWeightedMap(filterObjects(), this, checkpointIdx), checkpointIdx);
+			if (path.empty())
+				break;
+
+			for (const auto &point : path)
+			{
+				steerState = point.first > pos.x ? STEERING_RIGHT : STEERING_LEFT;
+				acceleratingState = ACCELERATING;
+				pos = Position{glm::vec3{point.first, pos.y, point.second}};
+				std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			}
+
+			++checkpointIdx;
+			if (checkpointIdx >= mapController.getCheckpoints().size())
+				break;
+		}
 	}
 };
 
