@@ -173,25 +173,11 @@ void GameWindow::run(const Data *data) const
 
 	bool drawBoxes = false;
 
-	auto mapController = MapController("assets/map/default.pgm",
-									   {{{175, 508}, {90, 508}},
-										{{426, 132}, {426, 73}},
-										{{838, 786}, {838, 1014}},
-										{{441, 438}, {441, 261}},
-										{{377, 817}, {365, 1013}}
-										});
-
 	const auto ch = ControlsHandler::getInstance();
 
 	ch->insertKeyCallback(
 		GLFW_KEY_B, [&drawBoxes]() -> void
 		{ Logger::getInstance()->info("Toggling boxes: " + std::string(((drawBoxes = !drawBoxes)) ? "on" : "off")); });
-	ch->insertKeyCallback(GLFW_KEY_T,
-						  [&mapController, data]() -> void
-						  {
-							  mapController.saveModifiedPPM("Teste.ppm", data->objects, data->player->getPos().x,
-															data->player->getPos().z, 0);
-						  });
 	ch->insertKeyCallback(GLFW_KEY_P,
 						  [data]() -> void
 						  {

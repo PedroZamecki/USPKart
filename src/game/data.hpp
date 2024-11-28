@@ -36,13 +36,13 @@ public:
 		std::shuffle(positions.begin(), positions.end(), g);
 
 		objects.push_back(track = new Track());
-		objects.push_back(player = new Player(positions[0], angle));
-		objects.push_back(new AIChar(positions[1], angle));
-		objects.push_back(new AIChar(positions[2], angle));
-		objects.push_back(new AIChar(positions[3], angle));
-		objects.push_back(new AIChar(positions[4], angle));
-		objects.push_back(new AIChar(positions[5], angle));
-		objects.push_back(new AIChar(positions[6], angle));
+		objects.push_back(player = new Player(objects, positions[0], angle));
+		objects.push_back(new AIChar(objects, positions[1], angle));
+		objects.push_back(new AIChar(objects, positions[2], angle));
+		objects.push_back(new AIChar(objects, positions[3], angle));
+		objects.push_back(new AIChar(objects, positions[4], angle));
+		objects.push_back(new AIChar(objects, positions[5], angle));
+		objects.push_back(new AIChar(objects, positions[6], angle));
 	}
 
 	~Data()
