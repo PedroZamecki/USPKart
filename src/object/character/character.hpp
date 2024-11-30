@@ -36,16 +36,17 @@ protected:
 	MapController mapController;
 	std::thread pathThread;
 	int checkpointIdx{0};
+	glm::vec3 color;
 
 public:
-	Character(std::vector<Object *> &objects, const Position &pos = {0, .5, 0}, const glm::vec3 angle = glm::vec3{0},
-			  const glm::vec3 scale = {1, 1, 1}) :
-		Kart(pos, angle, scale), objects(objects), mapController("assets/map/default.pgm",
-																 {{{175, 508}, {90, 508}},
-																  {{426, 132}, {426, 73}},
-																  {{838, 786}, {838, 1014}},
-																  {{441, 438}, {441, 261}},
-																  {{377, 817}, {365, 1013}}})
+	Character(std::vector<Object *> &objects, const Position &pos = {0, 0, 0}, const glm::vec3 angle = glm::vec3{0},
+			  const glm::vec3 scale = {1, 1, 1}, const glm::vec3 color = {0, 0, 0}) :
+		Kart(pos, angle, scale), objects(objects), color(color), mapController("assets/map/default.pgm",
+																			   {{{175, 508}, {90, 508}},
+																				{{426, 132}, {426, 73}},
+																				{{838, 786}, {838, 1014}},
+																				{{441, 438}, {441, 261}},
+																				{{377, 817}, {365, 1013}}})
 	{
 		pathThread = std::thread(&Character::updatePath, this);
 		pathThread.detach();
@@ -140,33 +141,34 @@ public:
 	}
 
 	void draw(const Shader &shader, const float deltaTime, const glm::mat4 baseModel, const bool drawBoxes,
-			  const Shader &boxShader) override
+			  const Shader &boxShader, const glm::vec3 &maskedColor = {0, 0, 0},
+			  const glm::vec3 &maskColor = {0, 0, 0}) override
 	{
 		update(deltaTime);
-		Kart::draw(shader, deltaTime, baseModel, drawBoxes, boxShader);
+		Kart::draw(shader, deltaTime, baseModel, drawBoxes, boxShader, {0.0784313725490196, 0.047058823529411764, 0.9490196078431372}, color);
 	}
 
 	void updatePath()
 	{
-		while (true)
-		{
-			const auto path = mapController.findPath(
-				pos.x, pos.z, mapController.getWeightedMap(filterObjects(), this, checkpointIdx), checkpointIdx);
-			if (path.empty())
-				break;
+		// while (true)
+		// {
+		// 	const auto path = mapController.findPath(
+		// 		pos.x, pos.z, mapController.getWeightedMap(filterObjects(), this, checkpointIdx), checkpointIdx);
+		// 	if (path.empty())
+		// 		break;
 
-			for (const auto &point : path)
-			{
-				steerState = point.first > pos.x ? STEERING_RIGHT : STEERING_LEFT;
-				acceleratingState = ACCELERATING;
-				pos = Position{glm::vec3{point.first, pos.y, point.second}};
-				std::this_thread::sleep_for(std::chrono::milliseconds(100));
-			}
+		// 	for (const auto &point : path)
+		// 	{
+		// 		steerState = point.first > pos.x ? STEERING_RIGHT : STEERING_LEFT;
+		// 		acceleratingState = ACCELERATING;
+		// 		pos = Position{glm::vec3{point.first, pos.y, point.second}};
+		// 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		// 	}
 
-			++checkpointIdx;
-			if (checkpointIdx >= mapController.getCheckpoints().size())
-				break;
-		}
+		// 	++checkpointIdx;
+		// 	if (checkpointIdx >= mapController.getCheckpoints().size())
+		// 		break;
+		// }
 	}
 };
 

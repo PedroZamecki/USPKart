@@ -5,12 +5,16 @@
 
 #include <iostream>
 
-Model::Model(string const &path, const bool gamma) : gammaCorrection(gamma) { Model::loadModel(path); }
+Model::Model(string const &path) 
+{ 
+	Model::loadModel(path); 
+}
 
-void Model::draw(const Shader &shader) const
+void Model::draw(const Shader &shader, const glm::vec3 &maskedColor, const glm::vec3 &maskColor) const
 {
+	shader.use();
 	for (const auto &mesh : meshes)
-		mesh.draw(shader);
+		mesh.draw(shader, maskedColor, maskColor);
 }
 
 void Model::loadModel(string const &path)

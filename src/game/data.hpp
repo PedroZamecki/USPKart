@@ -19,16 +19,17 @@ public:
 	Data()
 	{
 		auto positions = std::vector<Position>{
-			{-100, .5, 50},
-			{-100, .5, 38},
-			{-100, .5, 26},
-			{-100, .5, 14},
-			{-92, .5, 44},
-			{-92, .5, 32},
-			{-92, .5, 20},
+			{-100, .25, 50},
+			{-100, .25, 38},
+			{-100, .25, 26},
+			{-100, .25, 14},
+			{-92, .25, 44},
+			{-92, .25, 32},
+			{-92, .25, 20},
 		};
 
 		auto angle = glm::vec3{0, 3.14159265, 0};
+		auto scale = glm::vec3{1, 1, 1};
 
 		// Randomize the positions
 		std::random_device rd;
@@ -36,13 +37,13 @@ public:
 		std::shuffle(positions.begin(), positions.end(), g);
 
 		objects.push_back(track = new Track());
-		objects.push_back(player = new Player(objects, positions[0], angle));
-		objects.push_back(new AIChar(objects, positions[1], angle));
-		objects.push_back(new AIChar(objects, positions[2], angle));
-		objects.push_back(new AIChar(objects, positions[3], angle));
-		objects.push_back(new AIChar(objects, positions[4], angle));
-		objects.push_back(new AIChar(objects, positions[5], angle));
-		objects.push_back(new AIChar(objects, positions[6], angle));
+		objects.push_back(player = new Player(objects, positions[0], angle, scale, {1, 0, 0}));
+		objects.push_back(new Character(objects, positions[1], angle, scale, {0, 1, 0}));
+		objects.push_back(new Character(objects, positions[2], angle, scale, {0, 0, 1}));
+		objects.push_back(new Character(objects, positions[3], angle, scale, {1, 0.5, 0}));
+		objects.push_back(new Character(objects, positions[4], angle, scale, {1, 0, 0.5}));
+		objects.push_back(new Character(objects, positions[5], angle, scale, {0, 0.5, 1}));
+		objects.push_back(new Character(objects, positions[6], angle, scale, {0.5, 0, 1}));
 	}
 
 	~Data()

@@ -10,7 +10,7 @@ class AIChar final : public Character
 
 public:
 	AIChar(std::vector<Object *> &objects, const Position &pos = {0, 0.5, 0}, glm::vec3 angle = glm::vec3{0},
-		   glm::vec3 scale = {1, 1, 1}) : Character(objects, pos, angle, scale)
+		   glm::vec3 scale = {1, 1, 1}, glm::vec3 color = {0, 0, 0}) : Character(objects, pos, angle, scale, color)
 	{
 		// Start the thread to move the AI character
 		std::thread t(&AIChar::move, this);

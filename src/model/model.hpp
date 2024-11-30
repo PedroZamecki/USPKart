@@ -30,12 +30,11 @@ protected:
 	// textures aren't loaded more than once.
 	std::vector<Mesh> meshes;
 	string directory;
-	bool gammaCorrection;
 	Assimp::Importer importer;
 
 public:
 	// constructor, expects a filepath to a 3D model.
-	explicit Model(string const &path, bool gamma = false);
+	explicit Model(string const &path);
 	virtual ~Model()
 	{
 		texturesLoaded.clear();
@@ -43,7 +42,7 @@ public:
 	}
 
 	// draws the model, and thus all its meshes
-	virtual void draw(const Shader &shader) const;
+	virtual void draw(const Shader &shader, const glm::vec3 &maskedColor = {0, 0, 0}, const glm::vec3 &maskColor = {0, 0, 0}) const;
 };
 
 #endif // MODEL_HPP

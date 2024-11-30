@@ -25,7 +25,8 @@ class Mesh
 public:
 	Mesh(const vector<Vertex> &vertices, const vector<unsigned int> &indices, const vector<Texture> &textures);
 
-	void draw(const Shader &shader) const;
+	void draw(const Shader &shader, const glm::vec3 &maskedColor, const glm::vec3 &maskColor) const;
+	bool hasTransparency() const;
 };
 
 
