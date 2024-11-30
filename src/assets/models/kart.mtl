@@ -5,8 +5,8 @@ newmtl m_df81cd20-207e-e75d-87db-f85837695dbe
 map_Kd texture_kart.png
 newmtl m_dc5450ac-7e85-0d73-6f28-32b919f2615b
 map_Kd IME.png
-newmtl m_58ee8ec4-1243-2064-cfcb-bf9e689ebdcf
-map_Kd texture_character.png
-newmtl m_d512cb5d-6720-3b71-374b-7ac101528e24
+newmtl m_58412fee-9fc0-fdbd-b152-816ecb2e5ebf
 map_Kd texture_face.png
+newmtl m_7cb13777-7e44-97b4-1704-f1c97dcfdd07
+map_Kd texture_character_color.png
 newmtl none
