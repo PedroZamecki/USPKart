@@ -61,7 +61,7 @@ public:
 
 		glm::vec3 impulse = normal * j;
 		velocity += impulse / mass;
-		if(otherMass)
+		if (otherMass)
 			*other.getVelocity() += impulse / otherMass;
 	}
 
@@ -75,7 +75,8 @@ public:
 		}
 	}
 
-	void draw(const Shader &shader, float deltaTime, glm::mat4 baseModel, bool drawBoxes, const Shader &boxShader) override
+	void draw(const Shader &shader, float deltaTime, glm::mat4 baseModel, bool drawBoxes, const Shader &boxShader,
+			  const glm::vec3 &maskedColor = {0, 0, 0}, const glm::vec3 &maskColor = {0, 0, 0}) override
 	{
 		// Update the position of the object
 		pos += objectVelocity;
@@ -86,7 +87,7 @@ public:
 		// Update the angular velocity of the object
 		angularVelocity += acceleration / inertia;
 
-		Object::draw(shader, deltaTime, baseModel, drawBoxes, boxShader);
+		Object::draw(shader, deltaTime, baseModel, drawBoxes, boxShader, maskedColor, maskColor);
 	}
 };
 

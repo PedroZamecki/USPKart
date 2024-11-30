@@ -7,7 +7,8 @@
 class Player final : public Character
 {
 public:
-	Player(std::vector<Object *> &objects, Position pos, glm::vec3 angle) : Character(objects, pos, angle)
+	Player(std::vector<Object *> &objects, Position pos, glm::vec3 angle, glm::vec3 scale, glm::vec3 color = {1, 1, 1}) :
+		Character(objects, pos, angle, scale, color)
 	{
 		const auto controls = ControlsHandler::getInstance();
 		controls->insertKeyCallback(GLFW_KEY_UP, [this]() -> void { checkState(); }, ALL);

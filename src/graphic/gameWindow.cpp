@@ -185,7 +185,8 @@ void GameWindow::run(const Data *data) const
 								  "Player position: " + std::to_string(data->player->getPos().x) + ", " +
 								  std::to_string(data->player->getPos().z));
 						  });
-
+	ch->insertKeyCallback(GLFW_KEY_TAB, [&camera]() -> void { camera->setInverted(true);}, PRESS);
+	ch->insertKeyCallback(GLFW_KEY_TAB, [&camera]() -> void { camera->setInverted(false);}, RELEASE);
 	auto lastTime = std::chrono::high_resolution_clock::now();
 	unsigned long nbFrames = 0;
 	while (!glfwWindowShouldClose(window))

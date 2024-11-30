@@ -43,6 +43,8 @@ public:
 			state->update(this, player);
 	}
 
+	void setInverted(const bool value) { state->setInverted(value); }
+
 	static float aspectRatio()
 	{
 		const auto config = Configuration::getInstance();

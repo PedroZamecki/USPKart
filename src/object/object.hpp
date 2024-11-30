@@ -79,11 +79,12 @@ public:
 	}
 
 	virtual void draw(const Shader &shader, float deltaTime, const glm::mat4 baseModel, const bool drawBoxes,
-					  const Shader &boxShader)
+					  const Shader &boxShader, const glm::vec3 &maskedColor = {0, 0, 0},
+					  const glm::vec3 &maskColor = {0, 0, 0})
 	{
 		shader.use();
 		shader.setMat4("model", getModel(baseModel));
-		model->draw(shader);
+		model->draw(shader, maskedColor, maskColor);
 		if (drawBoxes)
 		{
 			box.draw(boxShader);

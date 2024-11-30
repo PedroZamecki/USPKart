@@ -10,9 +10,9 @@ void updateCameraPosition(Camera *camera, const Player *player, const bool inver
 	constexpr auto heightAngle = glm::radians(30.0f);
 
 	// Change the target dist based on the speed of the kart
-	// range from 3 to 6
+	// range from 4 to 7
 	// Top speed = 30
-	camera->setTargetDist(3 + abs(player->getSpeed()) / 10);
+	camera->setTargetDist(4 + abs(player->getSpeed()) / 10);
 
 	const auto dist = camera->getTargetDist();
 	camera->pos =

@@ -16,11 +16,12 @@ class Texture
 	std::string path;
 	unsigned int width{};
 	unsigned int height{};
+	unsigned int channels{};
 	unsigned char *data{};
 
 public:
 	Texture(const unsigned int id, std::string type, std::string path, const unsigned int width,
-			const unsigned int height, unsigned char *data) :
+			const unsigned int height, const unsigned int channels, unsigned char *data) :
 		id(id), type(std::move(type)), path(std::move(path)), width(width), height(height), data(data)
 	{
 	}
@@ -30,6 +31,7 @@ public:
 	[[nodiscard]] unsigned int getWidth() const { return width; }
 	[[nodiscard]] unsigned int getHeight() const { return height; }
 	[[nodiscard]] unsigned char *getData() const { return data; }
+	[[nodiscard]] bool hasAlphaChannel() const { return channels == 4; };
 };
 
 class Model;

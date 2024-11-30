@@ -10,7 +10,7 @@ Mesh::Mesh(const vector<Vertex> &vertices, const vector<unsigned int> &indices, 
 	setupMesh();
 }
 
-void Mesh::draw(const Shader &shader) const
+void Mesh::draw(const Shader &shader, const glm::vec3 &maskedColor, const glm::vec3 &maskColor) const
 {
 	const auto logger = Logger::getInstance();
 	// bind appropriate textures
@@ -59,6 +59,22 @@ void Mesh::draw(const Shader &shader) const
 
 			throw std::runtime_error("OpenGL error after glActiveTexture: " + std::to_string(error));
 		}
+	}
+
+	glUniform3fv(glGetUniformLocation(shader.ID, "maskedColor"), 1, &maskedColor[0]);
+	if (const auto error = glGetError() != GL_NO_ERROR)
+	{
+		logger->error("OpenGL error after glUniform3fv: (" + std::to_string(error) + ") - " +
+					  reinterpret_cast<const char *>(glewGetErrorString(error)));
+		throw std::runtime_error("OpenGL error after glUniform3fv: " + std::to_string(error));
+	}
+	
+	glUniform3fv(glGetUniformLocation(shader.ID, "maskColor"), 1, &maskColor[0]);
+	if (const auto error = glGetError() != GL_NO_ERROR)
+	{
+		logger->error("OpenGL error after glUniform3fv: (" + std::to_string(error) + ") - " +
+					  reinterpret_cast<const char *>(glewGetErrorString(error)));
+		throw std::runtime_error("OpenGL error after glUniform3fv: " + std::to_string(error));
 	}
 
 	// draw mesh
@@ -304,4 +320,16 @@ void Mesh::setupMesh()
 
 		throw std::runtime_error("OpenGL error after glActiveTexture: " + std::to_string(error));
 	}
+}
+
+bool Mesh::hasTransparency() const
+{
+	for (const auto &texture : textures)
+	{
+		if (texture.hasAlphaChannel())
+		{
+			return true;
+		}
+	}
+	return false;
 }

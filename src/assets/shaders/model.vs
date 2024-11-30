@@ -8,6 +8,9 @@ out vec2 TexCoords;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+uniform vec3 colorMultiplier;
+uniform vec3 maskedColor;
+uniform vec3 maskColor;
 
 void main()
 {

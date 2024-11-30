@@ -11,7 +11,7 @@ class Wheel final : public Object
 
 public:
 	explicit Wheel(const Position &pos, const bool inverted = false) :
-		Object("assets/models/wheel.obj", pos, 0.2, 0.5, 0.5), inverted(inverted)
+		Object("assets/models/wheel.obj", pos), inverted(inverted)
 	{
 	}
 
@@ -37,13 +37,13 @@ class Kart : public PhysicsObject
 {
 protected:
 	float steeringAngle{0.0f};
-	Wheel frontWheels[2] = {Wheel(Position{10, -4, 12.5} / 16), Wheel(Position{-10, -4, 12.5} / 16, true)};
-	Wheel backWheels[2] = {Wheel(Position{10, -4, -12.5} / 16), Wheel(Position{-10, -4, -12.5} / 16, true)};
+	Wheel frontWheels[2] = {Wheel(Position{-13.6, 1.2, 13.1} / 16), Wheel(Position{13.6, 1.2, 13.1} / 16, true)};
+	Wheel backWheels[2] = {Wheel(Position{-13.6, 1.2, -10.9} / 16), Wheel(Position{13.6, 1.2, -10.9} / 16, true)};
 	Wheel *wheels[4] = {&frontWheels[0], &frontWheels[1], &backWheels[0], &backWheels[1]};
 
 public:
-	Kart(const Position &pos = {0, .5, 0}, const glm::vec3 angle = glm::vec3{0}, const glm::vec3 scale = {1, 1, 1}) :
-		PhysicsObject("assets/models/kart.obj", pos, 18.0f / 16.0f, 1, 44.0f / 16.0f, angle, scale)
+	Kart(const Position &pos = {0, 0, 0}, const glm::vec3 angle = glm::vec3{0}, const glm::vec3 scale = {1, 1, 1}) :
+		PhysicsObject("assets/models/kart.obj", pos, 28.0f / 16.0f, 1, 42.0f / 16.0f, angle, scale)
 	{
 	}
 
@@ -51,9 +51,10 @@ public:
 	[[nodiscard]] float getSpeed() const { return glm::dot(velocity, forward()); }
 
 	void draw(const Shader &shader, const float deltaTime, const glm::mat4 baseModel, const bool drawBoxes,
-			  const Shader &boxShader) override
+			  const Shader &boxShader, const glm::vec3 &maskedColor = {0, 0, 0},
+			  const glm::vec3 &maskColor = {0, 0, 0}) override
 	{
-		Object::draw(shader, deltaTime, baseModel, drawBoxes, boxShader);
+		Object::draw(shader, deltaTime, baseModel, drawBoxes, boxShader, maskedColor, maskColor);
 		for (auto &wheel : frontWheels)
 		{
 			wheel.steer(steeringAngle);
@@ -61,7 +62,7 @@ public:
 		for (const auto &wheel : wheels)
 		{
 			wheel->adjustPitch(getSpeed() * deltaTime);
-			wheel->draw(shader, deltaTime, getModel(baseModel), false, boxShader);
+			wheel->draw(shader, deltaTime, getModel(baseModel), false, boxShader, maskedColor, maskColor);
 		}
 	}
 };
