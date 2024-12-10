@@ -44,6 +44,10 @@ public:
 		objects.push_back(new Character(objects, positions[4], angle, scale, {1, 0, 0.5}));
 		objects.push_back(new Character(objects, positions[5], angle, scale, {0, 0.5, 1}));
 		objects.push_back(new Character(objects, positions[6], angle, scale, {0.5, 0, 1}));
+
+		// After everything is set up, initialize the characters
+		for (const auto &object : objects)
+			object->init();
 	}
 
 	~Data()

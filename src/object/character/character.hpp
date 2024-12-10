@@ -37,6 +37,7 @@ protected:
 	std::thread pathThread;
 	int checkpointIdx{0};
 	glm::vec3 color;
+	float score{0.0f};
 
 public:
 	Character(std::vector<Object *> &objects, const Position &pos = {0, 0, 0}, const glm::vec3 angle = glm::vec3{0},
@@ -47,10 +48,14 @@ public:
 																				{{838, 786}, {838, 1014}},
 																				{{441, 438}, {441, 261}},
 																				{{377, 817}, {365, 1013}}})
-	{
-		pathThread = std::thread(&Character::updatePath, this);
+	{}
+
+	void init() {
+		pathThread = std::thread(&Character::updateScore, this);
 		pathThread.detach();
 	}
+
+	float getScore() const { return score; }
 
 	std::vector<Object *> filterObjects()
 	{
@@ -145,30 +150,19 @@ public:
 			  const glm::vec3 &maskColor = {0, 0, 0}) override
 	{
 		update(deltaTime);
-		Kart::draw(shader, deltaTime, baseModel, drawBoxes, boxShader, {0.0784313725490196, 0.047058823529411764, 0.9490196078431372}, color);
+		Kart::draw(shader, deltaTime, baseModel, drawBoxes, boxShader,
+				   {0.0784313725490196, 0.047058823529411764, 0.9490196078431372}, color);
 	}
 
-	void updatePath()
+	virtual void updateScore()
 	{
-		// while (true)
-		// {
-		// 	const auto path = mapController.findPath(
-		// 		pos.x, pos.z, mapController.getWeightedMap(filterObjects(), this, checkpointIdx), checkpointIdx);
-		// 	if (path.empty())
-		// 		break;
-
-		// 	for (const auto &point : path)
-		// 	{
-		// 		steerState = point.first > pos.x ? STEERING_RIGHT : STEERING_LEFT;
-		// 		acceleratingState = ACCELERATING;
-		// 		pos = Position{glm::vec3{point.first, pos.y, point.second}};
-		// 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
-		// 	}
-
-		// 	++checkpointIdx;
-		// 	if (checkpointIdx >= mapController.getCheckpoints().size())
-		// 		break;
-		// }
+		while (true)
+		{
+			auto filteredObjects = filterObjects();
+			auto weightedMap = mapController.getWeightedMap(filteredObjects, this, checkpointIdx);
+			auto pathResult = mapController.findPath(mapController.coordTransform(pos.x), mapController.coordTransform(pos.z), weightedMap, checkpointIdx);
+			score = pathResult.second;
+		}
 	}
 };
 

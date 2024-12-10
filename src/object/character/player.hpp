@@ -7,8 +7,8 @@
 class Player final : public Character
 {
 public:
-	Player(std::vector<Object *> &objects, Position pos, glm::vec3 angle, glm::vec3 scale, glm::vec3 color = {1, 1, 1}) :
-		Character(objects, pos, angle, scale, color)
+	Player(std::vector<Object *> &objects, Position pos, glm::vec3 angle, glm::vec3 scale,
+		   glm::vec3 color = {1, 1, 1}) : Character(objects, pos, angle, scale, color)
 	{
 		const auto controls = ControlsHandler::getInstance();
 		controls->insertKeyCallback(GLFW_KEY_UP, [this]() -> void { checkState(); }, ALL);
@@ -16,6 +16,8 @@ public:
 		controls->insertKeyCallback(GLFW_KEY_LEFT, [this]() -> void { checkState(); }, ALL);
 		controls->insertKeyCallback(GLFW_KEY_RIGHT, [this]() -> void { checkState(); }, ALL);
 		controls->insertKeyCallback(GLFW_KEY_T, [this]() -> void { printMapState(); }, PRESS);
+		controls->insertKeyCallback(
+			GLFW_KEY_P, [this]() -> void { Logger::getInstance()->info(std::to_string(this->score)); }, PRESS);
 	}
 
 	void checkState()

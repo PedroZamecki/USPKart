@@ -31,8 +31,8 @@ public:
 	void move(const glm::vec3 &value) override { pos += value; }
 	void resize(const float value) override { scale *= value; }
 	void rotate(const float value) override { angle.y += value; }
-	float getInertia() override { return inertia; }
-	float getMass() override { return mass; }
+	float getInertia() const override { return inertia; }
+	float getMass() const override { return mass; }
 	glm::vec3 getObjectVelocity() { return objectVelocity; }
 	void setObjectVelocity(const glm::vec3 &value) { objectVelocity = value; }
 
@@ -75,8 +75,7 @@ public:
 		}
 	}
 
-	void draw(const Shader &shader, float deltaTime, glm::mat4 baseModel, bool drawBoxes, const Shader &boxShader,
-			  const glm::vec3 &maskedColor = {0, 0, 0}, const glm::vec3 &maskColor = {0, 0, 0}) override
+	void updatePhysics(float deltaTime)
 	{
 		// Update the position of the object
 		pos += objectVelocity;
@@ -86,7 +85,12 @@ public:
 		objectVelocity += acceleration;
 		// Update the angular velocity of the object
 		angularVelocity += acceleration / inertia;
+	}
 
+	void draw(const Shader &shader, float deltaTime, glm::mat4 baseModel, bool drawBoxes, const Shader &boxShader,
+			  const glm::vec3 &maskedColor = {0, 0, 0}, const glm::vec3 &maskColor = {0, 0, 0}) override
+	{
+		updatePhysics(deltaTime);
 		Object::draw(shader, deltaTime, baseModel, drawBoxes, boxShader, maskedColor, maskColor);
 	}
 };

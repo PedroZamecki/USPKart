@@ -7,6 +7,9 @@
 #include <iostream>
 #include <memory>
 #include <mutex>
+#include <queue>
+#include <thread>
+#include <condition_variable>
 
 #define critical(message) log(LogLevel::CRITICAL, message, __FILE__, __LINE__)
 #define error(message) log(LogLevel::ERROR, message, __FILE__, __LINE__)
@@ -31,9 +34,32 @@ enum class LogLevel
 class Logger
 {
 	static std::mutex mut;
-	static std::unique_ptr<Logger> instance;
+	static Logger *instance;
 	std::ofstream logFile;
 	LogLevel logLevel = LogLevel::INFO;
+	std::queue<std::string> logQueue;
+	std::thread logThread;
+	std::condition_variable cv;
+	bool exitFlag = false;
+
+	void processQueue()
+	{
+		while (true)
+		{
+			std::unique_lock lock(mut);
+			cv.wait(lock, [this] { return !logQueue.empty() || exitFlag; });
+
+			if (exitFlag && logQueue.empty())
+				break;
+
+			auto logMessage = std::move(logQueue.front());
+			logQueue.pop();
+			lock.unlock();
+
+			logFile << logMessage << std::endl;
+			
+		}
+	}
 
 	Logger()
 	{
@@ -57,6 +83,18 @@ class Logger
 
 		logFile << "-------------------------------------------------------------------------------------\n"
 				<< std::put_time(std::localtime(&now), "Starting %Y-%m-%d %H:%M:%S\n") << std::endl;
+
+		logThread = std::thread(&Logger::processQueue, this);
+	}
+
+	~Logger()
+	{
+		{
+			std::lock_guard lock(mut);
+			exitFlag = true;
+		}
+		cv.notify_all();
+		logThread.join();
 	}
 
 public:
@@ -65,12 +103,13 @@ public:
 
 	static Logger *getInstance()
 	{
-		std::lock_guard lock(mut);
 		if (instance == nullptr)
 		{
-			instance = std::unique_ptr<Logger>(new Logger());
+			std::lock_guard lock(mut);
+			if (instance == nullptr)
+				return (instance = new Logger());
 		}
-		return instance.get();
+		return instance;
 	}
 
 	void setLogLevel(const LogLevel level)
@@ -117,8 +156,15 @@ public:
 			const auto now = std::chrono::system_clock::now();
 			const auto now_c = std::chrono::system_clock::to_time_t(now);
 			const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
-			logFile << std::put_time(std::localtime(&now_c), "%Y-%m-%d %H:%M:%S") << '.' << std::setfill('0')
-					<< std::setw(3) << ms.count() << " - " << levelStr << local << message << std::endl;
+			std::ostringstream oss;
+			oss << std::put_time(std::localtime(&now_c), "%Y-%m-%d %H:%M:%S") << '.' << std::setfill('0')
+				<< std::setw(3) << ms.count() << " - " << levelStr << local << message;
+
+			{
+				std::lock_guard lock(mut);
+				logQueue.push(oss.str());
+			}
+			cv.notify_one();
 		}
 	}
 };

@@ -16,7 +16,7 @@ protected:
 	CollisionBox box = CollisionBox(&pos, &angle, &scale, &width, &height, &depth);
 
 public:
-	virtual glm::mat4 getModel(const glm::mat4 &baseModel)
+	virtual glm::mat4 getModel(const glm::mat4 &baseModel) const
 	{
 		auto m_model = baseModel;
 		m_model = translate(m_model, pos);
@@ -36,7 +36,7 @@ public:
 
 	// Do nothing by default
 	virtual void applyCorrectionForce(const glm::vec3 &correctionForce, float massRatio) {}
-	virtual glm::vec3 getAngularVelocity() { return {0, 0, 0}; }
+	virtual glm::vec3 getAngularVelocity() const { return {0, 0, 0}; }
 	virtual glm::vec3 *getAcceleration() { return nullptr; }
 	virtual glm::vec3 *getVelocity() { return nullptr; }
 	virtual void adjustPitch(const float value) {}
@@ -44,8 +44,9 @@ public:
 	virtual void move(const glm::vec3 &value) {}
 	virtual void resize(const float value) {}
 	virtual void rotate(const float value) {}
-	virtual float getInertia() { return 0; }
-	virtual float getMass() { return 0; }
+	virtual float getInertia() const { return 0; }
+	virtual float getMass() const { return 0; }
+	virtual void init() {}
 
 	explicit Object(const std::string &modelPath, const Position &pos = {0, 0, 0}, const float width = 1,
 					const float height = 1, const float depth = 1, const glm::vec3 angle = {0, 0, 0},
