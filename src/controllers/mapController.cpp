@@ -54,18 +54,34 @@
 #define WALL_COST std::numeric_limits<double>::infinity()
 #define MAX_COST std::numeric_limits<double>::infinity()
 
-int coordTransform(float num, int maxCoord)
-{
-	return std::max(std::min(static_cast<int>(num * 4 + maxCoord / 2), maxCoord), 0);
-}
-
-MapController::MapController(const std::string &ppmFilePath, const std::vector<Checkpoint> &checkpoints)
+MapController::MapController(const std::string ppmFilePath, const std::vector<Checkpoint> checkpoints)
 {
 	this->checkpoints = checkpoints;
 	loadPGM(ppmFilePath);
 }
 
-void MapController::loadPGM(const std::string &ppmFilePath)
+int MapController::coordTransform(float num, int maxCoord) const
+{
+	if (maxCoord == 0)
+	{
+		maxCoord = map[0].size();
+	}
+	return std::max(std::min(static_cast<int>(num * 4 + maxCoord / 2), maxCoord), 0);
+}
+
+std::vector<Object *> MapController::objectsTransformer(std::vector<Object *> objects) {
+	std::vector<Object *> transformedObjects;
+	for (auto object : objects) {
+		auto pos = object->getPos();
+		auto newPos = Position(coordTransform(pos.x), pos.y, coordTransform(pos.z));
+		object->move(newPos - pos);
+		transformedObjects.push_back(object);
+	}
+
+	return transformedObjects;
+}
+
+void MapController::loadPGM(const std::string ppmFilePath)
 {
 	std::ifstream file(ppmFilePath);
 	if (!file.is_open())
@@ -139,8 +155,7 @@ struct Node
 	bool operator>(const Node &other) const { return totalCost() > other.totalCost(); }
 };
 
-std::vector<std::pair<int, int>> MapController::findPath(int x, int y, std::vector<std::vector<int>> weightedMap,
-														 int checkpointIdx)
+std::pair<std::vector<std::pair<int, int>>, double> MapController::findPath(int x, int y, std::vector<std::vector<int>> weightedMap, int checkpointIdx) const
 {
 	auto checkpoint = checkpoints[checkpointIdx];
 	int goalX = (checkpoint.first.first + checkpoint.second.first) / 2;
@@ -149,8 +164,9 @@ std::vector<std::pair<int, int>> MapController::findPath(int x, int y, std::vect
 	auto heuristic = [goalX, goalY](int x, int y)
 	{ return std::sqrt(std::pow(goalX - x, 2) + std::pow(goalY - y, 2)); };
 
-	auto getCost = [this, &weightedMap](int x, int y)
+	auto getCost = [&weightedMap](int x, int y)
 	{
+		if (y < 0 || y >= weightedMap.size() || x < 0 || x >= weightedMap[0].size()) return WALL_COST; // Verificação de limites
 		switch (weightedMap[y][x])
 		{
 		case ROAD_CODE:
@@ -186,6 +202,8 @@ std::vector<std::pair<int, int>> MapController::findPath(int x, int y, std::vect
 		Node current = openSet.top();
 		openSet.pop();
 
+		if (current.y < 0 || current.y >= weightedMap.size() || current.x < 0 || current.x >= weightedMap[0].size()) continue;
+
 		if (weightedMap[current.y][current.x] == CURRENT_CHECKPOINT_CODE)
 		{
 			std::vector<std::pair<int, int>> path;
@@ -194,7 +212,7 @@ std::vector<std::pair<int, int>> MapController::findPath(int x, int y, std::vect
 				path.emplace_back(node->x, node->y);
 			}
 			std::reverse(path.begin(), path.end());
-			return path;
+			return {path, current.cost};
 		}
 
 		if (closedSet[current.y][current.x])
@@ -222,7 +240,7 @@ std::vector<std::pair<int, int>> MapController::findPath(int x, int y, std::vect
 					}
 					path.emplace_back(newX, newY);
 					std::reverse(path.begin(), path.end());
-					return path;
+					return {path, current.cost};
 				}
 
 				openSet.emplace(newX, newY, newCost, heuristic(newX, newY), new Node(current));
@@ -230,14 +248,14 @@ std::vector<std::pair<int, int>> MapController::findPath(int x, int y, std::vect
 		}
 	}
 
-	return {};
+	return {{}, std::numeric_limits<double>::infinity()};
 }
 
-void MapController::fillPolygon(std::vector<std::vector<int>> *weightedMap, Object *object, int code)
+void MapController::fillPolygon(std::vector<std::vector<int>> &weightedMap, const Object object, int code) const
 {
 	int width = map[0].size();
 	int height = map.size();
-	auto box = object->getBox();
+	auto box = object.getBox();
 	auto projectedVertices = box.get2DProjectedVertices();
 	std::vector<std::pair<int, int>> points;
 	for (const auto &vertex : projectedVertices)
@@ -282,14 +300,14 @@ void MapController::fillPolygon(std::vector<std::vector<int>> *weightedMap, Obje
 			{
 				if (x >= 0 && x < width && y >= 0 && y < height)
 				{
-					(*weightedMap)[y][x] = code;
+					weightedMap[y][x] = code;
 				}
 			}
 		}
 	}
 }
 
-void MapController::fillLine(std::vector<std::vector<int>> *weightedMap, Checkpoint checkpoint, int code)
+void MapController::fillLine(std::vector<std::vector<int>> &weightedMap, const Checkpoint checkpoint, int code) const
 {
 	int width = map[0].size();
 	int height = map.size();
@@ -309,7 +327,7 @@ void MapController::fillLine(std::vector<std::vector<int>> *weightedMap, Checkpo
 	{
 		if (x1 >= 0 && x1 < width && y1 >= 0 && y1 < height)
 		{
-			(*weightedMap)[y1][x1] = code;
+			weightedMap[y1][x1] = code;
 		}
 		if (x1 == x2 && y1 == y2)
 			break;
@@ -327,8 +345,7 @@ void MapController::fillLine(std::vector<std::vector<int>> *weightedMap, Checkpo
 	}
 }
 
-std::vector<std::vector<int>> MapController::getWeightedMap(std::vector<Object *> trackObjects, Object *observer,
-															int checkpointIdx)
+std::vector<std::vector<int>> MapController::getWeightedMap(const std::vector<Object *> trackObjects, const Object *observer, int checkpointIdx) const
 {
 	int width = map[0].size();
 	int height = map.size();
@@ -336,23 +353,24 @@ std::vector<std::vector<int>> MapController::getWeightedMap(std::vector<Object *
 
 	for (const auto &object : trackObjects)
 	{
-		fillPolygon(&weightedMap, object, OBJECT_CODE);
+		fillPolygon(weightedMap, *object, OBJECT_CODE);
 	}
 
 	for (const auto &checkpoint : checkpoints)
 	{
 		if (checkpoint != checkpoints[checkpointIdx])
-			fillLine(&weightedMap, checkpoint, CHECKPOINT_CODE);
+			fillLine(weightedMap, checkpoint, CHECKPOINT_CODE);
 	}
 
-	fillPolygon(&weightedMap, observer, OBSERVER_CODE);
-	fillLine(&weightedMap, checkpoints[checkpointIdx], CURRENT_CHECKPOINT_CODE);
+	if (observer != nullptr)
+		fillPolygon(weightedMap, *observer, OBSERVER_CODE);
+	fillLine(weightedMap, checkpoints[checkpointIdx], CURRENT_CHECKPOINT_CODE);
 
 	return weightedMap;
 }
 
-void MapController::saveModifiedPPM(const std::string &outputFilePath, int x, int y, int checkpointIdx,
-									std::vector<Object *> trackObjects, Object *observer)
+void MapController::saveModifiedPPM(const std::string outputFilePath, int x, int y, int checkpointIdx,
+									const std::vector<Object *> trackObjects, const Object *observer) const
 {
 	// Create a snapshot of the map and objects
 	auto mapSnapshot = map;
@@ -420,7 +438,7 @@ void MapController::saveModifiedPPM(const std::string &outputFilePath, int x, in
 			}
 
 			// Find the shortest path and paint it green
-			auto path = findPath(convertedX, convertedY, weightedMap, checkpointIdx);
+			auto path = findPath(convertedX, convertedY, weightedMap, checkpointIdx).first;
 			for (const auto &point : path)
 			{
 				int x = point.first;

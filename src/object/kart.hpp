@@ -18,7 +18,7 @@ public:
 	void adjustPitch(const float value) override { angle.x += value; }
 	void steer(const float value) { steeringAngle = value; }
 
-	glm::mat4 getModel(const glm::mat4 &baseModel) override
+	glm::mat4 getModel(const glm::mat4 &baseModel) const override
 	{
 		auto m_model = baseModel;
 		m_model = glm::translate(m_model, pos);
