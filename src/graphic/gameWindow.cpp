@@ -13,6 +13,7 @@
 #include "game/data.hpp"
 #include "object/character/player.hpp"
 #include "skybox.hpp"
+#include "uiProvider.hpp"
 
 #define WINDOW_TITLE std::string("USPKart v") + USP_KART_VERSION
 
@@ -153,10 +154,13 @@ GameWindow::GameWindow(const std::string &title, const GLFWimage *icon)
 							  }
 							  config->writeConfigurationFile();
 						  });
+
+	UIProvider::getInstance().init(window);
 }
 
 GameWindow::~GameWindow()
 {
+	UIProvider::getInstance().destroy();
 	glfwTerminate();
 	Configuration::getInstance()->writeConfigurationFile();
 }
@@ -178,15 +182,8 @@ void GameWindow::run(const Data *data) const
 	ch->insertKeyCallback(
 		GLFW_KEY_B, [&drawBoxes]() -> void
 		{ Logger::getInstance()->info("Toggling boxes: " + std::string(((drawBoxes = !drawBoxes)) ? "on" : "off")); });
-	ch->insertKeyCallback(GLFW_KEY_P,
-						  [data]() -> void
-						  {
-							  Logger::getInstance()->info(
-								  "Player position: " + std::to_string(data->player->getPos().x) + ", " +
-								  std::to_string(data->player->getPos().z));
-						  });
-	ch->insertKeyCallback(GLFW_KEY_TAB, [&camera]() -> void { camera->setInverted(true);}, PRESS);
-	ch->insertKeyCallback(GLFW_KEY_TAB, [&camera]() -> void { camera->setInverted(false);}, RELEASE);
+	ch->insertKeyCallback(GLFW_KEY_TAB, [&camera]() -> void { camera->setInverted(true); }, PRESS);
+	ch->insertKeyCallback(GLFW_KEY_TAB, [&camera]() -> void { camera->setInverted(false); }, RELEASE);
 	auto lastTime = std::chrono::high_resolution_clock::now();
 	unsigned long nbFrames = 0;
 	while (!glfwWindowShouldClose(window))
@@ -216,15 +213,23 @@ void GameWindow::run(const Data *data) const
 
 		skybox.draw(view, projection);
 
+		// Start the ImGui frame
+		UIProvider::getInstance().beginFrame();
+
+		// Draw FPS
+		const auto c = Configuration::getInstance();
+		const auto fps = std::to_string(1 / delta);
+		const auto fpsString = fps.substr(0, fps.find('.') + 3);
+		UIProvider::getInstance().drawText("FPS: " + fpsString, 0.01f * c->width, 0.01f * c->height, 20.0f, ImVec4(0, 0, 0, 1), 1.0f, ImVec4(1, 1, 1, 1));
+
+		// Rendering
+		UIProvider::getInstance().render();
+
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
 		lastTime = frameStartTime;
 		nbFrames++;
-		// Only use the first 2 decimal places of the FPS
-		// Detecting where the dot is in the string
-		const auto fps = std::to_string(1 / delta);
-		const auto fpsString = fps.substr(0, fps.find('.') + 3);
 		glfwSetWindowTitle(window, (WINDOW_TITLE + " FPS: " + fpsString).c_str());
 		std::this_thread::sleep_for(std::chrono::milliseconds(delta < 0.001 ? 10 : 0));
 	}

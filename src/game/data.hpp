@@ -38,7 +38,7 @@ public:
 
 		objects.push_back(track = new Track());
 		objects.push_back(player = new Player(objects, positions[0], angle, scale, {1, 0, 0}));
-		objects.push_back(new Character(objects, positions[1], angle, scale, {0, 1, 0}));
+		objects.push_back(new AIChar(objects, positions[1], angle, scale, {0, 1, 0}));
 		objects.push_back(new Character(objects, positions[2], angle, scale, {0, 0, 1}));
 		objects.push_back(new Character(objects, positions[3], angle, scale, {1, 0.5, 0}));
 		objects.push_back(new Character(objects, positions[4], angle, scale, {1, 0, 0.5}));
@@ -52,8 +52,12 @@ public:
 
 	~Data()
 	{
-		for (const auto &object : objects)
+		for (const auto &object : objects) {
+			if (auto character = dynamic_cast<Character*>(object)) {
+				character->stopThread();
+			}
 			delete object;
+		}
 		objects.clear();
 	}
 	std::vector<Object *> objects;

@@ -16,6 +16,7 @@ find_package(glfw3 CONFIG REQUIRED)
 find_package(OpenAL CONFIG REQUIRED)
 find_package(soil2 CONFIG REQUIRED)
 find_package(assimp CONFIG REQUIRED)
+find_package(imgui CONFIG REQUIRED)
 
 if (NOT OpenGL_FOUND)
     message(FATAL_ERROR "OpenGL not found!")
@@ -49,7 +50,8 @@ target_link_libraries(USPKart PRIVATE GLEW::GLEW
         glm::glm
         soil2
         nlohmann_json::nlohmann_json
-        assimp::assimp)
+        assimp::assimp
+        imgui::imgui)
 
 function(copy_directory SRC_DIR DST_DIR)
     file(MAKE_DIRECTORY ${DST_DIR})
