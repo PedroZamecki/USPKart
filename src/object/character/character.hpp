@@ -5,6 +5,7 @@
 #include "../kart.hpp"
 #include "controllers/mapController.hpp"
 #include "utils/logger.hpp"
+#include <atomic>
 
 enum CharacterSteeringState
 {
@@ -38,6 +39,7 @@ protected:
 	int checkpointIdx{0};
 	glm::vec3 color;
 	float score{0.0f};
+	std::atomic<bool> running{true};
 
 public:
 	Character(std::vector<Object *> &objects, const Position &pos = {0, 0, 0}, const glm::vec3 angle = glm::vec3{0},
@@ -50,9 +52,19 @@ public:
 																				{{377, 817}, {365, 1013}}})
 	{}
 
-	void init() {
+	~Character() override {
+		stopThread();
+	}
+
+	virtual void stopThread() {
+		running = false;
+		if (pathThread.joinable()) {
+			pathThread.join();
+		}
+	}
+
+	virtual void init() {
 		pathThread = std::thread(&Character::updateScore, this);
-		pathThread.detach();
 	}
 
 	float getScore() const { return score; }
@@ -156,11 +168,15 @@ public:
 
 	virtual void updateScore()
 	{
-		while (true)
+		while (running)
 		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
 			auto filteredObjects = filterObjects();
 			auto weightedMap = mapController.getWeightedMap(filteredObjects, this, checkpointIdx);
 			auto pathResult = mapController.findPath(mapController.coordTransform(pos.x), mapController.coordTransform(pos.z), weightedMap, checkpointIdx);
+			if (pathResult.first.size() < 10) {
+				checkpointIdx = (checkpointIdx + 1) % mapController.getCheckpoints().size();
+			}
 			score = pathResult.second;
 		}
 	}

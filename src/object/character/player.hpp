@@ -41,6 +41,22 @@ public:
 	{
 		mapController.saveModifiedPPM("Teste.ppm", pos.x, pos.z, checkpointIdx, filterObjects(), this);
 	}
+
+	void updateScore() override
+	{
+		while (running)
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			auto filteredObjects = filterObjects();
+			auto weightedMap = mapController.getWeightedMap(filteredObjects, this, checkpointIdx);
+			auto pathResult = mapController.findPath(mapController.coordTransform(pos.x), mapController.coordTransform(pos.z), weightedMap, checkpointIdx);
+			if (pathResult.first.size() < 10) {
+				checkpointIdx = (checkpointIdx + 1) % mapController.getCheckpoints().size();
+				Logger::getInstance()->info("Checkpoint: " + std::to_string(checkpointIdx));
+			}
+			score = pathResult.second;
+		}
+	}
 };
 
 #endif // PLAYER_HPP

@@ -69,6 +69,15 @@ int MapController::coordTransform(float num, int maxCoord) const
 	return std::max(std::min(static_cast<int>(num * 4 + maxCoord / 2), maxCoord), 0);
 }
 
+int MapController::decodeMapCoord(int num, int maxCoord) const
+{
+	if (maxCoord == 0)
+	{
+		maxCoord = map[0].size();
+	}
+	return (num - maxCoord / 2) / 4;
+}
+
 std::vector<Object *> MapController::objectsTransformer(std::vector<Object *> objects) {
 	std::vector<Object *> transformedObjects;
 	for (auto object : objects) {

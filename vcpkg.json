@@ -25,5 +25,9 @@
   }, {
     "name" : "assimp",
     "version>=" : "5.4.3"
+  }, {
+    "name" : "imgui",
+    "version>=" : "1.91.5",
+    "features": ["freetype", "glfw-binding", "opengl3-binding"]
   } ]
 }
