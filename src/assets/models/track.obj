@@ -1,0 +1,15 @@
+# Made in Blockbench 4.11.1
+mtllib track.mtl
+
+o cuboid
+v 128 0 128
+v 128 0 -128
+v -128 0 128
+v -128 0 -128
+vt 0 0
+vt 1 0
+vt 1 1
+vt 0 1
+vn 0 1 0
+usemtl m_50bdab2f-d4e4-5364-1113-9f4cbb94e937
+f 3/1/1 1/2/1 2/3/1 4/4/1
