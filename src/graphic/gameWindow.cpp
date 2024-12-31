@@ -161,6 +161,7 @@ GameWindow::GameWindow(const std::string &title, const GLFWimage *icon)
 GameWindow::~GameWindow()
 {
 	UIProvider::getInstance().destroy();
+	glfwDestroyWindow(window);
 	glfwTerminate();
 	Configuration::getInstance()->writeConfigurationFile();
 }
@@ -209,6 +210,7 @@ void GameWindow::run(const Data *data) const
 			for (const auto &other : data->objects)
 				if (object != other && object != data->track && other != data->track)
 					object->treatCollision(*other);
+			object->resolveCollisionWithLimits();
 		}
 
 		skybox.draw(view, projection);

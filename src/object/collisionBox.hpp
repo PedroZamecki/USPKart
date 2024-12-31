@@ -39,6 +39,7 @@ public:
 	std::vector<glm::vec2> get2DProjectedVertices() const;
 	glm::mat4 getTransformMatrix() const;
 	[[nodiscard]] CollisionData getCollisionForce(const CollisionBox &other) const;
+	bool isWithinCollisionLimits() const;
 };
 
 #endif // COLLISION_BOX_HPP

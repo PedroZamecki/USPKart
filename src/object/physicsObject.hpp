@@ -17,6 +17,35 @@ protected:
 	glm::vec3 angularVelocity{0};
 	glm::vec3 objectVelocity{0};
 	float inertia{1};
+	float mass{1};
+	glm::vec3 netForce{0};
+	const float frictionCoefficient{0.1f}; // Coeficiente de atrito
+
+	void resolveCollisionWithLimits() override
+	{
+		if (!box.isWithinCollisionLimits())
+		{
+			// Calculate the correction force to bring the object back within limits
+			glm::vec3 correctionForce{0};
+			const auto vertices = box.get2DProjectedVertices();
+			for (const auto &vertex : vertices)
+			{
+				if (vertex.x < -128)
+					correctionForce.x += -128 - vertex.x;
+				else if (vertex.x > 128)
+					correctionForce.x += 128 - vertex.x;
+
+				if (vertex.y < -128)
+					correctionForce.z += -128 - vertex.y;
+				else if (vertex.y > 128)
+					correctionForce.z += 128 - vertex.y;
+			}
+
+			// Apply the correction force
+			move(correctionForce);
+			velocity = glm::vec3(0); // Stop the object
+		}
+	}
 
 public:
 	PhysicsObject(const std::string &modelPath, const Position &pos, const float width = 1, const float height = 1,
@@ -24,6 +53,8 @@ public:
 		Object(modelPath, pos, width, height, depth, angle, scale)
 	{
 	}
+
+	virtual ~PhysicsObject() = default;
 
 	glm::vec3 getAngularVelocity() { return angularVelocity; }
 	glm::vec3 *getAcceleration() override { return &acceleration; }
@@ -75,16 +106,37 @@ public:
 		}
 	}
 
+	void applyForce(const glm::vec3 &force)
+	{
+		netForce += force;
+	}
+
 	void updatePhysics(float deltaTime)
 	{
-		// Update the position of the object
-		pos += objectVelocity;
-		// Update the angle of the object
-		angle += angularVelocity;
-		// Update the velocity of the object
-		objectVelocity += acceleration;
-		// Update the angular velocity of the object
-		angularVelocity += acceleration / inertia;
+		// Calcular a aceleração resultante
+		acceleration = netForce / mass;
+
+		// Atualizar a velocidade do objeto
+		objectVelocity += acceleration * deltaTime;
+
+		// Aplicar atrito
+		glm::vec3 friction = -frictionCoefficient * objectVelocity;
+		objectVelocity += friction * deltaTime;
+
+		// Atualizar a posição do objeto
+		pos += objectVelocity * deltaTime;
+
+		// Atualizar a velocidade angular do objeto
+		angularVelocity += (acceleration / inertia) * deltaTime;
+
+		// Atualizar o ângulo do objeto
+		angle += angularVelocity * deltaTime;
+
+		// Resolver colisão com limites
+		resolveCollisionWithLimits();
+
+		// Resetar a força resultante
+		netForce = glm::vec3(0);
 	}
 
 	void draw(const Shader &shader, float deltaTime, glm::mat4 baseModel, bool drawBoxes, const Shader &boxShader,

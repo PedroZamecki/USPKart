@@ -43,6 +43,8 @@ void UIProvider::beginFrame()
 void UIProvider::drawText(const std::string &text, float x, float y, float fontSize, ImVec4 textColor, float outlineSize, ImVec4 outlineColor)
 {
 	ImGui::SetNextWindowPos(ImVec2(x, y));
+	ImVec2 textSize = ImGui::CalcTextSize(text.c_str());
+	ImGui::SetNextWindowSize(ImVec2(config->width - x, config->height - y));
 	ImGui::Begin("TextOverlay", nullptr,
 				 ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
 					 ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoScrollbar);
@@ -78,8 +80,19 @@ void UIProvider::drawText(const std::string &text, float x, float y, float fontS
 	ImGui::End();
 }
 
+void UIProvider::queueText(const std::string &text, float x, float y, float fontSize, ImVec4 textColor, float outlineSize, ImVec4 outlineColor)
+{
+	textQueue.push_back({text, x, y, fontSize, textColor, outlineColor, outlineSize});
+}
+
 void UIProvider::render()
 {
+	for (const auto &item : textQueue)
+	{
+		drawText(item.text, item.x, item.y, item.fontSize, item.textColor, item.outlineSize, item.outlineColor);
+	}
+	textQueue.clear();
+
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
@@ -88,4 +101,5 @@ void UIProvider::destroy() {
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
+	font = nullptr;
 }

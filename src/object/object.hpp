@@ -35,6 +35,7 @@ public:
 	[[nodiscard]] Position getPos() const { return pos; }
 
 	// Do nothing by default
+	virtual void resolveCollisionWithLimits() {}
 	virtual void applyCorrectionForce(const glm::vec3 &correctionForce, float massRatio) {}
 	virtual glm::vec3 getAngularVelocity() const { return {0, 0, 0}; }
 	virtual glm::vec3 *getAcceleration() { return nullptr; }

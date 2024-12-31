@@ -1,9 +1,9 @@
 #ifndef DATA_HPP
 #define DATA_HPP
 
-#include <vector>
 #include <algorithm>
 #include <random>
+#include <vector>
 
 #include "object/character/aiChar.hpp"
 #include "object/character/player.hpp"

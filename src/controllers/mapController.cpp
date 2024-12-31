@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <cmath>
 #include <fstream>
+#include <memory>
+#include <atomic>
 #include <queue>
 #include <sstream>
 #include <thread>
@@ -51,17 +53,35 @@
 #define ROADSIDE_COST 1.5
 #define OFF_ROAD_COST 2.0
 #define WATER_COST 5.0
-#define WALL_COST std::numeric_limits<double>::infinity()
+#define WALL_COST 1000000
 #define MAX_COST std::numeric_limits<double>::infinity()
 
-MapController::MapController(const std::string ppmFilePath, const std::vector<Checkpoint> checkpoints)
+MapController *MapController::instance = nullptr;
+std::mutex MapController::mutex;
+
+MapController *MapController::getInstance()
+{
+	std::lock_guard lock(mutex);
+	if (instance == nullptr)
+	{
+		instance = new MapController();
+	}
+	return instance;
+}
+
+void MapController::configure(const std::string &ppmFilePath, const std::vector<Checkpoint> &checkpoints)
 {
 	this->checkpoints = checkpoints;
 	loadPGM(ppmFilePath);
 }
 
-int MapController::coordTransform(float num, int maxCoord) const
+int MapController::encodeMapCoord(float num, int maxCoord) const
 {
+	if (map.empty())
+	{
+		return 0;
+	}
+
 	if (maxCoord == 0)
 	{
 		maxCoord = map[0].size();
@@ -69,7 +89,7 @@ int MapController::coordTransform(float num, int maxCoord) const
 	return std::max(std::min(static_cast<int>(num * 4 + maxCoord / 2), maxCoord), 0);
 }
 
-int MapController::decodeMapCoord(int num, int maxCoord) const
+float MapController::decodeMapCoord(int num, int maxCoord) const
 {
 	if (maxCoord == 0)
 	{
@@ -78,11 +98,13 @@ int MapController::decodeMapCoord(int num, int maxCoord) const
 	return (num - maxCoord / 2) / 4;
 }
 
-std::vector<Object *> MapController::objectsTransformer(std::vector<Object *> objects) {
+std::vector<Object *> MapController::objectsTransformer(std::vector<Object *> objects)
+{
 	std::vector<Object *> transformedObjects;
-	for (auto object : objects) {
+	for (auto object : objects)
+	{
 		auto pos = object->getPos();
-		auto newPos = Position(coordTransform(pos.x), pos.y, coordTransform(pos.z));
+		auto newPos = Position(encodeMapCoord(pos.x), pos.y, encodeMapCoord(pos.z));
 		object->move(newPos - pos);
 		transformedObjects.push_back(object);
 	}
@@ -152,10 +174,10 @@ struct Node
 {
 	int x, y;
 	double cost, heuristic;
-	Node *parent;
+	std::unique_ptr<Node> parent;
 
-	Node(int x, int y, double cost, double heuristic, Node *parent = nullptr) :
-		x(x), y(y), cost(cost), heuristic(heuristic), parent(parent)
+	Node(int x, int y, double cost, double heuristic, std::unique_ptr<Node> parent = nullptr) :
+		x(x), y(y), cost(cost), heuristic(heuristic), parent(std::move(parent))
 	{
 	}
 
@@ -164,7 +186,40 @@ struct Node
 	bool operator>(const Node &other) const { return totalCost() > other.totalCost(); }
 };
 
-std::pair<std::vector<std::pair<int, int>>, double> MapController::findPath(int x, int y, std::vector<std::vector<int>> weightedMap, int checkpointIdx) const
+
+double MapController::getCost(int x, int y, const std::vector<std::vector<int>> weightedMap) const
+{
+	if (y < 0 || y >= weightedMap.size() || x < 0 || x >= weightedMap[0].size())
+		return WALL_COST; // Verificação de limites
+	switch (weightedMap[y][x])
+	{
+	case ROAD_CODE:
+		return ROAD_COST;
+	case BRIDGE_CODE:
+		return BRIDGE_COST;
+	case ROADSIDE_CODE:
+		return ROADSIDE_COST;
+	case OFF_ROAD_CODE:
+		return OFF_ROAD_COST;
+	case WATER_CODE:
+		return WATER_COST;
+	case WALL_CODE:
+		return WALL_COST;
+	case OBSERVER_CODE:
+		return getCost(x, y, map);
+	case OBJECT_CODE:
+		return MAX_COST;
+	case CURRENT_CHECKPOINT_CODE:
+		return NO_COST;
+	default:
+		return WALL_COST;
+	}
+}
+
+extern std::atomic<bool> running;
+
+std::pair<std::vector<std::pair<int, int>>, double> MapController::findPath(int x, int y, int checkpointIdx,
+																			Object *filteredObject) const
 {
 	auto checkpoint = checkpoints[checkpointIdx];
 	int goalX = (checkpoint.first.first + checkpoint.second.first) / 2;
@@ -173,33 +228,7 @@ std::pair<std::vector<std::pair<int, int>>, double> MapController::findPath(int 
 	auto heuristic = [goalX, goalY](int x, int y)
 	{ return std::sqrt(std::pow(goalX - x, 2) + std::pow(goalY - y, 2)); };
 
-	auto getCost = [&weightedMap](int x, int y)
-	{
-		if (y < 0 || y >= weightedMap.size() || x < 0 || x >= weightedMap[0].size()) return WALL_COST; // Verificação de limites
-		switch (weightedMap[y][x])
-		{
-		case ROAD_CODE:
-			return ROAD_COST;
-		case BRIDGE_CODE:
-			return BRIDGE_COST;
-		case ROADSIDE_CODE:
-			return ROADSIDE_COST;
-		case OFF_ROAD_CODE:
-			return OFF_ROAD_COST;
-		case WATER_CODE:
-			return WATER_COST;
-		case WALL_CODE:
-			return WALL_COST;
-		case OBSERVER_CODE:
-			return MIN_COST;
-		case OBJECT_CODE:
-			return MAX_COST;
-		case CURRENT_CHECKPOINT_CODE:
-			return NO_COST;
-		default:
-			return WALL_COST;
-		}
-	};
+	auto weightedMap = getWeightedMap(filteredObject, checkpointIdx);
 
 	std::priority_queue<Node, std::vector<Node>, std::greater<Node>> openSet;
 	std::vector<std::vector<bool>> closedSet(weightedMap.size(), std::vector<bool>(weightedMap[0].size(), false));
@@ -208,15 +237,16 @@ std::pair<std::vector<std::pair<int, int>>, double> MapController::findPath(int 
 
 	while (!openSet.empty())
 	{
-		Node current = openSet.top();
+		Node current = std::move(const_cast<Node &>(openSet.top()));
 		openSet.pop();
 
-		if (current.y < 0 || current.y >= weightedMap.size() || current.x < 0 || current.x >= weightedMap[0].size()) continue;
+		if (current.y < 0 || current.y >= weightedMap.size() || current.x < 0 || current.x >= weightedMap[0].size())
+			continue;
 
 		if (weightedMap[current.y][current.x] == CURRENT_CHECKPOINT_CODE)
 		{
 			std::vector<std::pair<int, int>> path;
-			for (Node *node = &current; node != nullptr; node = node->parent)
+			for (Node *node = &current; node != nullptr; node = node->parent.get())
 			{
 				path.emplace_back(node->x, node->y);
 			}
@@ -238,12 +268,12 @@ std::pair<std::vector<std::pair<int, int>>, double> MapController::findPath(int 
 			if (newX >= 0 && newX < weightedMap[0].size() && newY >= 0 && newY < weightedMap.size() &&
 				!closedSet[newY][newX])
 			{
-				double newCost = current.cost + getCost(newX, newY);
+				double newCost = current.cost + getCost(newX, newY, weightedMap);
 
 				if (newCost == 0)
 				{
 					std::vector<std::pair<int, int>> path;
-					for (Node *node = &current; node != nullptr; node = node->parent)
+					for (Node *node = &current; node != nullptr; node = node->parent.get())
 					{
 						path.emplace_back(node->x, node->y);
 					}
@@ -252,7 +282,7 @@ std::pair<std::vector<std::pair<int, int>>, double> MapController::findPath(int 
 					return {path, current.cost};
 				}
 
-				openSet.emplace(newX, newY, newCost, heuristic(newX, newY), new Node(current));
+				openSet.emplace(newX, newY, newCost, heuristic(newX, newY), std::make_unique<Node>(std::move(current)));
 			}
 		}
 	}
@@ -269,8 +299,8 @@ void MapController::fillPolygon(std::vector<std::vector<int>> &weightedMap, cons
 	std::vector<std::pair<int, int>> points;
 	for (const auto &vertex : projectedVertices)
 	{
-		int x = coordTransform(vertex.x, width);
-		int y = coordTransform(vertex.y, height);
+		int x = encodeMapCoord(vertex.x, width);
+		int y = encodeMapCoord(vertex.y, height);
 		points.emplace_back(x, y);
 	}
 
@@ -354,15 +384,16 @@ void MapController::fillLine(std::vector<std::vector<int>> &weightedMap, const C
 	}
 }
 
-std::vector<std::vector<int>> MapController::getWeightedMap(const std::vector<Object *> trackObjects, const Object *observer, int checkpointIdx) const
+std::vector<std::vector<int>> MapController::getWeightedMap(Object *observer, int checkpointIdx) const
 {
 	int width = map[0].size();
 	int height = map.size();
 	std::vector<std::vector<int>> weightedMap = map;
 
-	for (const auto &object : trackObjects)
+	for (const auto &object : *objects)
 	{
-		fillPolygon(weightedMap, *object, OBJECT_CODE);
+		if (object != observer)
+			fillPolygon(weightedMap, *object, OBJECT_CODE);
 	}
 
 	for (const auto &checkpoint : checkpoints)
@@ -379,20 +410,20 @@ std::vector<std::vector<int>> MapController::getWeightedMap(const std::vector<Ob
 }
 
 void MapController::saveModifiedPPM(const std::string outputFilePath, int x, int y, int checkpointIdx,
-									const std::vector<Object *> trackObjects, const Object *observer) const
+									Object *observer) const
 {
 	// Create a snapshot of the map and objects
 	auto mapSnapshot = map;
-	std::vector<Object *> objectsSnapshot = trackObjects;
+	std::vector<Object *> objectsSnapshot = *objects;
 
-	const int convertedX = coordTransform(x, map[0].size());
-	const int convertedY = coordTransform(y, map.size());
+	const int convertedX = encodeMapCoord(x, map[0].size());
+	const int convertedY = encodeMapCoord(y, map.size());
 
 	// Run the save operation in a separate thread
 	std::thread saveThread(
 		[this, mapSnapshot, objectsSnapshot, outputFilePath, convertedX, convertedY, checkpointIdx, observer]()
 		{
-			auto weightedMap = getWeightedMap(objectsSnapshot, observer, checkpointIdx);
+			auto weightedMap = getWeightedMap(observer, checkpointIdx);
 
 			int width = weightedMap[0].size();
 			int height = weightedMap.size();
@@ -447,7 +478,7 @@ void MapController::saveModifiedPPM(const std::string outputFilePath, int x, int
 			}
 
 			// Find the shortest path and paint it green
-			auto path = findPath(convertedX, convertedY, weightedMap, checkpointIdx).first;
+			auto path = findPath(convertedX, convertedY, checkpointIdx, observer).first;
 			for (const auto &point : path)
 			{
 				int x = point.first;

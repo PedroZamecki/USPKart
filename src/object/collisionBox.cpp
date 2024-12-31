@@ -169,3 +169,16 @@ CollisionData CollisionBox::getCollisionForce(const CollisionBox &other) const
 
 	return {0, {}, {}};
 }
+
+bool CollisionBox::isWithinCollisionLimits() const
+{
+	const auto vertices = get2DProjectedVertices();
+	for (const auto &vertex : vertices)
+	{
+		if (vertex.x < -128 || vertex.x > 128 || vertex.y < -128 || vertex.y > 128)
+		{
+			return false;
+		}
+	}
+	return true;
+}

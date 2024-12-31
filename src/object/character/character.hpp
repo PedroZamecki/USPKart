@@ -34,7 +34,6 @@ protected:
 	CharacterAcceleratingState acceleratingState{NOT_ACCELERATING};
 	CharacterBreakingState breakingState{NOT_BREAKING};
 	std::vector<Object *> &objects;
-	MapController mapController;
 	std::thread pathThread;
 	int checkpointIdx{0};
 	glm::vec3 color;
@@ -44,12 +43,7 @@ protected:
 public:
 	Character(std::vector<Object *> &objects, const Position &pos = {0, 0, 0}, const glm::vec3 angle = glm::vec3{0},
 			  const glm::vec3 scale = {1, 1, 1}, const glm::vec3 color = {0, 0, 0}) :
-		Kart(pos, angle, scale), objects(objects), color(color), mapController("assets/map/default.pgm",
-																			   {{{175, 508}, {90, 508}},
-																				{{426, 132}, {426, 73}},
-																				{{838, 786}, {838, 1014}},
-																				{{441, 438}, {441, 261}},
-																				{{377, 817}, {365, 1013}}})
+		Kart(pos, angle, scale), objects(objects), color(color)
 	{}
 
 	~Character() override {
@@ -171,13 +165,12 @@ public:
 		while (running)
 		{
 			std::this_thread::sleep_for(std::chrono::milliseconds(100));
-			auto filteredObjects = filterObjects();
-			auto weightedMap = mapController.getWeightedMap(filteredObjects, this, checkpointIdx);
-			auto pathResult = mapController.findPath(mapController.coordTransform(pos.x), mapController.coordTransform(pos.z), weightedMap, checkpointIdx);
-			if (pathResult.first.size() < 10) {
-				checkpointIdx = (checkpointIdx + 1) % mapController.getCheckpoints().size();
+			auto mapController = MapController::getInstance();
+			auto [newPath, newScore] = mapController->findPath(mapController->encodeMapCoord(pos.x), mapController->encodeMapCoord(pos.z), checkpointIdx, this);
+			if (newPath.size() < 10) {
+				checkpointIdx = (checkpointIdx + 1) % mapController->getCheckpoints().size();
 			}
-			score = pathResult.second;
+			score = newScore;
 		}
 	}
 };

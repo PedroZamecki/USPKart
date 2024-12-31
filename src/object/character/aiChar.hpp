@@ -102,11 +102,10 @@ public:
 		while (running)
 		{
 			std::this_thread::sleep_for(std::chrono::milliseconds(100));
-			auto filteredObjects = filterObjects();
-			auto weightedMap = mapController.getWeightedMap(filteredObjects, this, checkpointIdx);
-			auto [newPath, newScore ] = mapController.findPath(mapController.coordTransform(pos.x), mapController.coordTransform(pos.z), weightedMap, checkpointIdx);
+			auto mapController = MapController::getInstance();
+			auto [newPath, newScore] = mapController->findPath(mapController->encodeMapCoord(pos.x), mapController->encodeMapCoord(pos.z), checkpointIdx, this);
 			if (newPath.size() < 10) {
-				checkpointIdx = (checkpointIdx + 1) % mapController.getCheckpoints().size();
+				checkpointIdx = (checkpointIdx + 1) % mapController->getCheckpoints().size();
 			}
 			path = newPath;
 			score = newScore;
