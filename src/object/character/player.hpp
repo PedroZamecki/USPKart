@@ -7,8 +7,8 @@
 class Player final : public Character
 {
 public:
-	Player(std::vector<Object *> &objects, Position pos, glm::vec3 angle, glm::vec3 scale,
-		   glm::vec3 color = {1, 1, 1}) : Character(objects, pos, angle, scale, color)
+	Player(Position pos, glm::vec3 angle, glm::vec3 scale,
+		   glm::vec3 color = {1, 1, 1}) : Character(pos, angle, scale, color)
 	{
 		const auto controls = ControlsHandler::getInstance();
 		controls->insertKeyCallback(GLFW_KEY_UP, [this]() -> void { checkState(); }, ALL);
@@ -40,21 +40,6 @@ public:
 	void printMapState()
 	{
 		MapController::getInstance()->saveModifiedPPM("Teste.ppm", pos.x, pos.z, checkpointIdx, this);
-	}
-
-	void updateScore() override
-	{
-		while (running)
-		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(100));
-			auto mapController = MapController::getInstance();
-			auto pathResult = mapController->findPath(mapController->encodeMapCoord(pos.x), mapController->encodeMapCoord(pos.z), checkpointIdx, this);
-			if (pathResult.first.size() < 10) {
-				checkpointIdx = (checkpointIdx + 1) % mapController->getCheckpoints().size();
-				Logger::getInstance()->info("Checkpoint: " + std::to_string(checkpointIdx));
-			}
-			score = pathResult.second;
-		}
 	}
 };
 

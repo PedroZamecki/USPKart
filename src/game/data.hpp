@@ -18,6 +18,16 @@ public:
 
 	Data()
 	{
+		MapController::getInstance()->configure("assets/map/default.pgm",
+									   {{{175, 508}, {90, 508}},
+										{{426, 132}, {426, 73}},
+										{{838, 786}, {838, 1014}},
+										{{441, 438}, {441, 261}},
+										{{377, 817}, {365, 1013}}
+										});
+		
+		MapController::getInstance()->setObjects(objects);
+
 		auto positions = std::vector<Position>{
 			{-100, .25, 50},
 			{-100, .25, 38},
@@ -26,6 +36,16 @@ public:
 			{-92, .25, 44},
 			{-92, .25, 32},
 			{-92, .25, 20},
+		};
+
+		auto colors = std::vector<glm::vec3>{
+			{1, 0, 0},
+			{0, 1, 0},
+			{0, 0, 1},
+			{1, 0.5, 0},
+			{1, 0, 0.5},
+			{0, 0.5, 1},
+			{0.5, 0, 1},
 		};
 
 		auto angle = glm::vec3{0, 3.14159265, 0};
@@ -37,13 +57,13 @@ public:
 		std::shuffle(positions.begin(), positions.end(), g);
 
 		objects.push_back(track = new Track());
-		objects.push_back(player = new Player(objects, positions[0], angle, scale, {1, 0, 0}));
-		objects.push_back(new AIChar(objects, positions[1], angle, scale, {0, 1, 0}));
-		objects.push_back(new Character(objects, positions[2], angle, scale, {0, 0, 1}));
-		objects.push_back(new Character(objects, positions[3], angle, scale, {1, 0.5, 0}));
-		objects.push_back(new Character(objects, positions[4], angle, scale, {1, 0, 0.5}));
-		objects.push_back(new Character(objects, positions[5], angle, scale, {0, 0.5, 1}));
-		objects.push_back(new Character(objects, positions[6], angle, scale, {0.5, 0, 1}));
+		objects.push_back(player = new Player(positions[0], angle, scale, colors[0]));
+		objects.push_back(new Character(positions[1], angle, scale, colors[1]));
+		objects.push_back(new Character(positions[2], angle, scale, colors[2]));
+		objects.push_back(new Character(positions[3], angle, scale, colors[3]));
+		objects.push_back(new Character(positions[4], angle, scale, colors[4]));
+		objects.push_back(new Character(positions[5], angle, scale, colors[5]));
+		objects.push_back(new Character(positions[6], angle, scale, colors[6]));
 
 		// After everything is set up, initialize the characters
 		for (const auto &object : objects)

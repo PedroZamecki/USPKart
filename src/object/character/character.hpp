@@ -1,11 +1,11 @@
 #ifndef CHARACTER_HPP
 #define CHARACTER_HPP
 
+#include <atomic>
 #include <thread>
 #include "../kart.hpp"
 #include "controllers/mapController.hpp"
 #include "utils/logger.hpp"
-#include <atomic>
 
 enum CharacterSteeringState
 {
@@ -33,7 +33,6 @@ protected:
 	CharacterSteeringState steerState{NOT_STEERING};
 	CharacterAcceleratingState acceleratingState{NOT_ACCELERATING};
 	CharacterBreakingState breakingState{NOT_BREAKING};
-	std::vector<Object *> &objects;
 	std::thread pathThread;
 	int checkpointIdx{0};
 	glm::vec3 color;
@@ -41,37 +40,26 @@ protected:
 	std::atomic<bool> running{true};
 
 public:
-	Character(std::vector<Object *> &objects, const Position &pos = {0, 0, 0}, const glm::vec3 angle = glm::vec3{0},
+	Character(const Position &pos = {0, 0, 0}, const glm::vec3 angle = glm::vec3{0},
 			  const glm::vec3 scale = {1, 1, 1}, const glm::vec3 color = {0, 0, 0}) :
-		Kart(pos, angle, scale), objects(objects), color(color)
-	{}
-
-	~Character() override {
-		stopThread();
+		Kart(pos, angle, scale), color(color)
+	{
 	}
 
-	virtual void stopThread() {
+	~Character() override { stopThread(); }
+
+	virtual void stopThread()
+	{
 		running = false;
-		if (pathThread.joinable()) {
+		if (pathThread.joinable())
+		{
 			pathThread.join();
 		}
 	}
 
-	virtual void init() {
-		pathThread = std::thread(&Character::updateScore, this);
-	}
+	virtual void init() { pathThread = std::thread(&Character::updateScore, this); }
 
 	float getScore() const { return score; }
-
-	std::vector<Object *> filterObjects()
-	{
-		std::vector<Object *> filteredObjects;
-		for (const auto &object : objects)
-			if (object != this)
-				filteredObjects.push_back(object);
-
-		return filteredObjects;
-	}
 
 	void updateBicycleModel(const float deltaTime)
 	{
@@ -160,19 +148,7 @@ public:
 				   {0.0784313725490196, 0.047058823529411764, 0.9490196078431372}, color);
 	}
 
-	virtual void updateScore()
-	{
-		while (running)
-		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(100));
-			auto mapController = MapController::getInstance();
-			auto [newPath, newScore] = mapController->findPath(mapController->encodeMapCoord(pos.x), mapController->encodeMapCoord(pos.z), checkpointIdx, this);
-			if (newPath.size() < 10) {
-				checkpointIdx = (checkpointIdx + 1) % mapController->getCheckpoints().size();
-			}
-			score = newScore;
-		}
-	}
+	virtual void updateScore() {}
 };
 
 #endif // CHARACTER_HPP

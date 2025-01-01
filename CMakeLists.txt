@@ -39,7 +39,7 @@ endif()
 # Set the toolchain file
 set(CMAKE_TOOLCHAIN_FILE "${VCPKG_DIR}/scripts/buildsystems/vcpkg.cmake")
 
-project("USPKart" VERSION 0.5.3)
+project("USPKart" VERSION 0.5.4)
 
 # Include sub-projects.
 add_subdirectory("src")
