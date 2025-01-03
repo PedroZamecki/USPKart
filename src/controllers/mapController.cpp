@@ -218,22 +218,17 @@ double MapController::getCost(int x, int y, const std::vector<std::vector<int>> 
 
 extern std::atomic<bool> running;
 
-std::pair<std::vector<std::pair<int, int>>, double> MapController::findPath(int x, int y, int checkpointIdx,
-																			Object *filteredObject) const
+std::pair<std::vector<std::pair<int, int>>, double> MapController::aStarSearch(int startX, int startY, int goalX, int goalY, Object *filteredObject) const
 {
-	auto checkpoint = checkpoints[checkpointIdx];
-	int goalX = (checkpoint.first.first + checkpoint.second.first) / 2;
-	int goalY = (checkpoint.first.second + checkpoint.second.second) / 2;
-
 	auto heuristic = [goalX, goalY](int x, int y)
 	{ return std::sqrt(std::pow(goalX - x, 2) + std::pow(goalY - y, 2)); };
 
-	auto weightedMap = getWeightedMap(filteredObject, checkpointIdx);
+	auto weightedMap = getWeightedMap(filteredObject, checkpoints.size() - 1);
 
 	std::priority_queue<Node, std::vector<Node>, std::greater<Node>> openSet;
 	std::vector<std::vector<bool>> closedSet(weightedMap.size(), std::vector<bool>(weightedMap[0].size(), false));
 
-	openSet.emplace(x, y, 0, heuristic(x, y));
+	openSet.emplace(startX, startY, 0, heuristic(startX, startY));
 
 	while (!openSet.empty())
 	{
@@ -243,7 +238,7 @@ std::pair<std::vector<std::pair<int, int>>, double> MapController::findPath(int 
 		if (current.y < 0 || current.y >= weightedMap.size() || current.x < 0 || current.x >= weightedMap[0].size())
 			continue;
 
-		if (weightedMap[current.y][current.x] == CURRENT_CHECKPOINT_CODE)
+		if (current.x == goalX && current.y == goalY)
 		{
 			std::vector<std::pair<int, int>> path;
 			for (Node *node = &current; node != nullptr; node = node->parent.get())
@@ -288,6 +283,15 @@ std::pair<std::vector<std::pair<int, int>>, double> MapController::findPath(int 
 	}
 
 	return {{}, std::numeric_limits<double>::infinity()};
+}
+
+std::pair<std::vector<std::pair<int, int>>, double> MapController::findPath(int x, int y, int checkpointIdx, Object *filteredObject) const
+{
+	auto checkpoint = checkpoints[checkpointIdx];
+	int goalX = (checkpoint.first.first + checkpoint.second.first) / 2;
+	int goalY = (checkpoint.first.second + checkpoint.second.second) / 2;
+
+	return aStarSearch(x, y, goalX, goalY, filteredObject);
 }
 
 void MapController::fillPolygon(std::vector<std::vector<int>> &weightedMap, const Object object, int code) const
@@ -409,8 +413,75 @@ std::vector<std::vector<int>> MapController::getWeightedMap(Object *observer, in
 	return weightedMap;
 }
 
-void MapController::saveModifiedPPM(const std::string outputFilePath, int x, int y, int checkpointIdx,
-									Object *observer) const
+void MapController::saveMapPPM(const std::string &outputFilePath, const std::vector<std::vector<int>> &map) const
+{
+	int width = map[0].size();
+	int height = map.size();
+
+	std::ofstream file(outputFilePath, std::ios::binary);
+	if (!file.is_open())
+	{
+		throw std::runtime_error("Failed to open output PPM file");
+	}
+
+	// Write the PPM header
+	file << "P6\n";
+	file << width << " " << height << "\n";
+	file << "255\n";
+
+	// Write the pixel data
+	for (int y = 0; y < height; y++)
+	{
+		for (int x = 0; x < width; x++)
+		{
+			std::tuple<unsigned char, unsigned char, unsigned char> color;
+			switch (map[y][x])
+			{
+			case ROAD_CODE:
+				color = ROAD_COLOR;
+				break;
+			case BRIDGE_CODE:
+				color = BRIDGE_COLOR;
+				break;
+			case ROADSIDE_CODE:
+				color = ROADSIDE_COLOR;
+				break;
+			case OFF_ROAD_CODE:
+				color = OFF_ROAD_COLOR;
+				break;
+			case WATER_CODE:
+				color = WATER_COLOR;
+				break;
+			case WALL_CODE:
+				color = WALL_COLOR;
+				break;
+			case CHECKPOINT_CODE:
+				color = CHECKPOINT_COLOR;
+				break;
+			case CURRENT_CHECKPOINT_CODE:
+				color = CURRENT_CHECKPOINT_COLOR;
+				break;
+			case OBJECT_CODE:
+				color = OBJECT_COLOR;
+				break;
+			case OBSERVER_CODE:
+				color = OBSERVER_COLOR;
+				break;
+			case PATH_CODE:
+				color = PATH_COLOR;
+				break;
+			default:
+				color = ROAD_COLOR;
+				break;
+			}
+			file << std::get<0>(color) << std::get<1>(color) << std::get<2>(color);
+		}
+	}
+
+	file.close();
+}
+
+void MapController::saveObserverViewPPM(const std::string outputFilePath, int x, int y, int checkpointIdx, Object *observer) const
 {
 	// Create a snapshot of the map and objects
 	auto mapSnapshot = map;
@@ -489,27 +560,7 @@ void MapController::saveModifiedPPM(const std::string outputFilePath, int x, int
 				}
 			}
 
-			std::ofstream file(outputFilePath, std::ios::binary);
-			if (!file.is_open())
-			{
-				throw std::runtime_error("Failed to open output PPM file");
-			}
-
-			// Write the PPM header
-			file << "P6\n";
-			file << width << " " << height << "\n";
-			file << "255\n";
-
-			// Write the pixel data
-			for (const auto &row : colorMap)
-			{
-				for (const auto &color : row)
-				{
-					file << std::get<0>(color) << std::get<1>(color) << std::get<2>(color);
-				}
-			}
-
-			file.close();
+			saveMapPPM(outputFilePath, weightedMap);
 		});
 	saveThread.detach();
 }

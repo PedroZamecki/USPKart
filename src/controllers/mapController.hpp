@@ -19,6 +19,8 @@ class MapController
 	std::vector<std::vector<int>> map;
 	std::vector<Checkpoint> checkpoints;
 	std::vector<Object *> *objects;
+	std::vector<std::vector<double>> pointsMap;
+	std::pair<std::vector<std::pair<int, int>>, double> aStarSearch(int startX, int startY, int goalX, int goalY, Object *filteredObject) const;
 
 public:
 	static MapController *getInstance();
@@ -33,7 +35,8 @@ public:
 	void fillPolygon(std::vector<std::vector<int>> &weightedMap, const Object object, int code) const;
 	void fillLine(std::vector<std::vector<int>> &weightedMap, const Checkpoint checkpoint, int code) const;
 	std::vector<std::vector<int>> getWeightedMap(Object *observer, int checkpointIdx) const;
-	void saveModifiedPPM(const std::string outputFilePath, int x, int y, int checkpointIdx, Object *observer) const;
+	void saveMapPPM(const std::string &outputFilePath, const std::vector<std::vector<int>> &map) const;
+	void saveObserverViewPPM(const std::string outputFilePath, int x, int y, int checkpointIdx, Object *observer) const;
 	std::vector<Checkpoint> getCheckpoints() const { return checkpoints; }
 	void setObjects(std::vector<Object *> &objects) { this->objects = &objects; }
 };

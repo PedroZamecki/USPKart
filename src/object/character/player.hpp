@@ -15,7 +15,7 @@ public:
 		controls->insertKeyCallback(GLFW_KEY_DOWN, [this]() -> void { checkState(); }, ALL);
 		controls->insertKeyCallback(GLFW_KEY_LEFT, [this]() -> void { checkState(); }, ALL);
 		controls->insertKeyCallback(GLFW_KEY_RIGHT, [this]() -> void { checkState(); }, ALL);
-		controls->insertKeyCallback(GLFW_KEY_T, [this]() -> void { printMapState(); }, PRESS);
+		controls->insertKeyCallback(GLFW_KEY_T, [this]() -> void { printPlayerView(); }, PRESS);
 		controls->insertKeyCallback(
 			GLFW_KEY_P, [this]() -> void { Logger::getInstance()->info(std::to_string(this->score)); }, PRESS);
 	}
@@ -37,9 +37,9 @@ public:
 		breakingState = static_cast<CharacterBreakingState>(getSpeed() > 0.1 && acceleratingState == -1);
 	}
 
-	void printMapState()
+	void printPlayerView()
 	{
-		MapController::getInstance()->saveModifiedPPM("Teste.ppm", pos.x, pos.z, checkpointIdx, this);
+		MapController::getInstance()->saveObserverViewPPM("Teste.ppm", pos.x, pos.z, checkpointIdx, this);
 	}
 };
 
